@@ -1,4 +1,4 @@
-*** This is the Postgresql Data Warehouse Repository ***
+### This is the Postgresql Data Warehouse Repository 
 
 What you'll find here:
 1. Intermediate File Loader scripts
@@ -6,6 +6,7 @@ What you'll find here:
 3. Builder scripts
 
 Project Hierarchy:
+```
 	+- IFL     //The Intermediate File Loaders. Python project for loading the digester's output (intermediate files) directly to their corresponding database modules
 	|   |---
 	|   |---
@@ -17,3 +18,4 @@ Project Hierarchy:
 		    |-- gobii_rice
 		    |-- gobii_wheat
 		    +-- gobii_maize
+```
