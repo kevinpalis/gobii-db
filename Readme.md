@@ -7,7 +7,7 @@ What you'll find here:
 
 Project Hierarchy:
 ```
-	+- IFL     //The Intermediate File Loaders. Python project for loading the digester's output (intermediate files) directly to their corresponding database modules
+	+- GOBII_IFL     //The Intermediate File Loaders. Python project for loading the digester's output (intermediate files) directly to their corresponding database modules
 	|   |--- docs     //auto-generated documentation by Sphynx
 	|   |--- gobii_ifl     //main project source directory
 	|   |--- tests     //test directory, in case we have the time to write any unit tests
