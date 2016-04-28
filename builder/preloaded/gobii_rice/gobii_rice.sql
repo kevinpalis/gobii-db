@@ -881,6 +881,40 @@ $$;
 
 
 --
+-- Name: deletemarkerinmarkergroupbyid(integer, integer); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION deletemarkerinmarkergroupbyid(id integer, markerid integer) RETURNS integer
+    LANGUAGE plpgsql
+    AS $$
+  BEGIN
+    update marker_group 
+    set markers = markers - markerId::text
+    where marker_group_id=id;
+    return propertyId;
+  END;
+$$;
+
+
+--
+-- Name: deletemarkerinmarkergroupbyname(integer, text); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION deletemarkerinmarkergroupbyname(id integer, propertyname text) RETURNS text
+    LANGUAGE plpgsql
+    AS $$
+  BEGIN
+    with markerInfo as (select marker_id from marker where name=markerName)
+    update marker_group 
+      set markers = markers - markerInfo.marker_id::text
+      from markerInfo
+      where marker_group_id=id;
+    return propertyName;
+  END;
+$$;
+
+
+--
 -- Name: deletemarkerlinkagegroup(integer); Type: FUNCTION; Schema: public; Owner: -
 --
 
@@ -1113,6 +1147,22 @@ CREATE FUNCTION getallcontactsbyrole(roleid integer) RETURNS SETOF contact
     return query
     select c.* from contact c, role r where r.role_id = roleId and r.role_id = any(c.roles);
   END;
+$$;
+
+
+--
+-- Name: getallmarkersinmarkergroup(integer); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION getallmarkersinmarkergroup(id integer) RETURNS TABLE(marker_id integer, marker_name text, favorable_allele text)
+    LANGUAGE plpgsql
+    AS $$
+  BEGIN
+    return query
+    select p1.key::int as marker_id, marker.name as marker_name, p1.value as favorable_allele
+    from marker, (select (jsonb_each_text(markers)).* from marker_group where marker_group_id=id) as p1
+    where marker.marker_id = p1.key::int;
+    END;
 $$;
 
 
@@ -1436,6 +1486,39 @@ CREATE FUNCTION getmapsetpropertybyname(id integer, propertyname text) RETURNS T
     select property.cv_id, (props->property.cv_id::text)::text as value
       from map_prop, property
       where map_id=id);
+  END;
+$$;
+
+
+--
+-- Name: getmarkerinmarkergroupbyid(integer, integer); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION getmarkerinmarkergroupbyid(id integer, markerid integer) RETURNS text
+    LANGUAGE plpgsql
+    AS $$
+  DECLARE
+    value text;
+  BEGIN
+    select markers->markerId::text into value from marker_group where marker_group_id=id;
+    return value;
+  END;
+$$;
+
+
+--
+-- Name: getmarkerinmarkergroupbyname(integer, text); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION getmarkerinmarkergroupbyname(id integer, markername text) RETURNS TABLE(marker_id integer, favorable_allele text)
+    LANGUAGE plpgsql
+    AS $$
+  BEGIN
+    return query
+    with markerInfo as (select marker_id from marker where name=markerName)
+    select markerInfo.marker_id, (props->markerInfo.marker_id::text)::text as favAllele
+      from marker_group, markerInfo
+      where marker_group_id=id;
   END;
 $$;
 
@@ -2412,6 +2495,38 @@ CREATE FUNCTION upsertmarkerpropertybyname(id integer, propertyname text, proper
     select cv_id into propertyId from cv where term=propertyName;
     update marker_prop set props = props || ('{"'||propertyId::text||'": "'||propertyValue||'"}')::jsonb
       where marker_id=id;
+    return propertyId;
+  END;
+$$;
+
+
+--
+-- Name: upsertmarkertomarkergroupbyid(integer, integer, text); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION upsertmarkertomarkergroupbyid(id integer, markerid integer, favallele text) RETURNS void
+    LANGUAGE plpgsql
+    AS $$
+  BEGIN
+    update marker_group set markers = markers || ('{"'||markerId::text||'": "'||favAllele||'"}')::jsonb
+      where marker_group_id=id;
+  END;
+$$;
+
+
+--
+-- Name: upsertmarkertomarkergroupbyname(integer, text, text); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION upsertmarkertomarkergroupbyname(id integer, markername text, favallele text) RETURNS integer
+    LANGUAGE plpgsql
+    AS $$
+  DECLARE
+    markerId integer;
+  BEGIN
+    select marker_id into markerId from marker where name=markerName;
+    update marker_group set markers = markers || ('{"'||markerId::text||'": "'||favAllele||'"}')::jsonb
+      where marker_group_id=id;
     return propertyId;
   END;
 $$;
