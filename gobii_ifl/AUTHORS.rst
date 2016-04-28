@@ -6,6 +6,8 @@ Development Lead
 ----------------
 
 * Kevin Palis <kdp44@cornell.edu>
+* Syed Raza
+* Venice Juanillas
 
 Contributors
 ------------
