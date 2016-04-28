@@ -1541,7 +1541,93 @@ RETURNS integer AS $$
     END;
 $$ LANGUAGE plpgsql;
 
+--jsonb column - markers
+--create or update property
+--upsert (update or insert) property by key id
+CREATE OR REPLACE FUNCTION upsertMarkerToMarkerGroupById(id integer, markerId integer, favAllele text)
+RETURNS void AS $$
+  BEGIN
+    update marker_group set markers = markers || ('{"'||markerId::text||'": "'||favAllele||'"}')::jsonb
+      where marker_group_id=id;
+  END;
+$$ LANGUAGE plpgsql;
 
+--upsert by property name
+CREATE OR REPLACE FUNCTION upsertMarkerToMarkerGroupByName(id integer, markerName text, favAllele text)
+RETURNS integer AS $$
+  DECLARE
+    markerId integer;
+  BEGIN
+    select marker_id into markerId from marker where name=markerName;
+    update marker_group set markers = markers || ('{"'||markerId::text||'": "'||favAllele||'"}')::jsonb
+      where marker_group_id=id;
+    return propertyId;
+  END;
+$$ LANGUAGE plpgsql;
+
+--read/select all
+CREATE OR REPLACE FUNCTION getAllMarkersInMarkerGroup(id integer)
+RETURNS table (marker_id integer, marker_name text, favorable_allele text) AS $$
+  BEGIN
+    return query
+    select p1.key::int as marker_id, marker.name as marker_name, p1.value as favorable_allele
+    from marker, (select (jsonb_each_text(markers)).* from marker_group where marker_group_id=id) as p1
+    where marker.marker_id = p1.key::int;
+    END;
+$$ LANGUAGE plpgsql;
+
+--read/select a single marker in group
+CREATE OR REPLACE FUNCTION getMarkerInMarkerGroupById(id integer, markerId integer)
+RETURNS text AS $$
+  DECLARE
+    value text;
+  BEGIN
+    select markers->markerId::text into value from marker_group where marker_group_id=id;
+    return value;
+  END;
+$$ LANGUAGE plpgsql;
+
+--read/select a single marker by name
+CREATE OR REPLACE FUNCTION getMarkerInMarkerGroupByName(id integer, markerName text)
+RETURNS table (marker_id integer, favorable_allele text) AS $$
+  BEGIN
+    return query
+    with markerInfo as (select marker_id from marker where name=markerName)
+    select markerInfo.marker_id, (props->markerInfo.marker_id::text)::text as favAllele
+      from marker_group, markerInfo
+      where marker_group_id=id;
+  END;
+$$ LANGUAGE plpgsql;
+
+--delete property by ID
+CREATE OR REPLACE FUNCTION deleteMarkerInMarkerGroupById(id integer, markerId integer)
+RETURNS integer AS $$
+  BEGIN
+    update marker_group 
+    set markers = markers - markerId::text
+    where marker_group_id=id;
+    return propertyId;
+  END;
+$$ LANGUAGE plpgsql;
+
+--delete property by name
+CREATE OR REPLACE FUNCTION deleteMarkerInMarkerGroupByName(id integer, propertyName text)
+RETURNS text AS $$
+  BEGIN
+    with markerInfo as (select marker_id from marker where name=markerName)
+    update marker_group 
+      set markers = markers - markerInfo.marker_id::text
+      from markerInfo
+      where marker_group_id=id;
+    return propertyName;
+  END;
+$$ LANGUAGE plpgsql;
+--$$$$$$$$$$$$$$$$$$$$$$$$
+--$$$$$$$$$$$$$$$$$$$$$$$$
+--$$$$$$$$$$$$$$$$$$$$$$$$
+--$$$$$$$$$$$$$$$$$$$$$$$$
+--$$$$$$$$$$$$$$$$$$$$$$$$
+--$$$$$$$$$$$$$$$$$$$$$$$$
 --### DatasetMarker ###--
 
 --create a new row, you may supply null for columns that are nullable
