@@ -3244,9 +3244,9 @@ CREATE TABLE platform (
     code text NOT NULL,
     vendor_id integer NOT NULL,
     description text,
-    created_by text NOT NULL,
+    created_by integer NOT NULL,
     created_date date DEFAULT ('now'::text)::date NOT NULL,
-    modified_by text NOT NULL,
+    modified_by integer NOT NULL,
     modified_date date DEFAULT ('now'::text)::date,
     status integer NOT NULL,
     type_id integer NOT NULL

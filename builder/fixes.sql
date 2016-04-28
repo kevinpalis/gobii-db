@@ -27,3 +27,6 @@ ALTER TABLE dataset ALTER COLUMN modified_by type integer using modified_by::int
 
 ALTER TABLE marker_group ALTER COLUMN created_by type integer using created_by::integer;
 ALTER TABLE marker_group ALTER COLUMN modified_by type integer using modified_by::integer;
+
+ALTER TABLE platform ALTER COLUMN created_by type integer using created_by::integer;
+ALTER TABLE platform ALTER COLUMN modified_by type integer using modified_by::integer;
