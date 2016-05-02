@@ -32,10 +32,16 @@ class LoadIfileManager:
 		print("copyStmt = "+copyStmt)
 		self.cur.execute(copyStmt)
 
-	def loadData(self, tableName, header, fileToLoad):
+	def loadData(self, tableName, header, fileToLoad, primaryKeyColumnName):
 		loadSql = "copy "+tableName+" ("+(",".join(header))+")"+" from '"+fileToLoad+"' with delimiter E'\\t' csv header;"
 		print("loadSql = "+loadSql)
+		self.updateSerialSequence(tableName, primaryKeyColumnName)
 		self.cur.execute(loadSql)
+
+	def updateSerialSequence(self, tableName, primaryKeyColumnName):
+		updateSeqSql = "SELECT pg_catalog.setval(pg_get_serial_sequence('"+tableName+"', '"+primaryKeyColumnName+"'), MAX("+primaryKeyColumnName+")) FROM "+tableName+";"
+		print("updateSeqSql = "+updateSeqSql)
+		self.cur.execute(updateSeqSql)
 
 	def commitTransaction(self):
 		self.conn.commit()
