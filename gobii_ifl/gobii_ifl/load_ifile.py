@@ -17,36 +17,36 @@ import csv
 import traceback
 from os.path import basename
 from os.path import splitext
-from db.preprocess_ifile_manager import PreprocessIfileManager
+from db.load_ifile_manager import LoadIfileManager
 
 IS_VERBOSE = True
 
 if len(sys.argv) < 4:
-	print("Please supply the parameters. \nUsage: preprocess_ifile <intermediate_file> <name_mapping_file> <output_file_path>")
+	print("Please supply the parameters. \nUsage: load_ifile <intermediate_file> <duplicate_mapping_file>")
 	sys.exit()
 
 if IS_VERBOSE:
 	print("arguments: %s" % str(sys.argv))
 
 iFile = str(sys.argv[1])
-nameMappingFile = str(sys.argv[2])
-outputFile = str(sys.argv[3])
+dupMappingFile = str(sys.argv[2])
+#outputFile = str(sys.argv[3])
 #print("splitext: ", splitext(basename(iFile)))
 tableName = splitext(basename(iFile))[1][1:]
-fTableName = "f_" + tableName
+fTableName = "ft_" + tableName
 print("tableName:", tableName)
 
-
 #instantiating this initializes a database connection
-ppMgr = PreprocessIfileManager()
+loadMgr = LoadIfileManager()
 
-ppMgr.dropForeignTable(fTableName)
-header = ppMgr.createForeignTable(iFile, fTableName)
-ppMgr.commitTransaction()
+loadMgr.dropForeignTable(fTableName)
+header = loadMgr.createForeignTable(iFile, fTableName)
+loadMgr.commitTransaction()
 print("Foreign table %s created and populated." % fTableName)
 selectStr = ""
 conditionStr = ""
 fromStr = fTableName
+'''
 for fColumn in header:
 	if selectStr == "":
 		selectStr += fTableName+"."+fColumn
@@ -69,9 +69,9 @@ try:
 	deriveIdSql = "select "+selectStr+" from "+fromStr+" where "+conditionStr
 	print ("deriveIdSql: "+deriveIdSql)
 	ppMgr.createFileWithDerivedIds(outputFile, deriveIdSql)
-	ppMgr.dropForeignTable(fTableName)
-	ppMgr.closeConnection()
+
 	print("Preprocessed file successfully.")
 except Exception as e:
 	print('Failed to preprocess file: %s' % str(e))
 	traceback.print_exc()
+'''
