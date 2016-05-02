@@ -70,8 +70,10 @@ try:
 	print ("deriveIdSql: "+deriveIdSql)
 	ppMgr.createFileWithDerivedIds(outputFile, deriveIdSql)
 	ppMgr.dropForeignTable(fTableName)
+	ppMgr.commitTransaction()
 	ppMgr.closeConnection()
 	print("Preprocessed file successfully.")
 except Exception as e:
 	print('Failed to preprocess file: %s' % str(e))
+	ppMgr.rollbackTransaction()
 	traceback.print_exc()

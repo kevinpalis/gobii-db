@@ -22,7 +22,7 @@ from db.load_ifile_manager import LoadIfileManager
 IS_VERBOSE = True
 
 if len(sys.argv) < 4:
-	print("Please supply the parameters. \nUsage: load_ifile <intermediate_file> <duplicate_mapping_file>")
+	print("Please supply the parameters. \nUsage: load_ifile <intermediate_file> <duplicate_mapping_file> <output_file_path>")
 	sys.exit()
 
 if IS_VERBOSE:
@@ -30,7 +30,7 @@ if IS_VERBOSE:
 
 iFile = str(sys.argv[1])
 dupMappingFile = str(sys.argv[2])
-#outputFile = str(sys.argv[3])
+outputFile = str(sys.argv[3])
 #print("splitext: ", splitext(basename(iFile)))
 tableName = splitext(basename(iFile))[1][1:]
 fTableName = "ft_" + tableName
@@ -44,34 +44,39 @@ header = loadMgr.createForeignTable(iFile, fTableName)
 loadMgr.commitTransaction()
 print("Foreign table %s created and populated." % fTableName)
 selectStr = ""
-conditionStr = ""
+joinStr = ""
 fromStr = fTableName
-'''
+conditionStr = ""
 for fColumn in header:
 	if selectStr == "":
 		selectStr += fTableName+"."+fColumn
 	else:
 		selectStr += ", "+fTableName+"."+fColumn
-try:
-	with open(nameMappingFile, 'r') as f1:
-		reader = csv.reader(f1, delimiter='\t')
-		for file_column_name, column_alias, table_name, name_column, id_column in reader:
-			print("Processing column: %s" % file_column_name)
-			fromStr += ", "+table_name
-			if(conditionStr == ""):
-				conditionStr += table_name+"."+name_column+"="+fTableName+"."+file_column_name
-			else:
-				conditionStr += " and "+table_name+"."+name_column+"="+fTableName+"."+file_column_name
-			selectStr = selectStr.replace(fTableName+"."+file_column_name, table_name+"."+id_column+" as "+column_alias)
-		#if(conditionStr != ""):
-		#	conditionStr += ";"
-	f1.close
-	deriveIdSql = "select "+selectStr+" from "+fromStr+" where "+conditionStr
-	print ("deriveIdSql: "+deriveIdSql)
-	ppMgr.createFileWithDerivedIds(outputFile, deriveIdSql)
 
-	print("Preprocessed file successfully.")
+try:
+	with open(dupMappingFile, 'r') as f1:
+		reader = csv.reader(f1, delimiter='\t')
+		for file_column_name, table_column_name in reader:
+			print("Processing column: %s" % file_column_name)
+			if(joinStr == ""):
+				joinStr += fTableName+"."+file_column_name+"="+tableName+"."+table_column_name
+			else:
+				joinStr += " and "+fTableName+"."+file_column_name+"="+tableName+"."+table_column_name
+			if(conditionStr == ""):
+				conditionStr += tableName+"."+table_column_name+" is null"
+			else:
+				conditionStr += " and "+tableName+"."+table_column_name+" is null"
+	f1.close
+	joinSql = "select "+selectStr+" from "+fromStr+" left join "+tableName+" on "+joinStr+" where "+conditionStr
+	print ("joinSql: "+joinSql)
+	#ppMgr.createFileWithDerivedIds(outputFile, deriveIdSql)
+	loadMgr.createFileWithoutDuplicates(outputFile, joinSql)
+	print("Removed duplicates successfully.")
+	loadMgr.loadData(tableName, header, outputFile)
+	loadMgr.dropForeignTable(fTableName)
+	loadMgr.commitTransaction()
+	loadMgr.closeConnection()
 except Exception as e:
 	print('Failed to preprocess file: %s' % str(e))
+	loadMgr.rollbackTransaction()
 	traceback.print_exc()
-'''
