@@ -35,6 +35,12 @@ class PreprocessIfileManager:
 	def createForeignTable(self, iFile, fTableName):
 		header, fdwScript = self.fdm.generateFDWScript(iFile, fTableName)
 		self.cur.execute(fdwScript)
+		return header
+
+	def createFileWithDerivedIds(self, outputFilePath, derivedIdSql):
+		copyStmt = "copy ("+derivedIdSql+") to '"+outputFilePath+"' with delimiter E'\\t'"+" csv header;"
+		print("copyStmt = "+copyStmt)
+		self.cur.execute(copyStmt)
 
 	def commitTransaction(self):
 		self.conn.commit()

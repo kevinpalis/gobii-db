@@ -7,7 +7,7 @@
 	Note(s):
 
 	TODO:
-		Append session_id or anything to uniquely identify a single run of this script -- to the Foreign Table name, 
+		Append session_id or anything to uniquely identify a single run of this script -- to the Foreign Table name,
 		without it we'll have issues when two users run this script on the same DB at the same time!
 	@author kdp44 Kevin Palis
 '''
@@ -21,8 +21,8 @@ from db.preprocess_ifile_manager import PreprocessIfileManager
 
 IS_VERBOSE = True
 
-if len(sys.argv) < 3:
-	print("Please supply the parameters. \nUsage: preprocess_ifile <intermediate_file> <name_mapping_file>")
+if len(sys.argv) < 4:
+	print("Please supply the parameters. \nUsage: preprocess_ifile <intermediate_file> <name_mapping_file> <output_file_path>")
 	sys.exit()
 
 if IS_VERBOSE:
@@ -30,6 +30,7 @@ if IS_VERBOSE:
 
 iFile = str(sys.argv[1])
 nameMappingFile = str(sys.argv[2])
+outputFile = str(sys.argv[3])
 #print("splitext: ", splitext(basename(iFile)))
 tableName = splitext(basename(iFile))[1][1:]
 fTableName = "f_" + tableName
@@ -40,16 +41,35 @@ print("tableName:", tableName)
 ppMgr = PreprocessIfileManager()
 
 ppMgr.dropForeignTable(fTableName)
-ppMgr.createForeignTable(iFile, fTableName)
+header = ppMgr.createForeignTable(iFile, fTableName)
 ppMgr.commitTransaction()
 print("Foreign table %s created and populated." % fTableName)
-
+selectStr = ""
+conditionStr = ""
+fromStr = fTableName
+for fColumn in header:
+	if selectStr == "":
+		selectStr += fTableName+"."+fColumn
+	else:
+		selectStr += ", "+fTableName+"."+fColumn
 try:
-	with open(iFile, 'r') as f1:
+	with open(nameMappingFile, 'r') as f1:
 		reader = csv.reader(f1, delimiter='\t')
-		#for platform_id, variant_id, name, code, ref, alts, sequence, reference_name, primers, probsets, strand_name, status in reader:
-			#print("Processing marker: %s" % name)
+		for file_column_name, column_alias, table_name, name_column, id_column in reader:
+			print("Processing column: %s" % file_column_name)
+			fromStr += ", "+table_name
+			if(conditionStr == ""):
+				conditionStr += table_name+"."+name_column+"="+fTableName+"."+file_column_name
+			else:
+				conditionStr += " and "+table_name+"."+name_column+"="+fTableName+"."+file_column_name
+			selectStr = selectStr.replace(fTableName+"."+file_column_name, table_name+"."+id_column+" as "+column_alias)
+		#if(conditionStr != ""):
+		#	conditionStr += ";"
 	f1.close
+	deriveIdSql = "select "+selectStr+" from "+fromStr+" where "+conditionStr
+	print ("deriveIdSql: "+deriveIdSql)
+	ppMgr.createFileWithDerivedIds(outputFile, deriveIdSql)
+
 	print("Preprocessed file successfully.")
 except Exception as e:
 	print('Failed to preprocess file: %s' % str(e))
