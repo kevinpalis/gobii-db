@@ -7,8 +7,6 @@ class ConnectionManager:
 	This class manages the database connection and initializes connection and cursor objects.
 	You'll have to manually change the connection credentials here.
 	"""
-	conn = None
-	cur = None
 	db_user = "loaderusr"
 	db_pass = "loaderusr"
 	db_host = "localhost"
@@ -21,9 +19,9 @@ class ConnectionManager:
 	def connectToDatabase(self):
 		"""
 		Start a database connection using the credentials set in the class variables.
+		:returns: A connection object - This class also stores it as an instance variable for your convenience.
 		"""
 		self.conn = psycopg2.connect(database=self.db_name, user=self.db_user, password=self.db_pass, host=self.db_host, port=self.db_port)
-		self.cur = self.conn.cursor()
 		return self.conn
 
 	def disconnectFromDatabase(self):

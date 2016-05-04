@@ -1367,7 +1367,7 @@ CREATE TABLE experiment (
     name text NOT NULL,
     code text NOT NULL,
     project_id integer NOT NULL,
-    platform_id integer,
+    platform_id integer NOT NULL,
     manifest_id integer,
     data_file text,
     created_by integer NOT NULL,
@@ -2743,7 +2743,8 @@ ALTER SEQUENCE dataset_dataset_id_seq OWNED BY dataset.dataset_id;
 CREATE TABLE dataset_dnarun (
     dataset_dnarun_id integer NOT NULL,
     dataset_id integer NOT NULL,
-    dnarun_id integer NOT NULL
+    dnarun_id integer NOT NULL,
+    dnarun_idx integer
 );
 
 
@@ -2777,7 +2778,8 @@ CREATE TABLE dataset_marker (
     call_rate real,
     maf real,
     reproducibility real,
-    scores jsonb
+    scores jsonb,
+    marker_idx integer
 );
 
 
@@ -3846,6 +3848,22 @@ ALTER TABLE ONLY platform_prop
 
 ALTER TABLE ONLY project_prop
     ADD CONSTRAINT idx_project_prop UNIQUE (project_id);
+
+
+--
+-- Name: name_project_id_platform_id_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY experiment
+    ADD CONSTRAINT name_project_id_platform_id_key UNIQUE (name, project_id, platform_id);
+
+
+--
+-- Name: pi_project_name_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY project
+    ADD CONSTRAINT pi_project_name_key UNIQUE (pi_contact, name);
 
 
 --
