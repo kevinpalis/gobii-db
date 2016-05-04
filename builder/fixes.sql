@@ -37,6 +37,7 @@ ALTER TABLE platform ALTER COLUMN modified_by type integer using modified_by::in
 --because we can't convert text[] to jsonb
 ALTER TABLE marker DROP COLUMN probsets;
 ALTER TABLE marker ADD COLUMN probsets jsonb;
+
 --Constraint additions/modifications
 --compound-unique constraint on the project table for pi contact (i.e., principle investigator user id) and project name.
 ALTER TABLE project ADD CONSTRAINT pi_project_name_key UNIQUE (pi_contact, name);
