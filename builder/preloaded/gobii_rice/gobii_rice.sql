@@ -3846,18 +3846,6 @@ COPY cv (cv_id, "group", term, definition, rank) FROM stdin;
 4	project property	division	Department or division where the project was made	0
 5	project property	study_name	The name of the study	0
 6	project property	genotyping_purpose	The purpose of genotyping	0
-16	chromosome	chr10	Oryza Sativa chromosome 10	0
-17	chromosome	chr11	Oryza Sativa chromosome 11	0
-18	chromosome	chr12	Oryza Sativa chromosome 12	0
-7	chromosome	chr1	Oryza Sativa chromosome 1	0
-8	chromosome	chr2	Oryza Sativa chromosome 2	0
-9	chromosome	chr3	Oryza Sativa chromosome 3	0
-10	chromosome	chr4	Oryza Sativa chromosome 4	0
-11	chromosome	chr5	Oryza Sativa chromosome 5	0
-12	chromosome	chr6	Oryza Sativa chromosome 6	0
-13	chromosome	chr7	Oryza Sativa chromosome 7	0
-14	chromosome	chr8	Oryza Sativa chromosome 8	0
-15	chromosome	chr9	Oryza Sativa chromosome 9	0
 19	map_type	physical	Physical Map	0
 20	map_type	genetic	Genetic Map	0
 21	strand	top	Illumina's TOP strand	0
