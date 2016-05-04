@@ -722,11 +722,11 @@ $$ LANGUAGE plpgsql;
 --### Dataset_DNARun ###--
 
 --create a new row, you may supply null for columns that are nullable
-CREATE OR REPLACE FUNCTION createDatasetDnaRun(datasetId integer, dnarunId integer, OUT id integer)
+CREATE OR REPLACE FUNCTION createDatasetDnaRun(datasetId integer, dnarunId integer, dnarunIdx integer, OUT id integer)
 RETURNS integer AS $$
   BEGIN
-    insert into dataset_dnarun (dataset_id, dnarun_id)
-      values (datasetId, dnarunId); 
+    insert into dataset_dnarun (dataset_id, dnarun_id, dnarun_idx)
+      values (datasetId, dnarunId, dnarunIdx); 
     select lastval() into id;
   END;
 $$ LANGUAGE plpgsql;
@@ -734,10 +734,10 @@ $$ LANGUAGE plpgsql;
 --update all columns
 --You can "avoid" updating certain columns by passing the same value as what's currently in that column
 --OR I can create update functions that updates only certain columns, just let me know.
-CREATE OR REPLACE FUNCTION updateDatasetDnaRun(id integer, datasetId integer, dnarunId integer)
+CREATE OR REPLACE FUNCTION updateDatasetDnaRun(id integer, datasetId integer, dnarunId integer, dnarunIdx integer)
 RETURNS void AS $$
     BEGIN
-    update dataset_dnarun set dataset_id=datasetId, dnarun_id=dnarunId
+    update dataset_dnarun set dataset_id=datasetId, dnarun_id=dnarunId, dnarun_idx=dnarunIdx
      where dataset_dnarun_id = id;
     END;
 $$ LANGUAGE plpgsql;
@@ -972,7 +972,7 @@ $$ LANGUAGE plpgsql;
 --
 --read/select all
 CREATE OR REPLACE FUNCTION getAllAnalysisParameters(id integer)
-RETURNS table (parameter_name text, parameter_value text) AS $$
+RETURNS table (property_name text, property_value text) AS $$
   BEGIN
     return query
     select (jsonb_each_text(parameters)).* from analysis where analysis_id=id;
@@ -1248,20 +1248,20 @@ $$ LANGUAGE plpgsql;
 --### Marker and Properties ###--
 
 --create a new row, you may supply null for columns that are nullable
-CREATE OR REPLACE FUNCTION createMarker(platformId integer, variantId integer, markerName text, markerCode text, markerRef text, markerAlts text[], markerSequence text, referenceId integer, markerProbsets text[], strandId integer, markerStatus integer, OUT id integer)
+CREATE OR REPLACE FUNCTION createMarker(platformId integer, variantId integer, markerName text, markerCode text, markerRef text, markerAlts text[], markerSequence text, referenceId integer, strandId integer, markerStatus integer, OUT id integer)
 RETURNS integer AS $$
   BEGIN
     insert into marker (marker_id, platform_id, variant_id, name, code, ref, alts, sequence, reference_id, primers, probsets, strand_id, status)
-      values (markerId, platformId, variantId, markerName, markerCode, markerRef, markerAlts, markerSequence, referenceId, '{}'::jsonb, markerProbsets, strandId, markerStatus); 
+      values (markerId, platformId, variantId, markerName, markerCode, markerRef, markerAlts, markerSequence, referenceId, '{}'::jsonb, '{}'::jsonb, strandId, markerStatus); 
     select lastval() into id;
   END;
 $$ LANGUAGE plpgsql;
 
 --update all columns
-CREATE OR REPLACE FUNCTION updateMarker(id integer, platformId integer, variantId integer, markerName text, markerCode text, markerRef text, markerAlts text[], markerSequence text, referenceId integer, markerProbsets text[], strandId integer, markerStatus integer)
+CREATE OR REPLACE FUNCTION updateMarker(id integer, platformId integer, variantId integer, markerName text, markerCode text, markerRef text, markerAlts text[], markerSequence text, referenceId integer, strandId integer, markerStatus integer)
 RETURNS void AS $$
     BEGIN
-    update marker set  platform_id=platformId, variant_id=variantId, name=markerName, code=markerCode, ref=markerRef, alts=markerAlts, sequence=markerSequence, reference_id=referenceId, primers='{}'::jsonb, probsets=markerProbsets, strand_id=strandId, status=markerStatus
+    update marker set  platform_id=platformId, variant_id=variantId, name=markerName, code=markerCode, ref=markerRef, alts=markerAlts, sequence=markerSequence, reference_id=referenceId, primers='{}'::jsonb, probsets='{}'::jsonb, strand_id=strandId, status=markerStatus
      where marker_id = id;
     END;
 $$ LANGUAGE plpgsql;
@@ -1622,29 +1622,24 @@ RETURNS text AS $$
     return propertyName;
   END;
 $$ LANGUAGE plpgsql;
---$$$$$$$$$$$$$$$$$$$$$$$$
---$$$$$$$$$$$$$$$$$$$$$$$$
---$$$$$$$$$$$$$$$$$$$$$$$$
---$$$$$$$$$$$$$$$$$$$$$$$$
---$$$$$$$$$$$$$$$$$$$$$$$$
---$$$$$$$$$$$$$$$$$$$$$$$$
+
 --### DatasetMarker ###--
 
 --create a new row, you may supply null for columns that are nullable
-CREATE OR REPLACE FUNCTION createDatasetMarker(datasetId integer, markerId integer, callRate real, datasetMarkerMaf real, datasetMarkerReproducibility real, OUT id integer)
+CREATE OR REPLACE FUNCTION createDatasetMarker(datasetId integer, markerId integer, callRate real, datasetMarkerMaf real, datasetMarkerReproducibility real, datasetMarkerIdx integer, OUT id integer)
 RETURNS integer AS $$
   BEGIN
-    insert into dataset_marker (dataset_id, marker_id, call_rate, maf, reproducibility, scores)
-      values (datasetId, markerId, callRate, datasetMarkerMaf, datasetMarkerReproducibility, '{}'::jsonb); 
+    insert into dataset_marker (dataset_id, marker_id, call_rate, maf, reproducibility, scores, marker_idx)
+      values (datasetId, markerId, callRate, datasetMarkerMaf, datasetMarkerReproducibility, '{}'::jsonb, datasetMarkerIdx); 
     select lastval() into id;
   END;
 $$ LANGUAGE plpgsql;
 
 --update all columns
-CREATE OR REPLACE FUNCTION updateDatasetMarker(id integer, datasetId integer, markerId integer, callRate real, datasetMarkerMaf real, datasetMarkerReproducibility real)
+CREATE OR REPLACE FUNCTION updateDatasetMarker(id integer, datasetId integer, markerId integer, callRate real, datasetMarkerMaf real, datasetMarkerReproducibility real, datasetMarkerIdx integer)
 RETURNS void AS $$
     BEGIN
-    update dataset_marker set dataset_id=datasetId, marker_id=markerId, call_rate=callRate, maf=datasetMarkerMaf, reproducibility=datasetMarkerReproducibility, scores='{}'::jsonb
+    update dataset_marker set dataset_id=datasetId, marker_id=markerId, call_rate=callRate, maf=datasetMarkerMaf, reproducibility=datasetMarkerReproducibility, scores='{}'::jsonb, marker_idx=datasetMarkerIdx
      where dataset_marker_id = id;
     END;
 $$ LANGUAGE plpgsql;

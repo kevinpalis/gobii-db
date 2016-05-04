@@ -186,30 +186,30 @@ $$;
 
 
 --
--- Name: createdatasetdnarun(integer, integer); Type: FUNCTION; Schema: public; Owner: -
+-- Name: createdatasetdnarun(integer, integer, integer); Type: FUNCTION; Schema: public; Owner: -
 --
 
-CREATE FUNCTION createdatasetdnarun(datasetid integer, dnarunid integer, OUT id integer) RETURNS integer
+CREATE FUNCTION createdatasetdnarun(datasetid integer, dnarunid integer, dnarunidx integer, OUT id integer) RETURNS integer
     LANGUAGE plpgsql
     AS $$
   BEGIN
-    insert into dataset_dnarun (dataset_id, dnarun_id)
-      values (datasetId, dnarunId); 
+    insert into dataset_dnarun (dataset_id, dnarun_id, dnarun_idx)
+      values (datasetId, dnarunId, dnarunIdx); 
     select lastval() into id;
   END;
 $$;
 
 
 --
--- Name: createdatasetmarker(integer, integer, real, real, real); Type: FUNCTION; Schema: public; Owner: -
+-- Name: createdatasetmarker(integer, integer, real, real, real, integer); Type: FUNCTION; Schema: public; Owner: -
 --
 
-CREATE FUNCTION createdatasetmarker(datasetid integer, markerid integer, callrate real, datasetmarkermaf real, datasetmarkerreproducibility real, OUT id integer) RETURNS integer
+CREATE FUNCTION createdatasetmarker(datasetid integer, markerid integer, callrate real, datasetmarkermaf real, datasetmarkerreproducibility real, datasetmarkeridx integer, OUT id integer) RETURNS integer
     LANGUAGE plpgsql
     AS $$
   BEGIN
-    insert into dataset_marker (dataset_id, marker_id, call_rate, maf, reproducibility, scores)
-      values (datasetId, markerId, callRate, datasetMarkerMaf, datasetMarkerReproducibility, '{}'::jsonb); 
+    insert into dataset_marker (dataset_id, marker_id, call_rate, maf, reproducibility, scores, marker_idx)
+      values (datasetId, markerId, callRate, datasetMarkerMaf, datasetMarkerReproducibility, '{}'::jsonb, datasetMarkerIdx); 
     select lastval() into id;
   END;
 $$;
@@ -354,15 +354,15 @@ $$;
 
 
 --
--- Name: createmarker(integer, integer, text, text, text, text[], text, integer, text[], integer, integer); Type: FUNCTION; Schema: public; Owner: -
+-- Name: createmarker(integer, integer, text, text, text, text[], text, integer, integer, integer); Type: FUNCTION; Schema: public; Owner: -
 --
 
-CREATE FUNCTION createmarker(platformid integer, variantid integer, markername text, markercode text, markerref text, markeralts text[], markersequence text, referenceid integer, markerprobsets text[], strandid integer, markerstatus integer, OUT id integer) RETURNS integer
+CREATE FUNCTION createmarker(platformid integer, variantid integer, markername text, markercode text, markerref text, markeralts text[], markersequence text, referenceid integer, strandid integer, markerstatus integer, OUT id integer) RETURNS integer
     LANGUAGE plpgsql
     AS $$
   BEGIN
     insert into marker (marker_id, platform_id, variant_id, name, code, ref, alts, sequence, reference_id, primers, probsets, strand_id, status)
-      values (markerId, platformId, variantId, markerName, markerCode, markerRef, markerAlts, markerSequence, referenceId, '{}'::jsonb, markerProbsets, strandId, markerStatus); 
+      values (markerId, platformId, variantId, markerName, markerCode, markerRef, markerAlts, markerSequence, referenceId, '{}'::jsonb, '{}'::jsonb, strandId, markerStatus); 
     select lastval() into id;
   END;
 $$;
@@ -1104,7 +1104,7 @@ $$;
 -- Name: getallanalysisparameters(integer); Type: FUNCTION; Schema: public; Owner: -
 --
 
-CREATE FUNCTION getallanalysisparameters(id integer) RETURNS TABLE(parameter_name text, parameter_value text)
+CREATE FUNCTION getallanalysisparameters(id integer) RETURNS TABLE(property_name text, property_value text)
     LANGUAGE plpgsql
     AS $$
   BEGIN
@@ -1367,7 +1367,7 @@ CREATE TABLE experiment (
     name text NOT NULL,
     code text NOT NULL,
     project_id integer NOT NULL,
-    platform_id integer,
+    platform_id integer NOT NULL,
     manifest_id integer,
     data_file text,
     created_by integer NOT NULL,
@@ -1807,28 +1807,28 @@ $$;
 
 
 --
--- Name: updatedatasetdnarun(integer, integer, integer); Type: FUNCTION; Schema: public; Owner: -
+-- Name: updatedatasetdnarun(integer, integer, integer, integer); Type: FUNCTION; Schema: public; Owner: -
 --
 
-CREATE FUNCTION updatedatasetdnarun(id integer, datasetid integer, dnarunid integer) RETURNS void
+CREATE FUNCTION updatedatasetdnarun(id integer, datasetid integer, dnarunid integer, dnarunidx integer) RETURNS void
     LANGUAGE plpgsql
     AS $$
     BEGIN
-    update dataset_dnarun set dataset_id=datasetId, dnarun_id=dnarunId
+    update dataset_dnarun set dataset_id=datasetId, dnarun_id=dnarunId, dnarun_idx=dnarunIdx
      where dataset_dnarun_id = id;
     END;
 $$;
 
 
 --
--- Name: updatedatasetmarker(integer, integer, integer, real, real, real); Type: FUNCTION; Schema: public; Owner: -
+-- Name: updatedatasetmarker(integer, integer, integer, real, real, real, integer); Type: FUNCTION; Schema: public; Owner: -
 --
 
-CREATE FUNCTION updatedatasetmarker(id integer, datasetid integer, markerid integer, callrate real, datasetmarkermaf real, datasetmarkerreproducibility real) RETURNS void
+CREATE FUNCTION updatedatasetmarker(id integer, datasetid integer, markerid integer, callrate real, datasetmarkermaf real, datasetmarkerreproducibility real, datasetmarkeridx integer) RETURNS void
     LANGUAGE plpgsql
     AS $$
     BEGIN
-    update dataset_marker set dataset_id=datasetId, marker_id=markerId, call_rate=callRate, maf=datasetMarkerMaf, reproducibility=datasetMarkerReproducibility, scores='{}'::jsonb
+    update dataset_marker set dataset_id=datasetId, marker_id=markerId, call_rate=callRate, maf=datasetMarkerMaf, reproducibility=datasetMarkerReproducibility, scores='{}'::jsonb, marker_idx=datasetMarkerIdx
      where dataset_marker_id = id;
     END;
 $$;
@@ -2087,14 +2087,14 @@ $$;
 
 
 --
--- Name: updatemarker(integer, integer, integer, text, text, text, text[], text, integer, text[], integer, integer); Type: FUNCTION; Schema: public; Owner: -
+-- Name: updatemarker(integer, integer, integer, text, text, text, text[], text, integer, integer, integer); Type: FUNCTION; Schema: public; Owner: -
 --
 
-CREATE FUNCTION updatemarker(id integer, platformid integer, variantid integer, markername text, markercode text, markerref text, markeralts text[], markersequence text, referenceid integer, markerprobsets text[], strandid integer, markerstatus integer) RETURNS void
+CREATE FUNCTION updatemarker(id integer, platformid integer, variantid integer, markername text, markercode text, markerref text, markeralts text[], markersequence text, referenceid integer, strandid integer, markerstatus integer) RETURNS void
     LANGUAGE plpgsql
     AS $$
     BEGIN
-    update marker set  platform_id=platformId, variant_id=variantId, name=markerName, code=markerCode, ref=markerRef, alts=markerAlts, sequence=markerSequence, reference_id=referenceId, primers='{}'::jsonb, probsets=markerProbsets, strand_id=strandId, status=markerStatus
+    update marker set  platform_id=platformId, variant_id=variantId, name=markerName, code=markerCode, ref=markerRef, alts=markerAlts, sequence=markerSequence, reference_id=referenceId, primers='{}'::jsonb, probsets='{}'::jsonb, strand_id=strandId, status=markerStatus
      where marker_id = id;
     END;
 $$;
@@ -2743,7 +2743,8 @@ ALTER SEQUENCE dataset_dataset_id_seq OWNED BY dataset.dataset_id;
 CREATE TABLE dataset_dnarun (
     dataset_dnarun_id integer NOT NULL,
     dataset_id integer NOT NULL,
-    dnarun_id integer NOT NULL
+    dnarun_id integer NOT NULL,
+    dnarun_idx integer
 );
 
 
@@ -2777,7 +2778,8 @@ CREATE TABLE dataset_marker (
     call_rate real,
     maf real,
     reproducibility real,
-    scores jsonb
+    scores jsonb,
+    marker_idx integer
 );
 
 
@@ -3225,9 +3227,9 @@ CREATE TABLE marker (
     sequence text,
     reference_id integer,
     primers jsonb,
-    probsets text[],
     strand_id integer,
-    status integer NOT NULL
+    status integer NOT NULL,
+    probsets jsonb
 );
 
 
@@ -3846,6 +3848,22 @@ ALTER TABLE ONLY platform_prop
 
 ALTER TABLE ONLY project_prop
     ADD CONSTRAINT idx_project_prop UNIQUE (project_id);
+
+
+--
+-- Name: name_project_id_platform_id_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY experiment
+    ADD CONSTRAINT name_project_id_platform_id_key UNIQUE (name, project_id, platform_id);
+
+
+--
+-- Name: pi_project_name_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY project
+    ADD CONSTRAINT pi_project_name_key UNIQUE (pi_contact, name);
 
 
 --
