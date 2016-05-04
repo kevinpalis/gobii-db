@@ -24,7 +24,7 @@ ALTER TABLE dataset_dnarun ADD COLUMN dnarun_idx integer;
   Some tables are not consistent on the column type of created_by and modified_by.
   The following commands will fix that.
 */
-
+ 
 ALTER TABLE dataset ALTER COLUMN created_by type integer using created_by::integer;
 ALTER TABLE dataset ALTER COLUMN modified_by type integer using modified_by::integer;
 
@@ -37,3 +37,6 @@ ALTER TABLE platform ALTER COLUMN modified_by type integer using modified_by::in
 --Constraint additions/modifications
 --compound-unique constraint on the project table for pi contact (i.e., principle investigator user id) and project name.
 ALTER TABLE project ADD CONSTRAINT pi_project_name_key UNIQUE (pi_contact, name);
+
+-- compound unique: in the experiment table: name, projectid,platformid
+ALTER TABLE experiment ADD CONSTRAINT project_id_platform_id_key UNIQUE (project_id, platform_id);
