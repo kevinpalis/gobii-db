@@ -1,14 +1,21 @@
 #!/usr/bin/env python
 '''
-	This script loads the marker intermediate file (Digester output) directly to the marker table in the GOBII schema.
+	This script loads an intermediate file (Digester output) directly to its corresponding table in the GOBII schema.
+	But before doing the actual bulk load, this will create a foreign table via the Foreign Data Wrapper and run a
+	duplicates check, effectively removing the duplicates. The 'unique' rows are then piped to a file for the bulk loader
+	to work on. Determining duplicates is done with the help of a mapping file (ex. marker.dupmap) which
+	details the condition for a particular row to be a duplicate. For example, if marker.dupmap has:
 
-	Prerequisites:
+	FILE_COLUMN_NAME 		TABLE_COLUMN_NAME
+	-------------------------------------------------------------------
+	name 								name
+	ref_allele					ref
 
-	Note(s):
+	This tells the script to use the following criteria for duplicates:
+	If name column in file is equal to the value of marker.name AND ref_allele column in file is equal to the value of marker.ref
+	column, then that row is a duplicate. The script will then NOT include that in the file for bulk loading. The .dupmap file
+	can have an arbitrary number of criteria, just note that the comparison will always be an exact match.
 
-	TODO:
-		Append session_id or anything to uniquely identify a single run of this script -- to the Foreign Table name,
-		without it we'll have issues when two users run this script on the same DB at the same time!
 	@author kdp44 Kevin Palis
 '''
 from __future__ import print_function
@@ -18,11 +25,13 @@ import traceback
 from os.path import basename
 from os.path import splitext
 from db.load_ifile_manager import LoadIfileManager
+from util.ifl_utility import IFLUtility
 
 IS_VERBOSE = True
+SUFFIX_LEN = 8
 
-if len(sys.argv) < 4:
-	print("Please supply the parameters. \nUsage: load_ifile <intermediate_file> <duplicate_mapping_file> <output_file_path>")
+if len(sys.argv) < 3:
+	print("Please supply the parameters. \nUsage: load_ifile <intermediate_file> <output_file_path>")
 	sys.exit()
 
 if IS_VERBOSE:
@@ -33,7 +42,8 @@ dupMappingFile = str(sys.argv[2])
 outputFile = str(sys.argv[3])
 #print("splitext: ", splitext(basename(iFile)))
 tableName = splitext(basename(iFile))[1][1:]
-fTableName = "ft_" + tableName
+randomStr = IFLUtility.generateRandomString(SUFFIX_LEN)
+fTableName = "ft_" + tableName + "_" + randomStr
 print("tableName:", tableName)
 
 #instantiating this initializes a database connection
