@@ -16,6 +16,7 @@ with open('HISTORY.rst') as history_file:
 
 requirements = [
     # TODO: put package requirements here
+    'psycopg2==2.6.1'
 ]
 
 test_requirements = [
@@ -29,7 +30,7 @@ setup(
     long_description=readme + '\n\n' + history,
     author="Kevin Palis",
     author_email='kdp44@cornell.edu',
-    url='https://github.com/kevinpalis/gobii_ifl',
+    url='http://cbsugobii05.tc.cornell.edu:6083/scm/gm/data-warehouse-postgresql',
     packages=[
         'gobii_ifl',
     ],
