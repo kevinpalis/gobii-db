@@ -30,16 +30,17 @@ from util.ifl_utility import IFLUtility
 
 IS_VERBOSE = True
 SUFFIX_LEN = 8
-if len(sys.argv) < 3:
-	print("Please supply the parameters. \nUsage: preprocess_ifile <intermediate_file> <output_file_path>")
+if len(sys.argv) < 4:
+	print("Please supply the parameters. \nUsage: preprocess_ifile <db_connection_string> <intermediate_file> <output_file_path>")
 	sys.exit()
 
 if IS_VERBOSE:
 	print("arguments: %s" % str(sys.argv))
 
-iFile = str(sys.argv[1])
+connectionStr = str(sys.argv[1])
+iFile = str(sys.argv[2])
 #nameMappingFile = str(sys.argv[2])
-outputFile = str(sys.argv[2])
+outputFile = str(sys.argv[3])
 
 #print("splitext: ", splitext(basename(iFile)))
 tableName = splitext(basename(iFile))[1][1:]
@@ -54,7 +55,7 @@ if IS_VERBOSE:
 nameMappingFile = resource_stream('res.map', tableName+'.nmap')
 #sys.exit()
 #instantiating this initializes a database connection
-ppMgr = PreprocessIfileManager()
+ppMgr = PreprocessIfileManager(connectionStr)
 
 ppMgr.dropForeignTable(fTableName)
 header = ppMgr.createForeignTable(iFile, fTableName)

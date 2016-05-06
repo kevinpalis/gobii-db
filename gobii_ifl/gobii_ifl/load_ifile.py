@@ -33,26 +33,30 @@ from util.ifl_utility import IFLUtility
 IS_VERBOSE = True
 SUFFIX_LEN = 8
 
-if len(sys.argv) < 3:
-	print("Please supply the parameters. \nUsage: load_ifile <intermediate_file> <output_file_path>")
+if len(sys.argv) < 4:
+	print("Please supply the parameters. \nUsage: load_ifile <db_connection_str> <intermediate_file> <output_file_path>")
 	sys.exit()
 
 if IS_VERBOSE:
 	print("arguments: %s" % str(sys.argv))
 
-iFile = str(sys.argv[1])
+connectionStr = str(sys.argv[1])
+iFile = str(sys.argv[2])
 #dupMappingFile = str(sys.argv[2])
-outputFile = str(sys.argv[2])
+outputFile = str(sys.argv[3])
 #print("splitext: ", splitext(basename(iFile)))
 tableName = splitext(basename(iFile))[1][1:]
 randomStr = IFLUtility.generateRandomString(SUFFIX_LEN)
 fTableName = "ft_" + tableName + "_" + randomStr
 if IS_VERBOSE:
 	print("tableName:", tableName)
+	print("Getting information from mapping file: ", tableName+'.dupmap')
+	print(resource_listdir('res.map', ''))
+	print(resource_string('res.map', tableName+'.dupmap'))
 
 dupMappingFile = resource_stream('res.map', tableName+'.dupmap')
 #instantiating this initializes a database connection
-loadMgr = LoadIfileManager()
+loadMgr = LoadIfileManager(connectionStr)
 
 loadMgr.dropForeignTable(fTableName)
 header = loadMgr.createForeignTable(iFile, fTableName)

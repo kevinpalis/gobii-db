@@ -6,9 +6,9 @@ from foreign_data_manager import ForeignDataManager
 
 class LoadIfileManager:
 
-	def __init__(self):
+	def __init__(self, connectionStr):
 		self.connMgr = ConnectionManager()
-		self.conn = self.connMgr.connectToDatabase()
+		self.conn = self.connMgr.connectToDatabase(connectionStr)
 		self.cur = self.conn.cursor()
 		self.fdm = ForeignDataManager()
 		print("Load IFile Manager Initialized.")
