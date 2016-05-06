@@ -32,10 +32,10 @@ setup(
     author_email='kdp44@cornell.edu',
     url='http://cbsugobii05.tc.cornell.edu:6083/scm/gm/data-warehouse-postgresql',
     packages=[
-        'gobii_ifl',
+        'gobii_ifl', 'gobii_ifl.db', 'gobii_ifl.res', 'gobii_ifl.util'
     ],
     package_dir={'gobii_ifl':
-                 'gobii_ifl'},
+                 'gobii_ifl', 'gobii_ifl.db': 'gobii_ifl/db', 'gobii_ifl.res': 'gobii_ifl/res', 'gobii_ifl.util': 'gobii_ifl/util'},
     include_package_data=True,
     install_requires=requirements,
     license="ISCL",
