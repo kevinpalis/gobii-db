@@ -16,6 +16,8 @@
 	column, then that row is a duplicate. The script will then NOT include that in the file for bulk loading. The .dupmap file
 	can have an arbitrary number of criteria, just note that the comparison will always be an exact match.
 
+	TODO:
+	-Find a way to handle non-string comparisons as the FDW table columns are all text.
 	@author kdp44 Kevin Palis
 '''
 from __future__ import print_function
@@ -25,6 +27,7 @@ import traceback
 from os.path import basename
 from os.path import splitext
 from db.load_ifile_manager import LoadIfileManager
+from pkg_resources import resource_string, resource_listdir, resource_stream
 from util.ifl_utility import IFLUtility
 
 IS_VERBOSE = True
@@ -38,21 +41,24 @@ if IS_VERBOSE:
 	print("arguments: %s" % str(sys.argv))
 
 iFile = str(sys.argv[1])
-dupMappingFile = str(sys.argv[2])
-outputFile = str(sys.argv[3])
+#dupMappingFile = str(sys.argv[2])
+outputFile = str(sys.argv[2])
 #print("splitext: ", splitext(basename(iFile)))
 tableName = splitext(basename(iFile))[1][1:]
 randomStr = IFLUtility.generateRandomString(SUFFIX_LEN)
 fTableName = "ft_" + tableName + "_" + randomStr
-print("tableName:", tableName)
+if IS_VERBOSE:
+	print("tableName:", tableName)
 
+dupMappingFile = resource_stream('res.map', tableName+'.dupmap')
 #instantiating this initializes a database connection
 loadMgr = LoadIfileManager()
 
 loadMgr.dropForeignTable(fTableName)
 header = loadMgr.createForeignTable(iFile, fTableName)
 loadMgr.commitTransaction()
-print("Foreign table %s created and populated." % fTableName)
+if IS_VERBOSE:
+	print("Foreign table %s created and populated." % fTableName)
 selectStr = ""
 joinStr = ""
 fromStr = fTableName
@@ -64,21 +70,22 @@ for fColumn in header:
 		selectStr += ", "+fTableName+"."+fColumn
 
 try:
-	with open(dupMappingFile, 'r') as f1:
-		reader = csv.reader(f1, delimiter='\t')
-		for file_column_name, table_column_name in reader:
+	reader = csv.reader(dupMappingFile, delimiter='\t')
+	for file_column_name, table_column_name in reader:
+		if IS_VERBOSE:
 			print("Processing column: %s" % file_column_name)
-			if(joinStr == ""):
-				joinStr += fTableName+"."+file_column_name+"="+tableName+"."+table_column_name
-			else:
-				joinStr += " and "+fTableName+"."+file_column_name+"="+tableName+"."+table_column_name
-			if(conditionStr == ""):
-				conditionStr += tableName+"."+table_column_name+" is null"
-			else:
-				conditionStr += " and "+tableName+"."+table_column_name+" is null"
-	f1.close
+		if(joinStr == ""):
+			joinStr += fTableName+"."+file_column_name+"="+tableName+"."+table_column_name
+		else:
+			joinStr += " and "+fTableName+"."+file_column_name+"="+tableName+"."+table_column_name
+		if(conditionStr == ""):
+			conditionStr += tableName+"."+table_column_name+" is null"
+		else:
+			conditionStr += " and "+tableName+"."+table_column_name+" is null"
+	dupMappingFile.close
 	joinSql = "select "+selectStr+" from "+fromStr+" left join "+tableName+" on "+joinStr+" where "+conditionStr
-	print ("joinSql: "+joinSql)
+	if IS_VERBOSE:
+		print ("joinSql: "+joinSql)
 	#ppMgr.createFileWithDerivedIds(outputFile, deriveIdSql)
 	loadMgr.createFileWithoutDuplicates(outputFile, joinSql)
 	print("Removed duplicates successfully.")
@@ -87,7 +94,8 @@ try:
 	loadMgr.dropForeignTable(fTableName)
 	loadMgr.commitTransaction()
 	loadMgr.closeConnection()
+	print("Loaded data successfully.")
 except Exception as e:
-	print('Failed to preprocess file: %s' % str(e))
+	print('Failed to load data. Error: %s' % str(e))
 	loadMgr.rollbackTransaction()
 	traceback.print_exc()
