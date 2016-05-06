@@ -18,7 +18,7 @@ class ForeignDataManager:
 		"""
 		fdwOptions = " SERVER %s OPTIONS (FILENAME '%s', format 'csv', delimiter E'%s', header 'true');" % (self.fdwServer, inputFile, self.delim)
 		header = self.getHeader(inputFile)
-		print("header: ", header)
+		#print("header: ", header)
 		numOfcol = len(header)
 		fdwScript = 'CREATE FOREIGN TABLE '+fdwTableName+' ( '
 		for i, column in enumerate(header):
@@ -27,7 +27,7 @@ class ForeignDataManager:
 			else:
 				fdwScript += column + " text, "
 		fdwScript += ') ' + fdwOptions
-		print("fdwScript: ", fdwScript)
+		#print("fdwScript: ", fdwScript)
 		return header, fdwScript
 
 	def getHeader(self, inputFile):

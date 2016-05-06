@@ -27,71 +27,76 @@ from pkg_resources import resource_string, resource_listdir, resource_stream
 from db.preprocess_ifile_manager import PreprocessIfileManager
 from util.ifl_utility import IFLUtility
 
+def main(isVerbose, connectionStr, iFile, outputPath):
+	IS_VERBOSE = isVerbose
+	SUFFIX_LEN = 8
 
-IS_VERBOSE = True
-SUFFIX_LEN = 8
-if len(sys.argv) < 4:
-	print("Please supply the parameters. \nUsage: preprocess_ifile <db_connection_string> <intermediate_file> <output_file_path>")
-	sys.exit()
+	if IS_VERBOSE:
+		print("arguments: %s" % str(sys.argv))
 
-if IS_VERBOSE:
-	print("arguments: %s" % str(sys.argv))
+	outputFile = outputPath+"ppd_"+basename(iFile)
 
-connectionStr = str(sys.argv[1])
-iFile = str(sys.argv[2])
-#nameMappingFile = str(sys.argv[2])
-outputFile = str(sys.argv[3])
+	#print("splitext: ", splitext(basename(iFile)))
+	tableName = splitext(basename(iFile))[1][1:]
+	randomStr = IFLUtility.generateRandomString(SUFFIX_LEN)
+	fTableName = "f_" + tableName + "_" + randomStr
+	if IS_VERBOSE:
+		print("Foreign Table Name:", tableName)
+		print("Output File: ", outputFile)
+		print("Getting information from mapping file: ", tableName+'.nmap')
+		print(resource_listdir('res.map', ''))
+		print(resource_string('res.map', tableName+'.nmap'))
 
-#print("splitext: ", splitext(basename(iFile)))
-tableName = splitext(basename(iFile))[1][1:]
-randomStr = IFLUtility.generateRandomString(SUFFIX_LEN)
-fTableName = "f_" + tableName + "_" + randomStr
-if IS_VERBOSE:
-	print("Foreign Table Name:", tableName)
-	print("Getting information from mapping file: ", tableName+'.nmap')
-	print(resource_listdir('res.map', ''))
-	print(resource_string('res.map', tableName+'.nmap'))
+	nameMappingFile = resource_stream('res.map', tableName+'.nmap')
+	#sys.exit()
+	#instantiating this initializes a database connection
+	ppMgr = PreprocessIfileManager(connectionStr)
 
-nameMappingFile = resource_stream('res.map', tableName+'.nmap')
-#sys.exit()
-#instantiating this initializes a database connection
-ppMgr = PreprocessIfileManager(connectionStr)
-
-ppMgr.dropForeignTable(fTableName)
-header = ppMgr.createForeignTable(iFile, fTableName)
-ppMgr.commitTransaction()
-if IS_VERBOSE:
-	print("Foreign table %s created and populated." % fTableName)
-selectStr = ""
-conditionStr = ""
-fromStr = fTableName
-for fColumn in header:
-	if selectStr == "":
-		selectStr += fTableName+"."+fColumn
-	else:
-		selectStr += ", "+fTableName+"."+fColumn
-try:
-	reader = csv.reader(nameMappingFile, delimiter='\t')
-	for file_column_name, column_alias, table_name, name_column, id_column in reader:
-		if IS_VERBOSE:
-			print("Processing column: %s" % file_column_name)
-		fromStr += ", "+table_name
-		if(conditionStr == ""):
-			conditionStr += table_name+"."+name_column+"="+fTableName+"."+file_column_name
-		else:
-			conditionStr += " and "+table_name+"."+name_column+"="+fTableName+"."+file_column_name
-		selectStr = selectStr.replace(fTableName+"."+file_column_name, table_name+"."+id_column+" as "+column_alias)
-	#if(conditionStr != ""):
-	#	conditionStr += ";"
-	nameMappingFile.close
-	deriveIdSql = "select "+selectStr+" from "+fromStr+" where "+conditionStr
-	#print ("deriveIdSql: "+deriveIdSql)
-	ppMgr.createFileWithDerivedIds(outputFile, deriveIdSql)
 	ppMgr.dropForeignTable(fTableName)
+	header = ppMgr.createForeignTable(iFile, fTableName)
 	ppMgr.commitTransaction()
-	ppMgr.closeConnection()
-	print("Preprocessed file successfully.")
-except Exception as e:
-	print('Failed to preprocess file: %s' % str(e))
-	ppMgr.rollbackTransaction()
-	traceback.print_exc()
+	if IS_VERBOSE:
+		print("Foreign table %s created and populated." % fTableName)
+	selectStr = ""
+	conditionStr = ""
+	fromStr = fTableName
+	for fColumn in header:
+		if selectStr == "":
+			selectStr += fTableName+"."+fColumn
+		else:
+			selectStr += ", "+fTableName+"."+fColumn
+	try:
+		reader = csv.reader(nameMappingFile, delimiter='\t')
+		for file_column_name, column_alias, table_name, name_column, id_column in reader:
+			if IS_VERBOSE:
+				print("Processing column: %s" % file_column_name)
+			fromStr += ", "+table_name
+			if(conditionStr == ""):
+				conditionStr += table_name+"."+name_column+"="+fTableName+"."+file_column_name
+			else:
+				conditionStr += " and "+table_name+"."+name_column+"="+fTableName+"."+file_column_name
+			selectStr = selectStr.replace(fTableName+"."+file_column_name, table_name+"."+id_column+" as "+column_alias)
+		#if(conditionStr != ""):
+		#	conditionStr += ";"
+		nameMappingFile.close
+		deriveIdSql = "select "+selectStr+" from "+fromStr+" where "+conditionStr
+		#print ("deriveIdSql: "+deriveIdSql)
+		ppMgr.createFileWithDerivedIds(outputFile, deriveIdSql)
+		ppMgr.dropForeignTable(fTableName)
+		ppMgr.commitTransaction()
+		ppMgr.closeConnection()
+		print("Preprocessed file successfully.")
+		return outputFile
+	except Exception as e:
+		print('Failed to preprocess file: %s' % str(e))
+		ppMgr.rollbackTransaction()
+		traceback.print_exc()
+
+if __name__ == "__main__":
+	if len(sys.argv) < 4:
+		print("Please supply the parameters. \nUsage: preprocess_ifile <db_connection_string> <intermediate_file> <output_directory_path>")
+		sys.exit()
+	connectionStr = str(sys.argv[1])
+	iFile = str(sys.argv[2])
+	outputPath = str(sys.argv[3])
+	main(True, connectionStr, iFile, outputPath)

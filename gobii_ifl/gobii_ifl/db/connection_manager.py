@@ -8,8 +8,8 @@ class ConnectionManager:
 	You'll have to manually change the connection credentials here.
 	"""
 
-	def __init__(self):
-		print("Database Manager Initialized.")
+	#def __init__(self):
+	#print("Database Manager Initialized.")
 
 	def connectToDatabase(self, connectionStr):
 		"""

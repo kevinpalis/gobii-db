@@ -11,7 +11,7 @@ class PreprocessIfileManager:
 		self.conn = self.connMgr.connectToDatabase(connectionStr)
 		self.cur = self.conn.cursor()
 		self.fdm = ForeignDataManager()
-		print("Preprocess IFile Manager Initialized.")
+		#print("Preprocess IFile Manager Initialized.")
 
 	def getCvIdOfTerm(self, term):
 		self.cur.execute("select cv_id from cv where lower(term)=%s", (term.lower(),))
@@ -39,7 +39,7 @@ class PreprocessIfileManager:
 
 	def createFileWithDerivedIds(self, outputFilePath, derivedIdSql):
 		copyStmt = "copy ("+derivedIdSql+") to '"+outputFilePath+"' with delimiter E'\\t'"+" csv header;"
-		print("copyStmt = "+copyStmt)
+		#print("copyStmt = "+copyStmt)
 		self.cur.execute(copyStmt)
 
 	def commitTransaction(self):
