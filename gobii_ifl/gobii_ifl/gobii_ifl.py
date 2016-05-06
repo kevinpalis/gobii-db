@@ -42,7 +42,7 @@ def printUsageHelp():
 	print ("gobii_ifl.py -c <connectionString> -i <inputFile> -o <outputDirectory> -v")
 	print ("\t-h = Usage help")
 	print ("\t-c or --connectionString = Database connection string (RFC 3986 URI).\n\t\tFormat: postgresql://[user[:password]@][netloc][:port][/dbname][?param1=value1&...]")
-	print ("\t-i or --inputFile = The intermmediate file. Expected format: freetext.tablename")
+	print ("\t-i or --inputFile = The intermediate file. Expected format: freetext.tablename")
 	print ("\t-o or --outputDir = The output directory where preprocessed file and file for bulk loading (no duplicates) will be placed.\n\t\tEnsure that this path is writeable.")
 	print ("\t-v or --verbose = Print the status of the IFL in more detail")
 	sys.exit()
