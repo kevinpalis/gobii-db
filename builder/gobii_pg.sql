@@ -349,6 +349,7 @@ CREATE FUNCTION createmapset(mapsetname text, mapsetcode text, mapsetdescription
     insert into mapset (name, code, description, reference_id, type_id, created_by, created_date, modified_by, modified_date, status)
       values (mapsetName, mapsetCode, mapsetDescription, referenceId, typeId, createdBy, createdDate, modifiedBy, modifiedDate, mapsetStatus); 
     select lastval() into id;
+    insert into map_prop (map_id, props) values (id, '{}'::jsonb);
   END;
 $$;
 
