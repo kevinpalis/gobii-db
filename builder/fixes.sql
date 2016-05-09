@@ -22,6 +22,7 @@ ALTER TABLE dataset_marker ADD COLUMN marker_idx integer;
 ALTER TABLE dataset_dnarun ADD COLUMN dnarun_idx integer;
 
 ALTER TABLE display add column rank integer;
+
 /*
   Some tables are not consistent on the column type of created_by and modified_by.
   The following commands will fix that.
@@ -36,6 +37,9 @@ ALTER TABLE marker_group ALTER COLUMN modified_by type integer using modified_by
 ALTER TABLE platform ALTER COLUMN created_by type integer using created_by::integer;
 ALTER TABLE platform ALTER COLUMN modified_by type integer using modified_by::integer;
 
+--to support genetic maps
+ALTER TABLE marker_linkage_group ALTER COLUMN start type DECIMAL(13,3);
+ALTER TABLE marker_linkage_group ALTER COLUMN stop type DECIMAL(13,3);
 --because we can't convert text[] to jsonb
 ALTER TABLE marker DROP COLUMN probsets;
 ALTER TABLE marker ADD COLUMN probsets jsonb;

@@ -1189,7 +1189,7 @@ $$ LANGUAGE plpgsql;
 --### MarkerLinkageGroup ###--
 
 --create a new row, you may supply null for columns that are nullable
-CREATE OR REPLACE FUNCTION createMarkerLinkageGroup(markerId integer, markerLinkageGroupStart integer, markerLinkageGroupStop integer, linkageGroupId integer, OUT id integer)
+CREATE OR REPLACE FUNCTION createMarkerLinkageGroup(markerId integer, markerLinkageGroupStart decimal, markerLinkageGroupStop decimal, linkageGroupId integer, OUT id integer)
 RETURNS integer AS $$
   BEGIN
     insert into marker_linkage_group (marker_id, start, stop, linkage_group_id)
@@ -1199,7 +1199,7 @@ RETURNS integer AS $$
 $$ LANGUAGE plpgsql;
 
 --update all columns
-CREATE OR REPLACE FUNCTION updateMarkerLinkageGroup(id integer, markerId integer, markerLinkageGroupStart integer, markerLinkageGroupStop integer, linkageGroupId integer)
+CREATE OR REPLACE FUNCTION updateMarkerLinkageGroup(id integer, markerId integer, markerLinkageGroupStart decimal, markerLinkageGroupStop decimal, linkageGroupId integer)
 RETURNS void AS $$
     BEGIN
     update marker_linkage_group set marker_id=markerId, start=markerLinkageGroupStart, stop=markerLinkageGroupStop, linkage_group_id=linkageGroupId
@@ -1388,7 +1388,7 @@ RETURNS integer AS $$
     insert into platform (name, code, vendor_id, description, created_by, created_date, modified_by, modified_date, status, type_id)
       values (platformName, platformCode, vendorId, platformDescription, createdBy, createdDate, modifiedBy, modifiedDate, platformStatus, typeId); 
     select lastval() into id;
-    insert into platform (platform_id, props) values (id, '{}'::jsonb);
+    insert into platform_prop (platform_id, props) values (id, '{}'::jsonb);
   END;
 $$ LANGUAGE plpgsql;
 
