@@ -20,6 +20,8 @@ ALTER TABLE mapset ALTER COLUMN status SET DEFAULT 1;
 
 ALTER TABLE dataset_marker ADD COLUMN marker_idx integer;
 ALTER TABLE dataset_dnarun ADD COLUMN dnarun_idx integer;
+
+ALTER TABLE display add column rank integer;
 /*
   Some tables are not consistent on the column type of created_by and modified_by.
   The following commands will fix that.

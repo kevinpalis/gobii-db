@@ -1388,6 +1388,7 @@ RETURNS integer AS $$
     insert into platform (name, code, vendor_id, description, created_by, created_date, modified_by, modified_date, status, type_id)
       values (platformName, platformCode, vendorId, platformDescription, createdBy, createdDate, modifiedBy, modifiedDate, platformStatus, typeId); 
     select lastval() into id;
+    insert into platform (platform_id, props) values (id, '{}'::jsonb);
   END;
 $$ LANGUAGE plpgsql;
 

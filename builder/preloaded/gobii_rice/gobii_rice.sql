@@ -440,6 +440,7 @@ CREATE FUNCTION createplatform(platformname text, platformcode text, vendorid in
     insert into platform (name, code, vendor_id, description, created_by, created_date, modified_by, modified_date, status, type_id)
       values (platformName, platformCode, vendorId, platformDescription, createdBy, createdDate, modifiedBy, modifiedDate, platformStatus, typeId); 
     select lastval() into id;
+    insert into platform (platform_id, props) values (id, '{}'::jsonb);
   END;
 $$;
 
@@ -2815,7 +2816,8 @@ CREATE TABLE display (
     created_by integer,
     created_date date,
     modified_by integer,
-    modified_date date
+    modified_date date,
+    rank integer
 );
 
 
@@ -34679,7 +34681,7 @@ SELECT pg_catalog.setval('dataset_marker_dataset_marker_id_seq', 27636, true);
 -- Data for Name: display; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY display (display_id, table_name, column_name, display_name, created_by, created_date, modified_by, modified_date) FROM stdin;
+COPY display (display_id, table_name, column_name, display_name, created_by, created_date, modified_by, modified_date, rank) FROM stdin;
 \.
 
 
