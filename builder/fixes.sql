@@ -22,6 +22,7 @@ ALTER TABLE dataset_marker ADD COLUMN marker_idx integer;
 ALTER TABLE dataset_dnarun ADD COLUMN dnarun_idx integer;
 
 ALTER TABLE display add column rank integer;
+--ALTER TABLE dataset ADD COLUMN type_id integer;
 
 /*
   Some tables are not consistent on the column type of created_by and modified_by.
@@ -51,3 +52,6 @@ ALTER TABLE project ADD CONSTRAINT pi_project_name_key UNIQUE (pi_contact, name)
 -- compound unique: in the experiment table: name, projectid,platformid
 ALTER TABLE experiment ADD CONSTRAINT name_project_id_platform_id_key UNIQUE (name, project_id, platform_id);
 ALTER TABLE experiment ALTER COLUMN platform_id SET NOT NULL;
+
+-- dataset type_id references cv.cv_id
+--ALTER TABLE dataset ADD CONSTRAINT dataset_fk3 FOREIGN KEY (type_id) REFERENCES cv(cv_id)
