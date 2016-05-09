@@ -385,30 +385,15 @@ $$;
 
 
 --
--- Name: createmarkergroup(text, text, text, integer, date, text, date, integer); Type: FUNCTION; Schema: public; Owner: -
+-- Name: createmarkergroup(text, text, text, integer, date, integer, date, integer); Type: FUNCTION; Schema: public; Owner: -
 --
 
-CREATE FUNCTION createmarkergroup(markergroupname text, markergroupcode text, germplasmgroup text, createdby integer, createdate date, modifiedby text, modifieddate date, markergroupstatus integer, OUT id integer) RETURNS integer
+CREATE FUNCTION createmarkergroup(markergroupname text, markergroupcode text, germplasmgroup text, createdby integer, createdate date, modifiedby integer, modifieddate date, markergroupstatus integer, OUT id integer) RETURNS integer
     LANGUAGE plpgsql
     AS $$
   BEGIN
     insert into marker_group (name, code, markers, germplasm_group, created_by, create_date, modified_by, modified_date, status)
       values (markerGroupName, markerGroupCode, '{}'::jsonb, germplasmGroup, createdBy, createDate, modifiedBy, modifiedDate, markerGroupStatus); 
-    select lastval() into id;
-  END;
-$$;
-
-
---
--- Name: createmarkergroup(text, text, jsonb, text, integer, date, text, date, integer); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION createmarkergroup(markergroupname text, markergroupcode text, markergroupmarkers jsonb, germplasmgroup text, createdby integer, createdate date, modifiedby text, modifieddate date, markergroupstatus integer, OUT id integer) RETURNS integer
-    LANGUAGE plpgsql
-    AS $$
-  BEGIN
-    insert into marker_group (name, code, markers, germplasm_group, created_by, create_date, modified_by, modified_date, status)
-      values (markerGroupName, markerGroupCode, markerGroupMarkers, germplasmGroup, createdBy::text, createDate, modifiedBy::text, modifiedDate, markerGroupStatus); 
     select lastval() into id;
   END;
 $$;
@@ -430,6 +415,21 @@ $$;
 
 
 --
+-- Name: createmarkerlinkagegroup(integer, numeric, numeric, integer); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION createmarkerlinkagegroup(markerid integer, markerlinkagegroupstart numeric, markerlinkagegroupstop numeric, linkagegroupid integer, OUT id integer) RETURNS integer
+    LANGUAGE plpgsql
+    AS $$
+  BEGIN
+    insert into marker_linkage_group (marker_id, start, stop, linkage_group_id)
+      values (markerId, markerLinkageGroupStart, markerLinkageGroupStop, linkageGroupId); 
+    select lastval() into id;
+  END;
+$$;
+
+
+--
 -- Name: createplatform(text, text, integer, text, integer, date, integer, date, integer, integer); Type: FUNCTION; Schema: public; Owner: -
 --
 
@@ -440,7 +440,7 @@ CREATE FUNCTION createplatform(platformname text, platformcode text, vendorid in
     insert into platform (name, code, vendor_id, description, created_by, created_date, modified_by, modified_date, status, type_id)
       values (platformName, platformCode, vendorId, platformDescription, createdBy, createdDate, modifiedBy, modifiedDate, platformStatus, typeId); 
     select lastval() into id;
-    insert into platform (platform_id, props) values (id, '{}'::jsonb);
+    insert into platform_prop (platform_id, props) values (id, '{}'::jsonb);
   END;
 $$;
 
@@ -2117,10 +2117,10 @@ $$;
 
 
 --
--- Name: updatemarkergroup(integer, text, text, text, integer, date, text, date, integer); Type: FUNCTION; Schema: public; Owner: -
+-- Name: updatemarkergroup(integer, text, text, text, integer, date, integer, date, integer); Type: FUNCTION; Schema: public; Owner: -
 --
 
-CREATE FUNCTION updatemarkergroup(id integer, markergroupname text, markergroupcode text, germplasmgroup text, createdby integer, createdate date, modifiedby text, modifieddate date, markergroupstatus integer) RETURNS void
+CREATE FUNCTION updatemarkergroup(id integer, markergroupname text, markergroupcode text, germplasmgroup text, createdby integer, createdate date, modifiedby integer, modifieddate date, markergroupstatus integer) RETURNS void
     LANGUAGE plpgsql
     AS $$
     BEGIN
@@ -2149,6 +2149,20 @@ $$;
 --
 
 CREATE FUNCTION updatemarkerlinkagegroup(id integer, markerid integer, markerlinkagegroupstart integer, markerlinkagegroupstop integer, linkagegroupid integer) RETURNS void
+    LANGUAGE plpgsql
+    AS $$
+    BEGIN
+    update marker_linkage_group set marker_id=markerId, start=markerLinkageGroupStart, stop=markerLinkageGroupStop, linkage_group_id=linkageGroupId
+     where marker_linkage_group_id = id;
+    END;
+$$;
+
+
+--
+-- Name: updatemarkerlinkagegroup(integer, integer, numeric, numeric, integer); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION updatemarkerlinkagegroup(id integer, markerid integer, markerlinkagegroupstart numeric, markerlinkagegroupstop numeric, linkagegroupid integer) RETURNS void
     LANGUAGE plpgsql
     AS $$
     BEGIN
@@ -3280,8 +3294,8 @@ ALTER SEQUENCE marker_group_marker_group_id_seq OWNED BY marker_group.marker_gro
 CREATE TABLE marker_linkage_group (
     marker_linkage_group_id integer NOT NULL,
     marker_id integer NOT NULL,
-    start integer,
-    stop integer,
+    start numeric(13,3),
+    stop numeric(13,3),
     linkage_group_id integer NOT NULL
 );
 

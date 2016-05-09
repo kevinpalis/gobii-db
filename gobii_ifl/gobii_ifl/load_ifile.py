@@ -70,11 +70,11 @@ def main(isVerbose, connectionStr, iFile, outputPath):
 
 	try:
 		reader = csv.reader(dupMappingFile, delimiter='\t')
-		for file_column_name, table_column_name in reader:
+		for file_column_name, table_column_name, data_type in reader:
 			if IS_VERBOSE:
 				print("Processing column: %s" % file_column_name)
 			if(joinStr == ""):
-				joinStr += fTableName+"."+file_column_name+"="+tableName+"."+table_column_name
+				joinStr += fTableName+"."+file_column_name+"::"+data_type+"="+tableName+"."+table_column_name
 			else:
 				joinStr += " and "+fTableName+"."+file_column_name+"="+tableName+"."+table_column_name
 			if(conditionStr == ""):
