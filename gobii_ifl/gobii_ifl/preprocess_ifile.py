@@ -44,7 +44,7 @@ def main(isVerbose, connectionStr, iFile, outputPath):
 		print("Foreign Table Name:", tableName)
 		print("Output File: ", outputFile)
 		print("Getting information from mapping file: ", tableName+'.nmap')
-		print(resource_listdir('res.map', ''))
+		#print(resource_listdir('res.map', ''))
 		print(resource_string('res.map', tableName+'.nmap'))
 
 	nameMappingFile = resource_stream('res.map', tableName+'.nmap')
@@ -80,9 +80,9 @@ def main(isVerbose, connectionStr, iFile, outputPath):
 		#	conditionStr += ";"
 		nameMappingFile.close
 		deriveIdSql = "select "+selectStr+" from "+fromStr+" where "+conditionStr
-		#print ("deriveIdSql: "+deriveIdSql)
+		print ("deriveIdSql: "+deriveIdSql)
 		ppMgr.createFileWithDerivedIds(outputFile, deriveIdSql)
-		ppMgr.dropForeignTable(fTableName)
+		#ppMgr.dropForeignTable(fTableName)
 		ppMgr.commitTransaction()
 		ppMgr.closeConnection()
 		print("Preprocessed file successfully.")

@@ -1526,7 +1526,7 @@ RETURNS integer AS $$
 $$ LANGUAGE plpgsql;
 
 --update all columns
-CREATE OR REPLACE FUNCTION updateMarkerGroup(id integer, markerGroupName text, markerGroupCode text, germplasmGroup text, createdBy integer, createDate date, modifiedBy integer, modifiedDate date, markerGroupStatus integer)
+CREATE OR REPLACE FUNCTION updateMarkerGroup(id integer, markerGroupName text, markerGroupCode text, germplasmGroup text, createdBy integer, createdDate date, modifiedBy integer, modifiedDate date, markerGroupStatus integer)
 RETURNS void AS $$
     BEGIN
     update marker_group set name=markerGroupName, code=markerGroupCode, markers='{}'::jsonb, germplasm_group=germplasmGroup, created_by=createdBy, create_date=createdDate, modified_by=modifiedBy, modified_date=modifiedDate, status=markerGroupStatus
