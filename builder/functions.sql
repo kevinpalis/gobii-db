@@ -1526,6 +1526,7 @@ RETURNS integer AS $$
 $$ LANGUAGE plpgsql;
 
 --update all columns
+DROP FUNCTION updatemarkergroup(integer,text,text,text,integer,date,integer,date,integer);
 CREATE OR REPLACE FUNCTION updateMarkerGroup(id integer, markerGroupName text, markerGroupCode text, germplasmGroup text, createdBy integer, createdDate date, modifiedBy integer, modifiedDate date, markerGroupStatus integer)
 RETURNS void AS $$
     BEGIN
