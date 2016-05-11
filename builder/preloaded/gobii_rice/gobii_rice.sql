@@ -902,7 +902,7 @@ $$;
 -- Name: deletemarkerinmarkergroupbyname(integer, text); Type: FUNCTION; Schema: public; Owner: -
 --
 
-CREATE FUNCTION deletemarkerinmarkergroupbyname(id integer, propertyname text) RETURNS text
+CREATE FUNCTION deletemarkerinmarkergroupbyname(id integer, markername text) RETURNS text
     LANGUAGE plpgsql
     AS $$
   BEGIN
@@ -911,7 +911,7 @@ CREATE FUNCTION deletemarkerinmarkergroupbyname(id integer, propertyname text) R
       set markers = markers - markerInfo.marker_id::text
       from markerInfo
       where marker_group_id=id;
-    return propertyName;
+    return markerName;
   END;
 $$;
 

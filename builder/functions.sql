@@ -1613,7 +1613,8 @@ RETURNS integer AS $$
 $$ LANGUAGE plpgsql;
 
 --delete property by name
-CREATE OR REPLACE FUNCTION deleteMarkerInMarkerGroupByName(id integer, propertyName text)
+DROP FUNCTION deletemarkerinmarkergroupbyname(integer,text);
+CREATE OR REPLACE FUNCTION deleteMarkerInMarkerGroupByName(id integer, markerName text)
 RETURNS text AS $$
   BEGIN
     with markerInfo as (select marker_id from marker where name=markerName)
@@ -1621,7 +1622,7 @@ RETURNS text AS $$
       set markers = markers - markerInfo.marker_id::text
       from markerInfo
       where marker_group_id=id;
-    return propertyName;
+    return markerName;
   END;
 $$ LANGUAGE plpgsql;
 
