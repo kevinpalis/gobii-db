@@ -1603,13 +1603,13 @@ RETURNS table (marker_id integer, favorable_allele text) AS $$
 $$ LANGUAGE plpgsql;
 
 --delete property by ID
+DROP FUNCTION deletemarkerinmarkergroupbyid(integer,integer);
 CREATE OR REPLACE FUNCTION deleteMarkerInMarkerGroupById(id integer, markerId integer)
-RETURNS integer AS $$
+RETURNS void AS $$
   BEGIN
     update marker_group 
     set markers = markers - markerId::text
     where marker_group_id=id;
-    return propertyId;
   END;
 $$ LANGUAGE plpgsql;
 
