@@ -227,7 +227,7 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION updateManifest(manifestId integer, manifestName text, manifestCode text, filePath text, createdBy integer, createdDate date, modifiedBy integer, modifiedDate date)
 RETURNS void AS $$
     BEGIN
-    update manifest set manifest_id=manifestId, name=manifestName, code=manifestCode, file_path=filePath, created_by=createdBy, 
+    update manifest set name=manifestName, code=manifestCode, file_path=filePath, created_by=createdBy, 
       created_date=createdDate, modified_by=modifiedBy, modified_date=modifiedDate
      where manifest_id = manifestId;
     END;
@@ -754,11 +754,12 @@ $$ LANGUAGE plpgsql;
 --### Display ###--
 
 --create a new row, you may supply null for columns that are nullable
-CREATE OR REPLACE FUNCTION createDisplay(tableName text, columnName text, displayName text, createdBy integer, createdDate date, modifiedBy integer, modifiedDate date, OUT id integer)
+DROP FUNCTION createDisplay(tableName text, columnName text, displayName text, createdBy integer, createdDate date, modifiedBy integer, modifiedDate date, OUT id integer);
+CREATE OR REPLACE FUNCTION createDisplay(tableName text, columnName text, displayName text, createdBy integer, createdDate date, modifiedBy integer, modifiedDate date, displayRank integer, OUT id integer)
 RETURNS integer AS $$
   BEGIN
-    insert into display (table_name, column_name, display_name, created_by, created_date, modified_by, modified_date)
-      values (tableName, columnName, displayName, createdBy, createdDate, modifiedBy, modifiedDate); 
+    insert into display (table_name, column_name, display_name, created_by, created_date, modified_by, modified_date, rank)
+      values (tableName, columnName, displayName, createdBy, createdDate, modifiedBy, modifiedDate, displayRank); 
     select lastval() into id;
   END;
 $$ LANGUAGE plpgsql;
@@ -766,11 +767,12 @@ $$ LANGUAGE plpgsql;
 --update all columns
 --You can "avoid" updating certain columns by passing the same value as what's currently in that column
 --OR I can create update functions that updates only certain columns, just let me know.
-CREATE OR REPLACE FUNCTION updateDisplay(id integer, tableName text, columnName text, displayName text, createdBy integer, createdDate date, modifiedBy integer, modifiedDate date)
+DROP FUNCTION updateDisplay(id integer, tableName text, columnName text, displayName text, createdBy integer, createdDate date, modifiedBy integer, modifiedDate date);
+CREATE OR REPLACE FUNCTION updateDisplay(id integer, tableName text, columnName text, displayName text, createdBy integer, createdDate date, modifiedBy integer, modifiedDate date, displayRank integer)
 RETURNS void AS $$
     BEGIN
-    update display set display_id=displayId, table_name=tableName, column_name=columnName, display_name=displayName, created_by=createdBy, created_date=createdDate, 
-      modified_by=modifiedBy, modified_date=modifiedDate
+    update display set table_name=tableName, column_name=columnName, display_name=displayName, created_by=createdBy, created_date=createdDate, 
+      modified_by=modifiedBy, modified_date=modifiedDate, rank=displayRank
      where display_id = id;
     END;
 $$ LANGUAGE plpgsql;

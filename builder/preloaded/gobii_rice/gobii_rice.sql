@@ -245,15 +245,15 @@ $$;
 
 
 --
--- Name: createdisplay(text, text, text, integer, date, integer, date); Type: FUNCTION; Schema: public; Owner: -
+-- Name: createdisplay(text, text, text, integer, date, integer, date, integer); Type: FUNCTION; Schema: public; Owner: -
 --
 
-CREATE FUNCTION createdisplay(tablename text, columnname text, displayname text, createdby integer, createddate date, modifiedby integer, modifieddate date, OUT id integer) RETURNS integer
+CREATE FUNCTION createdisplay(tablename text, columnname text, displayname text, createdby integer, createddate date, modifiedby integer, modifieddate date, displayrank integer, OUT id integer) RETURNS integer
     LANGUAGE plpgsql
     AS $$
   BEGIN
-    insert into display (table_name, column_name, display_name, created_by, created_date, modified_by, modified_date)
-      values (tableName, columnName, displayName, createdBy, createdDate, modifiedBy, modifiedDate); 
+    insert into display (table_name, column_name, display_name, created_by, created_date, modified_by, modified_date, rank)
+      values (tableName, columnName, displayName, createdBy, createdDate, modifiedBy, modifiedDate, displayRank); 
     select lastval() into id;
   END;
 $$;
@@ -1958,15 +1958,15 @@ $$;
 
 
 --
--- Name: updatedisplay(integer, text, text, text, integer, date, integer, date); Type: FUNCTION; Schema: public; Owner: -
+-- Name: updatedisplay(integer, text, text, text, integer, date, integer, date, integer); Type: FUNCTION; Schema: public; Owner: -
 --
 
-CREATE FUNCTION updatedisplay(id integer, tablename text, columnname text, displayname text, createdby integer, createddate date, modifiedby integer, modifieddate date) RETURNS void
+CREATE FUNCTION updatedisplay(id integer, tablename text, columnname text, displayname text, createdby integer, createddate date, modifiedby integer, modifieddate date, displayrank integer) RETURNS void
     LANGUAGE plpgsql
     AS $$
     BEGIN
-    update display set display_id=displayId, table_name=tableName, column_name=columnName, display_name=displayName, created_by=createdBy, created_date=createdDate, 
-      modified_by=modifiedBy, modified_date=modifiedDate
+    update display set table_name=tableName, column_name=columnName, display_name=displayName, created_by=createdBy, created_date=createdDate, 
+      modified_by=modifiedBy, modified_date=modifiedDate, rank=displayRank
      where display_id = id;
     END;
 $$;
@@ -2143,7 +2143,7 @@ CREATE FUNCTION updatemanifest(manifestid integer, manifestname text, manifestco
     LANGUAGE plpgsql
     AS $$
     BEGIN
-    update manifest set manifest_id=manifestId, name=manifestName, code=manifestCode, file_path=filePath, created_by=createdBy, 
+    update manifest set name=manifestName, code=manifestCode, file_path=filePath, created_by=createdBy, 
       created_date=createdDate, modified_by=modifiedBy, modified_date=modifiedDate
      where manifest_id = manifestId;
     END;
@@ -34811,7 +34811,7 @@ COPY display (display_id, table_name, column_name, display_name, created_by, cre
 -- Name: display_display_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('display_display_id_seq', 1, false);
+SELECT pg_catalog.setval('display_display_id_seq', 3, true);
 
 
 --
