@@ -92,6 +92,7 @@ def main(isVerbose, connectionStr, iFile, outputPath):
 		loadMgr.commitTransaction()
 		loadMgr.closeConnection()
 		print("Loaded data successfully.")
+		return outputFile
 	except Exception as e:
 		print('Failed to load data. Error: %s' % str(e))
 		loadMgr.rollbackTransaction()

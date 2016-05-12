@@ -2,6 +2,7 @@
 
 from __future__ import print_function
 import sys
+import os
 import getopt
 import load_ifile
 import preprocess_ifile
@@ -35,9 +36,12 @@ def main(argv):
 			print("Opts: ", opts)
 		if connectionStr != "" and outputPath != "" and iFile != "":
 			preprocessedFile = preprocess_ifile.main(verbose, connectionStr, iFile, outputPath)
-			load_ifile.main(verbose, connectionStr, preprocessedFile, outputPath)
+			loadFile = load_ifile.main(verbose, connectionStr, preprocessedFile, outputPath)
 		else:
 			printUsageHelp()
+		#cleanup
+		os.remove(preprocessedFile)
+		os.remove(loadFile)
 
 def printUsageHelp():
 	print ("gobii_ifl.py -c <connectionString> -i <inputFile> -o <outputDirectory> -v")
