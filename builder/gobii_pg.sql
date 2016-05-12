@@ -40,6 +40,20 @@ CREATE TYPE keyvaluepair_type AS (
 
 
 --
+-- Name: addanalysistodataset(integer, integer); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION addanalysistodataset(datasetid integer, analysisid integer) RETURNS void
+    LANGUAGE plpgsql
+    AS $$
+    BEGIN
+    update dataset set analyses=array_append(analyses, analysisId)
+     where dataset_id = id;
+    END;
+$$;
+
+
+--
 -- Name: appendanalysistodataset(integer, integer); Type: FUNCTION; Schema: public; Owner: -
 --
 
@@ -886,14 +900,13 @@ $$;
 -- Name: deletemarkerinmarkergroupbyid(integer, integer); Type: FUNCTION; Schema: public; Owner: -
 --
 
-CREATE FUNCTION deletemarkerinmarkergroupbyid(id integer, markerid integer) RETURNS integer
+CREATE FUNCTION deletemarkerinmarkergroupbyid(id integer, markerid integer) RETURNS void
     LANGUAGE plpgsql
     AS $$
   BEGIN
     update marker_group 
     set markers = markers - markerId::text
     where marker_group_id=id;
-    return propertyId;
   END;
 $$;
 
@@ -1116,6 +1129,33 @@ CREATE FUNCTION getallanalysisparameters(id integer) RETURNS TABLE(property_name
 $$;
 
 
+--
+-- Name: getallcontacts(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION getallcontacts() RETURNS refcursor
+    LANGUAGE plpgsql
+    AS $$
+    DECLARE
+      contacts refcursor;           -- Declare cursor variables                         
+    BEGIN
+      OPEN contacts FOR 
+      SELECT c.contact_id,
+					c.lastname ,
+					c.firstname ,
+					c.code ,
+					c.email, 
+					null as "roles", 
+					c.created_by,
+					c.created_date, 
+					c.modified_by, 
+					c.modified_date 
+			from contact c;
+      RETURN contacts;
+    END;
+$$;
+
+
 SET default_tablespace = '';
 
 SET default_with_oids = false;
@@ -1281,6 +1321,55 @@ $$;
 
 
 --
+-- Name: getcontactnamesbyrole(character varying); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION getcontactnamesbyrole(_role_name character varying) RETURNS refcursor
+    LANGUAGE plpgsql
+    AS $$
+  DECLARE
+    contacts refcursor;           -- Declare cursor variables                         
+  BEGIN
+    OPEN contacts FOR 
+    SELECT c.contact_id,
+				c.lastname,
+				c.firstname
+		from contact c
+		join role r on (r.role_id=ANY(c.roles))
+		where r.role_name=_role_name;
+    RETURN contacts;
+  END;
+$$;
+
+
+--
+-- Name: getcontactsbyrole(character varying); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION getcontactsbyrole(_role_name character varying) RETURNS refcursor
+    LANGUAGE plpgsql
+    AS $$
+    DECLARE
+      contacts refcursor;           -- Declare cursor variables                         
+    BEGIN
+      OPEN contacts FOR 
+      SELECT c.contact_id,
+					c.lastname,
+					c.firstname,
+					c.code,
+					c.email,
+					r.role_id,
+					r.role_name,
+					r.role_code
+			from contact c
+			join role r on (r.role_id=ANY(c.roles))
+			where r.role_name=_role_name;
+      RETURN contacts;
+    END;
+$$;
+
+
+--
 -- Name: getdnarunpropertybyid(integer, integer); Type: FUNCTION; Schema: public; Owner: -
 --
 
@@ -1387,8 +1476,6 @@ CREATE TABLE experiment (
 CREATE FUNCTION getexperimentsbyprojectid(projectid integer) RETURNS SETOF experiment
     LANGUAGE plpgsql
     AS $$
-  DECLARE
-    total integer;
   BEGIN
     return query
     select * from experiment where project_id = projectId;
@@ -1592,6 +1679,26 @@ $$;
 
 
 --
+-- Name: getprojectnamesbypi(integer); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION getprojectnamesbypi(_contact_id integer) RETURNS refcursor
+    LANGUAGE plpgsql
+    AS $$
+    DECLARE
+      projects refcursor;
+    BEGIN
+      OPEN projects FOR 
+      select p.project_id, 
+					p.name 
+			from project p
+			where p.pi_contact=_contact_id;
+      RETURN projects;
+    END;
+$$;
+
+
+--
 -- Name: getprojectpropertybyid(integer, integer); Type: FUNCTION; Schema: public; Owner: -
 --
 
@@ -1620,7 +1727,7 @@ CREATE FUNCTION getprojectpropertybyname(projectid integer, propertyname text) R
     select property.cv_id, (props->property.cv_id::text)::text as value
       from project_prop, property
       where project_id=projectId);
-    END;
+  END;
 $$;
 
 
@@ -1659,9 +1766,9 @@ CREATE FUNCTION gettotalprojects() RETURNS integer
     LANGUAGE plpgsql
     AS $$
   DECLARE
-    total integer;
+    total integer; 
   BEGIN
-    select count(*) into total from project;
+    select count(*) into total from projects;
     return total;
   END;
 $$;
@@ -2120,7 +2227,7 @@ $$;
 -- Name: updatemarkergroup(integer, text, text, text, integer, date, integer, date, integer); Type: FUNCTION; Schema: public; Owner: -
 --
 
-CREATE FUNCTION updatemarkergroup(id integer, markergroupname text, markergroupcode text, germplasmgroup text, createdby integer, createdate date, modifiedby integer, modifieddate date, markergroupstatus integer) RETURNS void
+CREATE FUNCTION updatemarkergroup(id integer, markergroupname text, markergroupcode text, germplasmgroup text, createdby integer, createddate date, modifiedby integer, modifieddate date, markergroupstatus integer) RETURNS void
     LANGUAGE plpgsql
     AS $$
     BEGIN
@@ -2285,7 +2392,8 @@ CREATE FUNCTION updateprojectpropertybyname(projectid integer, propertyname text
     AS $$
   BEGIN
     with property as (select cv_id from cv where term=propertyName)
-    update project_prop set props = jsonb_set(props, ('{'||property.cv_id::text||'}')::text[], ('"'||propertyValue||'"')::jsonb)
+    update project_prop 
+      set props = jsonb_set(props, ('{'||property.cv_id::text||'}')::text[], ('"'||propertyValue||'"')::jsonb)
       from property
       where project_id=projectId;
   END;
