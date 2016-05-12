@@ -2,3 +2,4 @@
 
 \i gobii_rice.sql
 \i seed_data.sql
+\i resync_sequences.sql
