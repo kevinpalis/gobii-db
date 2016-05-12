@@ -80,9 +80,9 @@ def main(isVerbose, connectionStr, iFile, outputPath):
 		#	conditionStr += ";"
 		nameMappingFile.close
 		deriveIdSql = "select "+selectStr+" from "+fromStr+" where "+conditionStr
-		print ("deriveIdSql: "+deriveIdSql)
+		#print ("deriveIdSql: "+deriveIdSql)
 		ppMgr.createFileWithDerivedIds(outputFile, deriveIdSql)
-		#ppMgr.dropForeignTable(fTableName)
+		ppMgr.dropForeignTable(fTableName)
 		ppMgr.commitTransaction()
 		ppMgr.closeConnection()
 		print("Preprocessed file successfully.")

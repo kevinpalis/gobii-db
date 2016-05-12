@@ -83,8 +83,7 @@ def main(isVerbose, connectionStr, iFile, outputPath):
 				conditionStr += " and "+tableName+"."+table_column_name+" is null"
 		dupMappingFile.close
 		joinSql = "select "+selectStr+" from "+fromStr+" left join "+tableName+" on "+joinStr+" where "+conditionStr
-		if IS_VERBOSE:
-			print ("joinSql: "+joinSql)
+		#print ("joinSql: "+joinSql)
 		#ppMgr.createFileWithDerivedIds(outputFile, deriveIdSql)
 		loadMgr.createFileWithoutDuplicates(outputFile, joinSql)
 		print("Removed duplicates successfully.")
