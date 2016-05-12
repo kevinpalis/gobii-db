@@ -6,18 +6,17 @@
 	to work on. Determining duplicates is done with the help of a mapping file (ex. marker.dupmap) which
 	details the condition for a particular row to be a duplicate. For example, if marker.dupmap has:
 
-	FILE_COLUMN_NAME 		TABLE_COLUMN_NAME
+	FILE_COLUMN_NAME 		TABLE_COLUMN_NAME 	COLUMN_DATA_TYPE
 	-------------------------------------------------------------------
-	name 								name
-	ref_allele					ref
+	name 								name 								text
+	ref_allele					ref 								text
 
 	This tells the script to use the following criteria for duplicates:
 	If name column in file is equal to the value of marker.name AND ref_allele column in file is equal to the value of marker.ref
-	column, then that row is a duplicate. The script will then NOT include that in the file for bulk loading. The .dupmap file
+	column, then that row is a duplicate. The third column is the data type of the column to be compared, this basically just cast the column
+	via ::<column_type>. The script will then NOT include that in the file for bulk loading. The .dupmap file
 	can have an arbitrary number of criteria, just note that the comparison will always be an exact match.
 
-	TODO:
-	-Find a way to handle non-string comparisons as the FDW table columns are all text.
 	@author kdp44 Kevin Palis
 '''
 from __future__ import print_function

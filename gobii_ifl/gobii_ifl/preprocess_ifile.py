@@ -67,15 +67,20 @@ def main(isVerbose, connectionStr, iFile, outputPath):
 			selectStr += ", "+fTableName+"."+fColumn
 	try:
 		reader = csv.reader(nameMappingFile, delimiter='\t')
-		for file_column_name, column_alias, table_name, name_column, id_column in reader:
+		for file_column_name, column_alias, table_name, name_column, id_column, table_alias in reader:
 			if IS_VERBOSE:
 				print("Processing column: %s" % file_column_name)
-			fromStr += ", "+table_name
 			if(conditionStr == ""):
 				conditionStr += table_name+"."+name_column+"="+fTableName+"."+file_column_name
 			else:
 				conditionStr += " and "+table_name+"."+name_column+"="+fTableName+"."+file_column_name
 			selectStr = selectStr.replace(fTableName+"."+file_column_name, table_name+"."+id_column+" as "+column_alias)
+			if table_alias is not None and table_alias.strip() != '':
+				selectStr = selectStr.replace(table_name+".", table_alias+".")
+				fromStr += ", "+table_name+" as "+table_alias
+				conditionStr = conditionStr.replace(table_name+".", table_alias+".")
+			else:
+				fromStr += ", "+table_name
 		#if(conditionStr != ""):
 		#	conditionStr += ";"
 		nameMappingFile.close
