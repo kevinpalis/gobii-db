@@ -4,10 +4,21 @@
 	corresponding database table IDs. This is done with the help of a mapping file (ex. marker.nmap) which
 	details the name mapping. For example:
 
-	FILE_COL_NAME 	COL_ALIAS 		TABLE_NAME 		NAME_COLUMN 	ID_COLUMN
-	-------------------------------------------------------------------
-	reference_name	reference_id	reference			name					reference_id
-	strand_name			strand_id			cv						term					cv_id
+	FILE_COL_TO_MATCH 	COL_ALIAS 		TABLE_NAME 		TABLE_COL_TO_MATCH 	ID_COLUMN 			TABLE_ALIAS
+	-------------------------------------------------------------------------------------------------------------
+	species_name				species_id		cv						term								cv_id						cv1
+	type_name						type_id				cv						term								cv_id						cv2
+
+	This tells the preprocess script that for column 'species_name', find its ID in the database table 'cv'
+	using the criteria: species_name = cv.term column. Then in the result file, change the column name to the
+	col_alias 'species_id' for it to map directly to the species_id column of the germplasm table. The table_alias
+	value is necessary in cases when the table name repeats - ie. another column 'type_id' maps to the same table 'cv'.
+	For other cases, you don't need to specify this, but will need to leave a placeholder (trailing tab).
+
+	Another example:
+
+	reference_name			reference_id	reference			name								reference_id
+	strand_name					strand_id			cv						term								cv_id
 
 	Row 2 basically says, for the 'strand_name' column in the file, find its ID in the database table 'cv'
 	using the criteria: strand_name = cv.term column. Then in the result file, change the column name to the col_alias
@@ -23,7 +34,7 @@ import csv
 import traceback
 from os.path import basename
 from os.path import splitext
-from pkg_resources import resource_string, resource_listdir, resource_stream
+from pkg_resources import resource_string, resource_stream
 from db.preprocess_ifile_manager import PreprocessIfileManager
 from util.ifl_utility import IFLUtility
 
