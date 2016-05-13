@@ -2971,7 +2971,7 @@ CREATE TABLE dnarun (
     experiment_id integer NOT NULL,
     dnasample_id integer NOT NULL,
     name text,
-    code text NOT NULL
+    code text
 );
 
 
@@ -3031,7 +3031,7 @@ ALTER SEQUENCE dnarun_prop_dnarun_prop_id_seq OWNED BY dnarun_prop.dnarun_prop_i
 CREATE TABLE dnasample (
     dnasample_id integer NOT NULL,
     name text NOT NULL,
-    code text NOT NULL,
+    code text,
     platename text,
     num text,
     well_row text,
@@ -3129,7 +3129,7 @@ CREATE TABLE germplasm (
     modified_by integer NOT NULL,
     modified_date date DEFAULT ('now'::text)::date NOT NULL,
     status integer NOT NULL,
-    code text DEFAULT 0 NOT NULL
+    code text DEFAULT 0
 );
 
 
@@ -3346,7 +3346,7 @@ CREATE TABLE marker (
     platform_id integer NOT NULL,
     variant_id integer,
     name text NOT NULL,
-    code text NOT NULL,
+    code text,
     ref text NOT NULL,
     alts text[] NOT NULL,
     sequence text,
@@ -3689,7 +3689,7 @@ CREATE VIEW v_all_projects_full_details AS
 
 CREATE TABLE variant (
     variant_id integer NOT NULL,
-    code text NOT NULL,
+    code text,
     created_by integer NOT NULL,
     created_date date NOT NULL,
     modified_by integer NOT NULL,

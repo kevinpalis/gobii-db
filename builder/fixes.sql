@@ -54,3 +54,10 @@ ALTER TABLE experiment ALTER COLUMN platform_id SET NOT NULL;
 
 -- dataset type_id references cv.cv_id
 --ALTER TABLE dataset ADD CONSTRAINT dataset_fk3 FOREIGN KEY (type_id) REFERENCES cv(cv_id)
+
+--drop constraints
+ALTER TABLE marker ALTER COLUMN code DROP NOT NULL;
+ALTER TABLE variant ALTER COLUMN code DROP NOT NULL;
+ALTER TABLE germplasm ALTER COLUMN code DROP NOT NULL;
+ALTER TABLE dnasample ALTER COLUMN code DROP NOT NULL;
+ALTER TABLE dnarun ALTER COLUMN code DROP NOT NULL;
