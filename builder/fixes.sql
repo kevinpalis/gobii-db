@@ -61,3 +61,8 @@ ALTER TABLE variant ALTER COLUMN code DROP NOT NULL;
 ALTER TABLE germplasm ALTER COLUMN code DROP NOT NULL;
 ALTER TABLE dnasample ALTER COLUMN code DROP NOT NULL;
 ALTER TABLE dnarun ALTER COLUMN code DROP NOT NULL;
+
+--enable foreign data wrapper
+CREATE EXTENSION postgres_fdw;
+--create the foreign server for IFLs to work
+CREATE SERVER idatafilesrvr FOREIGN DATA WRAPPER file_fdw; 
