@@ -81,6 +81,10 @@ def main(isVerbose, connectionStr, iFile, outputPath):
 		for file_column_name, column_alias, table_name, name_column, id_column, table_alias in reader:
 			if IS_VERBOSE:
 				print("Processing column: %s" % file_column_name)
+			if file_column_name not in header:
+				if IS_VERBOSE:
+					print("Column is not present in input file. Skipping...")
+				break
 			if(conditionStr == ""):
 				conditionStr += table_name+"."+name_column+"="+fTableName+"."+file_column_name
 			else:
