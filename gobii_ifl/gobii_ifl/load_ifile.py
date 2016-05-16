@@ -33,8 +33,8 @@ def main(isVerbose, connectionStr, iFile, outputPath):
 	IS_VERBOSE = isVerbose
 	SUFFIX_LEN = 8
 
-	if IS_VERBOSE:
-		print("arguments: %s" % str(sys.argv))
+	#if IS_VERBOSE:
+	#print("arguments: %s" % str(sys.argv))
 
 	outputFile = outputPath+"nodups_"+basename(iFile)
 	#print("splitext: ", splitext(basename(iFile)))
@@ -42,7 +42,7 @@ def main(isVerbose, connectionStr, iFile, outputPath):
 	randomStr = IFLUtility.generateRandomString(SUFFIX_LEN)
 	fTableName = "ft_" + tableName + "_" + randomStr
 	if IS_VERBOSE:
-		print("Foreign Table Name:", tableName)
+		print("Table Name:", tableName)
 		print("Output File: ", outputFile)
 		print("Getting information from mapping file: ", tableName+'.dupmap')
 		print(resource_listdir('res.map', ''))

@@ -42,8 +42,8 @@ def main(isVerbose, connectionStr, iFile, outputPath):
 	IS_VERBOSE = isVerbose
 	SUFFIX_LEN = 8
 
-	if IS_VERBOSE:
-		print("arguments: %s" % str(sys.argv))
+	#if IS_VERBOSE:
+	#print("arguments: %s" % str(sys.argv))
 
 	outputFile = outputPath+"ppd_"+basename(iFile)
 
@@ -52,7 +52,7 @@ def main(isVerbose, connectionStr, iFile, outputPath):
 	randomStr = IFLUtility.generateRandomString(SUFFIX_LEN)
 	fTableName = "f_" + tableName + "_" + randomStr
 	if IS_VERBOSE:
-		print("Foreign Table Name:", tableName)
+		print("Table Name:", tableName)
 		print("Output File: ", outputFile)
 		print("Getting information from mapping file: ", tableName+'.nmap')
 		#print(resource_listdir('res.map', ''))
@@ -84,7 +84,7 @@ def main(isVerbose, connectionStr, iFile, outputPath):
 			if file_column_name not in header:
 				if IS_VERBOSE:
 					print("Column is not present in input file. Skipping...")
-				break
+				continue
 			if(conditionStr == ""):
 				conditionStr += table_name+"."+name_column+"="+fTableName+"."+file_column_name
 			else:
@@ -98,7 +98,7 @@ def main(isVerbose, connectionStr, iFile, outputPath):
 				fromStr += ", "+table_name
 		#if(conditionStr != ""):
 		#	conditionStr += ";"
-		nameMappingFile.close
+		nameMappingFile.close()
 		deriveIdSql = "select "+selectStr+" from "+fromStr+" where "+conditionStr
 		#print ("deriveIdSql: "+deriveIdSql)
 		ppMgr.createFileWithDerivedIds(outputFile, deriveIdSql)
