@@ -34,7 +34,7 @@ import csv
 import traceback
 from os.path import basename
 from os.path import splitext
-from pkg_resources import resource_string, resource_stream
+from pkg_resources import resource_stream
 from db.preprocess_ifile_manager import PreprocessIfileManager
 from util.ifl_utility import IFLUtility
 
@@ -56,7 +56,7 @@ def main(isVerbose, connectionStr, iFile, outputPath):
 		print("Output File: ", outputFile)
 		print("Getting information from mapping file: ", tableName+'.nmap')
 		#print(resource_listdir('res.map', ''))
-		print(resource_string('res.map', tableName+'.nmap'))
+		#print(resource_string('res.map', tableName+'.nmap'))
 
 	nameMappingFile = resource_stream('res.map', tableName+'.nmap')
 	#sys.exit()
