@@ -105,12 +105,12 @@ def main(isVerbose, connectionStr, iFile, outputPath):
 		ppMgr.dropForeignTable(fTableName)
 		ppMgr.commitTransaction()
 		ppMgr.closeConnection()
-		print("Preprocessed file successfully.")
+		print("Preprocessed %s successfully." % iFile)
 		return outputFile
 	except Exception as e:
-		print('Failed to preprocess file: %s' % str(e))
+		IFLUtility.printError('Failed to preprocess %s. Error: %s' % (iFile, str(e)))
 		ppMgr.rollbackTransaction()
-		traceback.print_exc()
+		traceback.print_exc(file=sys.stderr)
 
 if __name__ == "__main__":
 	if len(sys.argv) < 4:

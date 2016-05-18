@@ -6,6 +6,7 @@ import os
 import getopt
 import load_ifile
 import preprocess_ifile
+from util.ifl_utility import IFLUtility
 
 def main(argv):
 		verbose = False
@@ -40,15 +41,18 @@ def main(argv):
 		if connectionStr != "" and outputPath != "":
 			if inputDir != "":
 				for f in os.listdir(inputDir):
-					if verbose:
-						print("Processing file %s..." % f)
-					preprocessedFile = preprocess_ifile.main(verbose, connectionStr, os.path.join(inputDir, f), outputPath)
-					loadFile = load_ifile.main(verbose, connectionStr, preprocessedFile, outputPath)
-					'''try:
-						os.remove(preprocessedFile)
-						os.remove(loadFile)
-					except Exception as e:
-						print("Failed to remove temporary files. Check file permissions. Error: %s" % str(e))'''
+					try:
+						if verbose:
+							print("Processing file %s..." % f)
+						preprocessedFile = preprocess_ifile.main(verbose, connectionStr, os.path.join(inputDir, f), outputPath)
+						loadFile = load_ifile.main(verbose, connectionStr, preprocessedFile, outputPath)
+						try:
+							os.remove(preprocessedFile)
+							os.remove(loadFile)
+						except Exception as e:
+							IFLUtility.printError("Failed to remove temporary files. Check file permissions. Error: %s" % str(e))
+					except Exception as e1:
+						IFLUtility.printError("Failed to load file %s. Error: %s" % (f, str(e1)))
 			elif iFile != "":
 				preprocessedFile = preprocess_ifile.main(verbose, connectionStr, iFile, outputPath)
 				loadFile = load_ifile.main(verbose, connectionStr, preprocessedFile, outputPath)
@@ -56,7 +60,7 @@ def main(argv):
 					os.remove(preprocessedFile)
 					os.remove(loadFile)
 				except Exception as e:
-					print("Failed to remove temporary files. Check file permissions. Error: %s" % str(e))
+					IFLUtility.printError("Failed to remove temporary files. Check file permissions. Error: %s" % str(e))
 			else:
 				printUsageHelp()
 		else:
@@ -64,7 +68,7 @@ def main(argv):
 		#cleanup
 
 def printUsageHelp():
-	print ("gobii_ifl.py -c <connectionString> -i <inputFile> -o <outputDirectory> -v")
+	print ("gobii_ifl.py -c <connectionString> -i <inputFile> -d <inputDir> -o <outputDirectory> -v")
 	print ("\t-h = Usage help")
 	print ("\t-c or --connectionString = Database connection string (RFC 3986 URI).\n\t\tFormat: postgresql://[user[:password]@][netloc][:port][/dbname][?param1=value1&...]")
 	print ("\t-i or --inputFile = The intermediate file. Expected format: freetext.tablename")

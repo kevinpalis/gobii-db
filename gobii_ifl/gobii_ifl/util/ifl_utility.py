@@ -2,6 +2,7 @@
 from __future__ import print_function
 import string
 import random
+import sys
 
 class IFLUtility:
 	"""
@@ -16,3 +17,7 @@ class IFLUtility:
 		"""
 		chars = string.ascii_uppercase + string.digits
 		return ''.join(random.choice(chars) for _ in range(length))
+
+	@staticmethod
+	def printError(*args, **kwargs):
+		print(*args, file=sys.stderr, **kwargs)

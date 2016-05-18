@@ -85,18 +85,19 @@ def main(isVerbose, connectionStr, iFile, outputPath):
 		#print ("joinSql: "+joinSql)
 		#ppMgr.createFileWithDerivedIds(outputFile, deriveIdSql)
 		loadMgr.createFileWithoutDuplicates(outputFile, joinSql)
-		print("Removed duplicates successfully.")
+		if IS_VERBOSE:
+			print("Removed duplicates successfully.")
 		#primary key column assumed to be tablename_id --> needs to be configurable(?) (would've been better if everything's just 'id' as usual!)
 		loadMgr.loadData(tableName, header, outputFile, tableName+"_id")
 		loadMgr.dropForeignTable(fTableName)
 		loadMgr.commitTransaction()
 		loadMgr.closeConnection()
-		print("Loaded data successfully.")
+		print("Loaded %s successfully." % iFile)
 		return outputFile
 	except Exception as e:
-		print('Failed to load data. Error: %s' % str(e))
+		IFLUtility.printError('Failed to load %s. Error: %s' % (iFile, str(e)))
 		loadMgr.rollbackTransaction()
-		traceback.print_exc()
+		traceback.print_exc(file=sys.stderr)
 
 if __name__ == "__main__":
 	if len(sys.argv) < 4:
