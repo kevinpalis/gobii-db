@@ -527,22 +527,22 @@ $$ LANGUAGE plpgsql;
 --### Dataset ###--
 
 --create a new row, you may supply null for columns that are nullable
-CREATE OR REPLACE FUNCTION createDataset(experimentId integer, callinganalysisId integer, datasetAnalyses integer[], dataTable text, dataFile text, qualityTable text, qualityFile text, createdBy int, createdDate date, modifiedBy int, modifiedDate date, datasetStatus integer, OUT id integer)
+DROP FUNCTION createDataset(experimentId integer, callinganalysisId integer, datasetAnalyses integer[], dataTable text, dataFile text, qualityTable text, qualityFile text, createdBy int, createdDate date, modifiedBy int, modifiedDate date, datasetStatus integer, OUT id integer);
+CREATE OR REPLACE FUNCTION createDataset(experimentId integer, callinganalysisId integer, datasetAnalyses integer[], dataTable text, dataFile text, qualityTable text, qualityFile text, createdBy int, createdDate date, modifiedBy int, modifiedDate date, datasetStatus integer, typeId integer, OUT id integer)
 RETURNS integer AS $$
   BEGIN
-    insert into dataset (experiment_id, callinganalysis_id, analyses, data_table, data_file, quality_table, quality_file, scores, created_by, created_date, modified_by, modified_date, status)
-      values (experimentId, callinganalysisId, datasetAnalyses, dataTable, dataFile, qualityTable, qualityFile, '{}'::jsonb, createdBy, createdDate, modifiedBy, modifiedDate, datasetStatus); 
+    insert into dataset (experiment_id, callinganalysis_id, analyses, data_table, data_file, quality_table, quality_file, scores, created_by, created_date, modified_by, modified_date, status, type_id)
+      values (experimentId, callinganalysisId, datasetAnalyses, dataTable, dataFile, qualityTable, qualityFile, '{}'::jsonb, createdBy, createdDate, modifiedBy, modifiedDate, datasetStatus, typeId); 
     select lastval() into id;
   END;
 $$ LANGUAGE plpgsql;
 
 --update all columns
---You can "avoid" updating certain columns by passing the same value as what's currently in that column
---OR I can create update functions that updates only certain columns, just let me know.
-CREATE OR REPLACE FUNCTION updateDataset(id integer, experimentId integer, callinganalysisId integer, datasetAnalyses integer[], dataTable text, dataFile text, qualityTable text, qualityFile text, createdBy int, createdDate date, modifiedBy int, modifiedDate date, datasetStatus integer)
+DROP FUNCTION updateDataset(id integer, experimentId integer, callinganalysisId integer, datasetAnalyses integer[], dataTable text, dataFile text, qualityTable text, qualityFile text, createdBy int, createdDate date, modifiedBy int, modifiedDate date, datasetStatus integer);
+CREATE OR REPLACE FUNCTION updateDataset(id integer, experimentId integer, callinganalysisId integer, datasetAnalyses integer[], dataTable text, dataFile text, qualityTable text, qualityFile text, createdBy int, createdDate date, modifiedBy int, modifiedDate date, datasetStatus integer, typeId integer)
 RETURNS void AS $$
     BEGIN
-    update dataset set experiment_id=experimentId, callinganalysis_id=callinganalysisId, analyses=datasetAnalyses, data_table=dataTable, data_file=dataFile, quality_table=qualityTable, quality_file=qualityFile, scores='{}'::jsonb, created_by=createdBy, created_date=createdDate, modified_by=modifiedBy, modified_date=modifiedDate, status=datasetStatus
+    update dataset set experiment_id=experimentId, callinganalysis_id=callinganalysisId, analyses=datasetAnalyses, data_table=dataTable, data_file=dataFile, quality_table=qualityTable, quality_file=qualityFile, scores='{}'::jsonb, created_by=createdBy, created_date=createdDate, modified_by=modifiedBy, modified_date=modifiedDate, status=datasetStatus, type_id=typeId
      where dataset_id = id;
     END;
 $$ LANGUAGE plpgsql;

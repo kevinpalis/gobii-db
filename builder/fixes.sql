@@ -20,9 +20,9 @@ ALTER TABLE mapset ALTER COLUMN status SET DEFAULT 1;
 
 ALTER TABLE dataset_marker ADD COLUMN marker_idx integer;
 ALTER TABLE dataset_dnarun ADD COLUMN dnarun_idx integer;
-
 ALTER TABLE display add column rank integer;
---ALTER TABLE dataset ADD COLUMN type_id integer;
+ALTER TABLE dataset ADD COLUMN type_id integer;
+
 /*
   Some tables are not consistent on the column type of created_by and modified_by.
   The following commands will fix that.
@@ -41,8 +41,8 @@ ALTER TABLE platform ALTER COLUMN modified_by type integer using modified_by::in
 ALTER TABLE marker_linkage_group ALTER COLUMN start type DECIMAL(13,3);
 ALTER TABLE marker_linkage_group ALTER COLUMN stop type DECIMAL(13,3);
 --because we can't convert text[] to jsonb
-ALTER TABLE marker DROP COLUMN probsets;
-ALTER TABLE marker ADD COLUMN probsets jsonb;
+--ALTER TABLE marker DROP COLUMN probsets;
+--ALTER TABLE marker ADD COLUMN probsets jsonb;
 
 --Constraint additions/modifications
 --compound-unique constraint on the project table for pi contact (i.e., principle investigator user id) and project name.
@@ -51,9 +51,7 @@ ALTER TABLE project ADD CONSTRAINT pi_project_name_key UNIQUE (pi_contact, name)
 -- compound unique: in the experiment table: name, projectid,platformid
 ALTER TABLE experiment ADD CONSTRAINT name_project_id_platform_id_key UNIQUE (name, project_id, platform_id);
 ALTER TABLE experiment ALTER COLUMN platform_id SET NOT NULL;
-
--- dataset type_id references cv.cv_id
---ALTER TABLE dataset ADD CONSTRAINT dataset_fk3 FOREIGN KEY (type_id) REFERENCES cv(cv_id)
+ALTER TABLE dataset ADD CONSTRAINT dataset_fk3 FOREIGN KEY (type_id) REFERENCES cv(cv_id)
 
 --drop constraints
 ALTER TABLE marker ALTER COLUMN code DROP NOT NULL;
@@ -63,6 +61,7 @@ ALTER TABLE dnasample ALTER COLUMN code DROP NOT NULL;
 ALTER TABLE dnarun ALTER COLUMN code DROP NOT NULL;
 
 --enable foreign data wrapper
-CREATE EXTENSION postgres_fdw;
+CREATE EXTENSION file_fdw;
 --create the foreign server for IFLs to work
 CREATE SERVER idatafilesrvr FOREIGN DATA WRAPPER file_fdw; 
+
