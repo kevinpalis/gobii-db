@@ -170,15 +170,15 @@ $$;
 
 
 --
--- Name: createdataset(integer, integer, integer[], text, text, text, text, integer, date, integer, date, integer); Type: FUNCTION; Schema: public; Owner: -
+-- Name: createdataset(integer, integer, integer[], text, text, text, text, integer, date, integer, date, integer, integer); Type: FUNCTION; Schema: public; Owner: -
 --
 
-CREATE FUNCTION createdataset(experimentid integer, callinganalysisid integer, datasetanalyses integer[], datatable text, datafile text, qualitytable text, qualityfile text, createdby integer, createddate date, modifiedby integer, modifieddate date, datasetstatus integer, OUT id integer) RETURNS integer
+CREATE FUNCTION createdataset(experimentid integer, callinganalysisid integer, datasetanalyses integer[], datatable text, datafile text, qualitytable text, qualityfile text, createdby integer, createddate date, modifiedby integer, modifieddate date, datasetstatus integer, typeid integer, OUT id integer) RETURNS integer
     LANGUAGE plpgsql
     AS $$
   BEGIN
-    insert into dataset (experiment_id, callinganalysis_id, analyses, data_table, data_file, quality_table, quality_file, scores, created_by, created_date, modified_by, modified_date, status)
-      values (experimentId, callinganalysisId, datasetAnalyses, dataTable, dataFile, qualityTable, qualityFile, '{}'::jsonb, createdBy, createdDate, modifiedBy, modifiedDate, datasetStatus); 
+    insert into dataset (experiment_id, callinganalysis_id, analyses, data_table, data_file, quality_table, quality_file, scores, created_by, created_date, modified_by, modified_date, status, type_id)
+      values (experimentId, callinganalysisId, datasetAnalyses, dataTable, dataFile, qualityTable, qualityFile, '{}'::jsonb, createdBy, createdDate, modifiedBy, modifiedDate, datasetStatus, typeId); 
     select lastval() into id;
   END;
 $$;
@@ -1888,14 +1888,14 @@ $$;
 
 
 --
--- Name: updatedataset(integer, integer, integer, integer[], text, text, text, text, integer, date, integer, date, integer); Type: FUNCTION; Schema: public; Owner: -
+-- Name: updatedataset(integer, integer, integer, integer[], text, text, text, text, integer, date, integer, date, integer, integer); Type: FUNCTION; Schema: public; Owner: -
 --
 
-CREATE FUNCTION updatedataset(id integer, experimentid integer, callinganalysisid integer, datasetanalyses integer[], datatable text, datafile text, qualitytable text, qualityfile text, createdby integer, createddate date, modifiedby integer, modifieddate date, datasetstatus integer) RETURNS void
+CREATE FUNCTION updatedataset(id integer, experimentid integer, callinganalysisid integer, datasetanalyses integer[], datatable text, datafile text, qualitytable text, qualityfile text, createdby integer, createddate date, modifiedby integer, modifieddate date, datasetstatus integer, typeid integer) RETURNS void
     LANGUAGE plpgsql
     AS $$
     BEGIN
-    update dataset set experiment_id=experimentId, callinganalysis_id=callinganalysisId, analyses=datasetAnalyses, data_table=dataTable, data_file=dataFile, quality_table=qualityTable, quality_file=qualityFile, scores='{}'::jsonb, created_by=createdBy, created_date=createdDate, modified_by=modifiedBy, modified_date=modifiedDate, status=datasetStatus
+    update dataset set experiment_id=experimentId, callinganalysis_id=callinganalysisId, analyses=datasetAnalyses, data_table=dataTable, data_file=dataFile, quality_table=qualityTable, quality_file=qualityFile, scores='{}'::jsonb, created_by=createdBy, created_date=createdDate, modified_by=modifiedBy, modified_date=modifiedDate, status=datasetStatus, type_id=typeId
      where dataset_id = id;
     END;
 $$;
@@ -2837,7 +2837,8 @@ CREATE TABLE dataset (
     created_date date DEFAULT ('now'::text)::date,
     modified_by integer,
     modified_date date DEFAULT ('now'::text)::date,
-    status integer
+    status integer,
+    type_id integer
 );
 
 
