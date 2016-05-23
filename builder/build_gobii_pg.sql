@@ -4,3 +4,4 @@
 \i views.sql
 \i functions.sql
 \i fixes.sql
+\i cv_builder.sql

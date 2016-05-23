@@ -4023,6 +4023,7 @@ COPY cv (cv_id, "group", term, definition, rank) FROM stdin;
 95	dataset_type	dominant_non-nucleotide	Dominant Non-nucleotide	3
 96	dataset_type	codominant_non-nucleotide	Codominant non-nucleotide (1 is het)	4
 97	dataset_type	ssr_allele_size	SSR Allele Size	5
+98	platform_prop	date	placeholder property	0
 \.
 
 
@@ -4030,7 +4031,7 @@ COPY cv (cv_id, "group", term, definition, rank) FROM stdin;
 -- Name: cv_cv_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('cv_cv_id_seq', 97, true);
+SELECT pg_catalog.setval('cv_cv_id_seq', 98, true);
 
 
 --
