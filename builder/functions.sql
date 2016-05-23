@@ -527,22 +527,22 @@ $$ LANGUAGE plpgsql;
 --### Dataset ###--
 
 --create a new row, you may supply null for columns that are nullable
-DROP FUNCTION createDataset(experimentId integer, callinganalysisId integer, datasetAnalyses integer[], dataTable text, dataFile text, qualityTable text, qualityFile text, createdBy int, createdDate date, modifiedBy int, modifiedDate date, datasetStatus integer, OUT id integer);
-CREATE OR REPLACE FUNCTION createDataset(experimentId integer, callinganalysisId integer, datasetAnalyses integer[], dataTable text, dataFile text, qualityTable text, qualityFile text, createdBy int, createdDate date, modifiedBy int, modifiedDate date, datasetStatus integer, typeId integer, OUT id integer)
+--DROP FUNCTION createDataset(experimentId integer, callinganalysisId integer, datasetAnalyses integer[], dataTable text, dataFile text, qualityTable text, qualityFile text, createdBy int, createdDate date, modifiedBy int, modifiedDate date, datasetStatus integer, OUT id integer);
+CREATE OR REPLACE FUNCTION createDataset(datasetName text, experimentId integer, callinganalysisId integer, datasetAnalyses integer[], dataTable text, dataFile text, qualityTable text, qualityFile text, createdBy int, createdDate date, modifiedBy int, modifiedDate date, datasetStatus integer, typeId integer, OUT id integer)
 RETURNS integer AS $$
   BEGIN
-    insert into dataset (experiment_id, callinganalysis_id, analyses, data_table, data_file, quality_table, quality_file, scores, created_by, created_date, modified_by, modified_date, status, type_id)
-      values (experimentId, callinganalysisId, datasetAnalyses, dataTable, dataFile, qualityTable, qualityFile, '{}'::jsonb, createdBy, createdDate, modifiedBy, modifiedDate, datasetStatus, typeId); 
+    insert into dataset (experiment_id, callinganalysis_id, analyses, data_table, data_file, quality_table, quality_file, scores, created_by, created_date, modified_by, modified_date, status, type_id, name)
+      values (experimentId, callinganalysisId, datasetAnalyses, dataTable, dataFile, qualityTable, qualityFile, '{}'::jsonb, createdBy, createdDate, modifiedBy, modifiedDate, datasetStatus, typeId, datasetName); 
     select lastval() into id;
   END;
 $$ LANGUAGE plpgsql;
 
 --update all columns
-DROP FUNCTION updateDataset(id integer, experimentId integer, callinganalysisId integer, datasetAnalyses integer[], dataTable text, dataFile text, qualityTable text, qualityFile text, createdBy int, createdDate date, modifiedBy int, modifiedDate date, datasetStatus integer);
-CREATE OR REPLACE FUNCTION updateDataset(id integer, experimentId integer, callinganalysisId integer, datasetAnalyses integer[], dataTable text, dataFile text, qualityTable text, qualityFile text, createdBy int, createdDate date, modifiedBy int, modifiedDate date, datasetStatus integer, typeId integer)
+--DROP FUNCTION updateDataset(id integer, experimentId integer, callinganalysisId integer, datasetAnalyses integer[], dataTable text, dataFile text, qualityTable text, qualityFile text, createdBy int, createdDate date, modifiedBy int, modifiedDate date, datasetStatus integer);
+CREATE OR REPLACE FUNCTION updateDataset(id integer, datasetName text, experimentId integer, callinganalysisId integer, datasetAnalyses integer[], dataTable text, dataFile text, qualityTable text, qualityFile text, createdBy int, createdDate date, modifiedBy int, modifiedDate date, datasetStatus integer, typeId integer)
 RETURNS void AS $$
     BEGIN
-    update dataset set experiment_id=experimentId, callinganalysis_id=callinganalysisId, analyses=datasetAnalyses, data_table=dataTable, data_file=dataFile, quality_table=qualityTable, quality_file=qualityFile, scores='{}'::jsonb, created_by=createdBy, created_date=createdDate, modified_by=modifiedBy, modified_date=modifiedDate, status=datasetStatus, type_id=typeId
+    update dataset set experiment_id=experimentId, callinganalysis_id=callinganalysisId, analyses=datasetAnalyses, data_table=dataTable, data_file=dataFile, quality_table=qualityTable, quality_file=qualityFile, scores='{}'::jsonb, created_by=createdBy, created_date=createdDate, modified_by=modifiedBy, modified_date=modifiedDate, status=datasetStatus, type_id=typeId, name=datasetName
      where dataset_id = id;
     END;
 $$ LANGUAGE plpgsql;
@@ -1518,11 +1518,11 @@ $$ LANGUAGE plpgsql;
 --### MarkerGroup ###--
 
 --create a new row, you may supply null for columns that are nullable
-CREATE OR REPLACE FUNCTION createMarkerGroup(markerGroupName text, markerGroupCode text, germplasmGroup text, createdBy integer, createDate date, modifiedBy integer, modifiedDate date, markerGroupStatus integer, OUT id integer)
+CREATE OR REPLACE FUNCTION createMarkerGroup(markerGroupName text, markerGroupCode text, germplasmGroup text, createdBy integer, createdDate date, modifiedBy integer, modifiedDate date, markerGroupStatus integer, OUT id integer)
 RETURNS integer AS $$
   BEGIN
-    insert into marker_group (name, code, markers, germplasm_group, created_by, create_date, modified_by, modified_date, status)
-      values (markerGroupName, markerGroupCode, '{}'::jsonb, germplasmGroup, createdBy, createDate, modifiedBy, modifiedDate, markerGroupStatus); 
+    insert into marker_group (name, code, markers, germplasm_group, created_by, created_date, modified_by, modified_date, status)
+      values (markerGroupName, markerGroupCode, '{}'::jsonb, germplasmGroup, createdBy, createdDate, modifiedBy, modifiedDate, markerGroupStatus); 
     select lastval() into id;
   END;
 $$ LANGUAGE plpgsql;
@@ -1532,7 +1532,7 @@ DROP FUNCTION updatemarkergroup(integer,text,text,text,integer,date,integer,date
 CREATE OR REPLACE FUNCTION updateMarkerGroup(id integer, markerGroupName text, markerGroupCode text, germplasmGroup text, createdBy integer, createdDate date, modifiedBy integer, modifiedDate date, markerGroupStatus integer)
 RETURNS void AS $$
     BEGIN
-    update marker_group set name=markerGroupName, code=markerGroupCode, markers='{}'::jsonb, germplasm_group=germplasmGroup, created_by=createdBy, create_date=createdDate, modified_by=modifiedBy, modified_date=modifiedDate, status=markerGroupStatus
+    update marker_group set name=markerGroupName, code=markerGroupCode, markers='{}'::jsonb, germplasm_group=germplasmGroup, created_by=createdBy, created_date=createdDate, modified_by=modifiedBy, modified_date=modifiedDate, status=markerGroupStatus
      where marker_group_id = id;
     END;
 $$ LANGUAGE plpgsql;

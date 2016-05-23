@@ -22,7 +22,7 @@ ALTER TABLE dataset_marker ADD COLUMN marker_idx integer;
 ALTER TABLE dataset_dnarun ADD COLUMN dnarun_idx integer;
 ALTER TABLE display add column rank integer;
 ALTER TABLE dataset ADD COLUMN type_id integer;
-
+ALTER TABLE dataset ADD COLUMN name text;
 /*
   Some tables are not consistent on the column type of created_by and modified_by.
   The following commands will fix that.
@@ -64,4 +64,62 @@ ALTER TABLE dnarun ALTER COLUMN code DROP NOT NULL;
 CREATE EXTENSION file_fdw;
 --create the foreign server for IFLs to work
 CREATE SERVER idatafilesrvr FOREIGN DATA WRAPPER file_fdw; 
+
+--drop all not null constraints of created and modified columns
+ALTER TABLE marker_group RENAME COLUMN create_date TO created_date;
+--select 'ALTER TABLE ' || table_name || ' ALTER COLUMN modified_by DROP NOT NULL;' from information_schema.columns where column_name = 'modified_by';
+ALTER TABLE contact ALTER COLUMN modified_by DROP NOT NULL;
+ALTER TABLE dataset ALTER COLUMN modified_by DROP NOT NULL;
+ALTER TABLE display ALTER COLUMN modified_by DROP NOT NULL;
+ALTER TABLE dnasample ALTER COLUMN modified_by DROP NOT NULL;
+ALTER TABLE experiment ALTER COLUMN modified_by DROP NOT NULL;
+ALTER TABLE germplasm ALTER COLUMN modified_by DROP NOT NULL;
+ALTER TABLE manifest ALTER COLUMN modified_by DROP NOT NULL;
+ALTER TABLE mapset ALTER COLUMN modified_by DROP NOT NULL;
+ALTER TABLE marker_group ALTER COLUMN modified_by DROP NOT NULL;
+ALTER TABLE platform ALTER COLUMN modified_by DROP NOT NULL;
+ALTER TABLE project ALTER COLUMN modified_by DROP NOT NULL;
+ALTER TABLE variant ALTER COLUMN modified_by DROP NOT NULL;
+--select 'ALTER TABLE ' || table_name || ' ALTER COLUMN created_by DROP NOT NULL;' from information_schema.columns where column_name = 'created_by';
+ALTER TABLE contact ALTER COLUMN created_by DROP NOT NULL;
+ALTER TABLE dataset ALTER COLUMN created_by DROP NOT NULL;
+ALTER TABLE display ALTER COLUMN created_by DROP NOT NULL;
+ALTER TABLE dnasample ALTER COLUMN created_by DROP NOT NULL;
+ALTER TABLE experiment ALTER COLUMN created_by DROP NOT NULL;
+ALTER TABLE germplasm ALTER COLUMN created_by DROP NOT NULL;
+ALTER TABLE manifest ALTER COLUMN created_by DROP NOT NULL;
+ALTER TABLE mapset ALTER COLUMN created_by DROP NOT NULL;
+ALTER TABLE marker_group ALTER COLUMN created_by DROP NOT NULL;
+ALTER TABLE platform ALTER COLUMN created_by DROP NOT NULL;
+ALTER TABLE project ALTER COLUMN created_by DROP NOT NULL;
+ALTER TABLE variant ALTER COLUMN created_by DROP NOT NULL;
+--select 'ALTER TABLE ' || table_name || ' ALTER COLUMN modified_date DROP NOT NULL;' from information_schema.columns where column_name = 'modified_date';
+ALTER TABLE contact ALTER COLUMN modified_date DROP NOT NULL;
+ALTER TABLE dataset ALTER COLUMN modified_date DROP NOT NULL;
+ALTER TABLE display ALTER COLUMN modified_date DROP NOT NULL;
+ALTER TABLE dnasample ALTER COLUMN modified_date DROP NOT NULL;
+ALTER TABLE experiment ALTER COLUMN modified_date DROP NOT NULL;
+ALTER TABLE germplasm ALTER COLUMN modified_date DROP NOT NULL;
+ALTER TABLE manifest ALTER COLUMN modified_date DROP NOT NULL;
+ALTER TABLE mapset ALTER COLUMN modified_date DROP NOT NULL;
+ALTER TABLE marker_group ALTER COLUMN modified_date DROP NOT NULL;
+ALTER TABLE platform ALTER COLUMN modified_date DROP NOT NULL;
+ALTER TABLE project ALTER COLUMN modified_date DROP NOT NULL;
+ALTER TABLE variant ALTER COLUMN modified_date DROP NOT NULL;
+--select 'ALTER TABLE ' || table_name || ' ALTER COLUMN created_date DROP NOT NULL;' from information_schema.columns where column_name = 'created_date';
+ALTER TABLE contact ALTER COLUMN created_date DROP NOT NULL;
+ALTER TABLE dataset ALTER COLUMN created_date DROP NOT NULL;
+ALTER TABLE display ALTER COLUMN created_date DROP NOT NULL;
+ALTER TABLE dnasample ALTER COLUMN created_date DROP NOT NULL;
+ALTER TABLE experiment ALTER COLUMN created_date DROP NOT NULL;
+ALTER TABLE germplasm ALTER COLUMN created_date DROP NOT NULL;
+ALTER TABLE manifest ALTER COLUMN created_date DROP NOT NULL;
+ALTER TABLE mapset ALTER COLUMN created_date DROP NOT NULL;
+ALTER TABLE marker_group ALTER COLUMN created_date DROP NOT NULL;
+ALTER TABLE platform ALTER COLUMN created_date DROP NOT NULL;
+ALTER TABLE project ALTER COLUMN created_date DROP NOT NULL;
+ALTER TABLE variant ALTER COLUMN created_date DROP NOT NULL;
+
+ALTER TABLE dataset ALTER COLUMN data_table DROP NOT NULL;
+ALTER TABLE dataset ALTER COLUMN data_file DROP NOT NULL;
 

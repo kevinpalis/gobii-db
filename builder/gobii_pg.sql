@@ -170,30 +170,15 @@ $$;
 
 
 --
--- Name: createdataset(integer, integer, integer[], text, text, text, text, integer, date, integer, date, integer, integer); Type: FUNCTION; Schema: public; Owner: -
+-- Name: createdataset(text, integer, integer, integer[], text, text, text, text, integer, date, integer, date, integer, integer); Type: FUNCTION; Schema: public; Owner: -
 --
 
-CREATE FUNCTION createdataset(experimentid integer, callinganalysisid integer, datasetanalyses integer[], datatable text, datafile text, qualitytable text, qualityfile text, createdby integer, createddate date, modifiedby integer, modifieddate date, datasetstatus integer, typeid integer, OUT id integer) RETURNS integer
+CREATE FUNCTION createdataset(datasetname text, experimentid integer, callinganalysisid integer, datasetanalyses integer[], datatable text, datafile text, qualitytable text, qualityfile text, createdby integer, createddate date, modifiedby integer, modifieddate date, datasetstatus integer, typeid integer, OUT id integer) RETURNS integer
     LANGUAGE plpgsql
     AS $$
   BEGIN
-    insert into dataset (experiment_id, callinganalysis_id, analyses, data_table, data_file, quality_table, quality_file, scores, created_by, created_date, modified_by, modified_date, status, type_id)
-      values (experimentId, callinganalysisId, datasetAnalyses, dataTable, dataFile, qualityTable, qualityFile, '{}'::jsonb, createdBy, createdDate, modifiedBy, modifiedDate, datasetStatus, typeId); 
-    select lastval() into id;
-  END;
-$$;
-
-
---
--- Name: createdataset(integer, integer, integer[], text, text, text, text, jsonb, integer, date, integer, date, integer); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION createdataset(experimentid integer, callinganalysisid integer, datasetanalyses integer[], datatable text, datafile text, qualitytable text, qualityfile text, datasetscores jsonb, createdby integer, createddate date, modifiedby integer, modifieddate date, datasetstatus integer, OUT id integer) RETURNS integer
-    LANGUAGE plpgsql
-    AS $$
-  BEGIN
-    insert into dataset (experiment_id, callinganalysis_id, analyses, data_table, data_file, quality_table, quality_file, scores, created_by, created_date, modified_by, modified_date, status)
-      values (experimentId, callinganalysisId, datasetAnalyses, dataTable, dataFile, qualityTable, qualityFile, datasetScores, createdBy::text, createdDate, modifiedBy::text, modifiedDate, datasetStatus); 
+    insert into dataset (experiment_id, callinganalysis_id, analyses, data_table, data_file, quality_table, quality_file, scores, created_by, created_date, modified_by, modified_date, status, type_id, name)
+      values (experimentId, callinganalysisId, datasetAnalyses, dataTable, dataFile, qualityTable, qualityFile, '{}'::jsonb, createdBy, createdDate, modifiedBy, modifiedDate, datasetStatus, typeId, datasetName); 
     select lastval() into id;
   END;
 $$;
@@ -402,12 +387,12 @@ $$;
 -- Name: createmarkergroup(text, text, text, integer, date, integer, date, integer); Type: FUNCTION; Schema: public; Owner: -
 --
 
-CREATE FUNCTION createmarkergroup(markergroupname text, markergroupcode text, germplasmgroup text, createdby integer, createdate date, modifiedby integer, modifieddate date, markergroupstatus integer, OUT id integer) RETURNS integer
+CREATE FUNCTION createmarkergroup(markergroupname text, markergroupcode text, germplasmgroup text, createdby integer, createddate date, modifiedby integer, modifieddate date, markergroupstatus integer, OUT id integer) RETURNS integer
     LANGUAGE plpgsql
     AS $$
   BEGIN
-    insert into marker_group (name, code, markers, germplasm_group, created_by, create_date, modified_by, modified_date, status)
-      values (markerGroupName, markerGroupCode, '{}'::jsonb, germplasmGroup, createdBy, createDate, modifiedBy, modifiedDate, markerGroupStatus); 
+    insert into marker_group (name, code, markers, germplasm_group, created_by, created_date, modified_by, modified_date, status)
+      values (markerGroupName, markerGroupCode, '{}'::jsonb, germplasmGroup, createdBy, createdDate, modifiedBy, modifiedDate, markerGroupStatus); 
     select lastval() into id;
   END;
 $$;
@@ -1171,8 +1156,8 @@ CREATE TABLE contact (
     code text NOT NULL,
     email text NOT NULL,
     roles integer[],
-    created_by integer NOT NULL,
-    created_date date DEFAULT ('now'::text)::date NOT NULL,
+    created_by integer,
+    created_date date DEFAULT ('now'::text)::date,
     modified_by integer,
     modified_date date DEFAULT ('now'::text)::date
 );
@@ -1461,9 +1446,9 @@ CREATE TABLE experiment (
     platform_id integer NOT NULL,
     manifest_id integer,
     data_file text,
-    created_by integer NOT NULL,
-    created_date date DEFAULT ('now'::text)::date NOT NULL,
-    modified_by integer NOT NULL,
+    created_by integer,
+    created_date date DEFAULT ('now'::text)::date,
+    modified_by integer,
     modified_date date DEFAULT ('now'::text)::date,
     status integer NOT NULL
 );
@@ -1525,10 +1510,10 @@ CREATE TABLE manifest (
     name text NOT NULL,
     code text NOT NULL,
     file_path text,
-    created_by integer NOT NULL,
-    created_date date DEFAULT ('now'::text)::date NOT NULL,
-    modified_by integer NOT NULL,
-    modified_date date DEFAULT ('now'::text)::date NOT NULL
+    created_by integer,
+    created_date date DEFAULT ('now'::text)::date,
+    modified_by integer,
+    modified_date date DEFAULT ('now'::text)::date
 );
 
 
@@ -1888,28 +1873,14 @@ $$;
 
 
 --
--- Name: updatedataset(integer, integer, integer, integer[], text, text, text, text, integer, date, integer, date, integer, integer); Type: FUNCTION; Schema: public; Owner: -
+-- Name: updatedataset(integer, text, integer, integer, integer[], text, text, text, text, integer, date, integer, date, integer, integer); Type: FUNCTION; Schema: public; Owner: -
 --
 
-CREATE FUNCTION updatedataset(id integer, experimentid integer, callinganalysisid integer, datasetanalyses integer[], datatable text, datafile text, qualitytable text, qualityfile text, createdby integer, createddate date, modifiedby integer, modifieddate date, datasetstatus integer, typeid integer) RETURNS void
+CREATE FUNCTION updatedataset(id integer, datasetname text, experimentid integer, callinganalysisid integer, datasetanalyses integer[], datatable text, datafile text, qualitytable text, qualityfile text, createdby integer, createddate date, modifiedby integer, modifieddate date, datasetstatus integer, typeid integer) RETURNS void
     LANGUAGE plpgsql
     AS $$
     BEGIN
-    update dataset set experiment_id=experimentId, callinganalysis_id=callinganalysisId, analyses=datasetAnalyses, data_table=dataTable, data_file=dataFile, quality_table=qualityTable, quality_file=qualityFile, scores='{}'::jsonb, created_by=createdBy, created_date=createdDate, modified_by=modifiedBy, modified_date=modifiedDate, status=datasetStatus, type_id=typeId
-     where dataset_id = id;
-    END;
-$$;
-
-
---
--- Name: updatedataset(integer, integer, integer, integer[], text, text, text, text, jsonb, integer, date, integer, date, integer); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION updatedataset(id integer, experimentid integer, callinganalysisid integer, datasetanalyses integer[], datatable text, datafile text, qualitytable text, qualityfile text, datasetscores jsonb, createdby integer, createddate date, modifiedby integer, modifieddate date, datasetstatus integer) RETURNS void
-    LANGUAGE plpgsql
-    AS $$
-    BEGIN
-    update dataset set experiment_id=experimentId, callinganalysis_id=callinganalysisId, analyses=datasetAnalyses, data_table=dataTable, data_file=dataFile, quality_table=qualityTable, quality_file=qualityFile, scores=datasetScores, created_by=createdBy, created_date=createdDate, modified_by=modifiedBy, modified_date=modifiedDate, status=datasetStatus
+    update dataset set experiment_id=experimentId, callinganalysis_id=callinganalysisId, analyses=datasetAnalyses, data_table=dataTable, data_file=dataFile, quality_table=qualityTable, quality_file=qualityFile, scores='{}'::jsonb, created_by=createdBy, created_date=createdDate, modified_by=modifiedBy, modified_date=modifiedDate, status=datasetStatus, type_id=typeId, name=datasetName
      where dataset_id = id;
     END;
 $$;
@@ -2231,7 +2202,7 @@ CREATE FUNCTION updatemarkergroup(id integer, markergroupname text, markergroupc
     LANGUAGE plpgsql
     AS $$
     BEGIN
-    update marker_group set name=markerGroupName, code=markerGroupCode, markers='{}'::jsonb, germplasm_group=germplasmGroup, created_by=createdBy, create_date=createdDate, modified_by=modifiedBy, modified_date=modifiedDate, status=markerGroupStatus
+    update marker_group set name=markerGroupName, code=markerGroupCode, markers='{}'::jsonb, germplasm_group=germplasmGroup, created_by=createdBy, created_date=createdDate, modified_by=modifiedBy, modified_date=modifiedDate, status=markerGroupStatus
      where marker_group_id = id;
     END;
 $$;
@@ -2828,8 +2799,8 @@ CREATE TABLE dataset (
     experiment_id integer NOT NULL,
     callinganalysis_id integer NOT NULL,
     analyses integer[],
-    data_table text NOT NULL,
-    data_file text NOT NULL,
+    data_table text,
+    data_file text,
     quality_table text,
     quality_file text,
     scores jsonb,
@@ -2838,7 +2809,8 @@ CREATE TABLE dataset (
     modified_by integer,
     modified_date date DEFAULT ('now'::text)::date,
     status integer,
-    type_id integer
+    type_id integer,
+    name text
 );
 
 
@@ -3039,10 +3011,10 @@ CREATE TABLE dnasample (
     well_col text,
     project_id integer NOT NULL,
     germplasm_id integer NOT NULL,
-    created_by integer NOT NULL,
-    created_date date DEFAULT ('now'::text)::date NOT NULL,
-    modified_by integer NOT NULL,
-    modified_date date DEFAULT ('now'::text)::date NOT NULL,
+    created_by integer,
+    created_date date DEFAULT ('now'::text)::date,
+    modified_by integer,
+    modified_date date DEFAULT ('now'::text)::date,
     status integer NOT NULL
 );
 
@@ -3125,10 +3097,10 @@ CREATE TABLE germplasm (
     external_code text,
     species_id integer NOT NULL,
     type_id integer,
-    created_by integer NOT NULL,
-    created_date date DEFAULT ('now'::text)::date NOT NULL,
-    modified_by integer NOT NULL,
-    modified_date date DEFAULT ('now'::text)::date NOT NULL,
+    created_by integer,
+    created_date date DEFAULT ('now'::text)::date,
+    modified_by integer,
+    modified_date date DEFAULT ('now'::text)::date,
     status integer NOT NULL,
     code text DEFAULT 0
 );
@@ -3281,10 +3253,10 @@ CREATE TABLE mapset (
     description text,
     reference_id integer,
     type_id integer NOT NULL,
-    created_by integer NOT NULL,
-    created_date date DEFAULT ('now'::text)::date NOT NULL,
-    modified_by integer NOT NULL,
-    modified_date date DEFAULT ('now'::text)::date NOT NULL,
+    created_by integer,
+    created_date date DEFAULT ('now'::text)::date,
+    modified_by integer,
+    modified_date date DEFAULT ('now'::text)::date,
     status integer NOT NULL
 );
 
@@ -3370,7 +3342,7 @@ CREATE TABLE marker_group (
     markers jsonb NOT NULL,
     germplasm_group text,
     created_by integer,
-    create_date date,
+    created_date date,
     modified_by integer,
     modified_date date,
     status integer NOT NULL
@@ -3487,9 +3459,9 @@ CREATE TABLE platform (
     code text NOT NULL,
     vendor_id integer NOT NULL,
     description text,
-    created_by integer NOT NULL,
-    created_date date DEFAULT ('now'::text)::date NOT NULL,
-    modified_by integer NOT NULL,
+    created_by integer,
+    created_date date DEFAULT ('now'::text)::date,
+    modified_by integer,
     modified_date date DEFAULT ('now'::text)::date,
     status integer NOT NULL,
     type_id integer NOT NULL
@@ -3555,10 +3527,10 @@ CREATE TABLE project (
     code text,
     description text,
     pi_contact integer NOT NULL,
-    created_by integer NOT NULL,
-    created_date date DEFAULT ('now'::text)::date NOT NULL,
-    modified_by integer NOT NULL,
-    modified_date date DEFAULT ('now'::text)::date NOT NULL,
+    created_by integer,
+    created_date date DEFAULT ('now'::text)::date,
+    modified_by integer,
+    modified_date date DEFAULT ('now'::text)::date,
     status integer NOT NULL
 );
 
@@ -3691,10 +3663,10 @@ CREATE VIEW v_all_projects_full_details AS
 CREATE TABLE variant (
     variant_id integer NOT NULL,
     code text,
-    created_by integer NOT NULL,
-    created_date date NOT NULL,
-    modified_by integer NOT NULL,
-    modified_date date NOT NULL
+    created_by integer,
+    created_date date,
+    modified_by integer,
+    modified_date date
 );
 
 
