@@ -47,6 +47,7 @@ ALTER TABLE marker_linkage_group ALTER COLUMN stop type DECIMAL(13,3);
 --Constraint additions/modifications
 --compound-unique constraint on the project table for pi contact (i.e., principle investigator user id) and project name.
 ALTER TABLE project ADD CONSTRAINT pi_project_name_key UNIQUE (pi_contact, name);
+ALTER TABLE cv ADD CONSTRAINT group_term_key UNIQUE ("group", term);
 
 -- compound unique: in the experiment table: name, projectid,platformid
 ALTER TABLE experiment ADD CONSTRAINT name_project_id_platform_id_key UNIQUE (name, project_id, platform_id);
