@@ -2289,7 +2289,7 @@ CREATE FUNCTION updateplatform(id integer, platformname text, platformcode text,
     LANGUAGE plpgsql
     AS $$
     BEGIN
-    update platform set name=platformName, code=platformCode, vendor_id=vendorId, description=platformDescription, created_by=createdBy, created_date=createdDate, modified_by=modifiedBy, modified_date=modifiedDate, status=platformStatus
+    update platform set name=platformName, code=platformCode, vendor_id=vendorId, description=platformDescription, created_by=createdBy, created_date=createdDate, modified_by=modifiedBy, modified_date=modifiedDate, status=platformStatus, type_id=typeId
      where platform_id = id;
     END;
 $$;

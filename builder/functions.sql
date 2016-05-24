@@ -1398,7 +1398,7 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION updatePlatform(id integer, platformName text, platformCode text, vendorId integer, platformDescription text, createdBy integer, createdDate date, modifiedBy integer, modifiedDate date, platformStatus integer, typeId integer)
 RETURNS void AS $$
     BEGIN
-    update platform set name=platformName, code=platformCode, vendor_id=vendorId, description=platformDescription, created_by=createdBy, created_date=createdDate, modified_by=modifiedBy, modified_date=modifiedDate, status=platformStatus
+    update platform set name=platformName, code=platformCode, vendor_id=vendorId, description=platformDescription, created_by=createdBy, created_date=createdDate, modified_by=modifiedBy, modified_date=modifiedDate, status=platformStatus, type_id=typeId
      where platform_id = id;
     END;
 $$ LANGUAGE plpgsql;
