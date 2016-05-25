@@ -27,6 +27,20 @@ CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
 COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
 
 
+--
+-- Name: file_fdw; Type: EXTENSION; Schema: -; Owner: -
+--
+
+CREATE EXTENSION IF NOT EXISTS file_fdw WITH SCHEMA public;
+
+
+--
+-- Name: EXTENSION file_fdw; Type: COMMENT; Schema: -; Owner: -
+--
+
+COMMENT ON EXTENSION file_fdw IS 'foreign-data wrapper for flat file access';
+
+
 SET search_path = public, pg_catalog;
 
 --
@@ -2692,6 +2706,13 @@ $$;
 
 
 --
+-- Name: idatafilesrvr; Type: SERVER; Schema: -; Owner: -
+--
+
+CREATE SERVER idatafilesrvr FOREIGN DATA WRAPPER file_fdw;
+
+
+--
 -- Name: analysis; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -3085,6 +3106,22 @@ CREATE SEQUENCE experiment_experiment_id_seq
 --
 
 ALTER SEQUENCE experiment_experiment_id_seq OWNED BY experiment.experiment_id;
+
+
+--
+-- Name: f_h5i_mm4qt1bs; Type: FOREIGN TABLE; Schema: public; Owner: -
+--
+
+CREATE FOREIGN TABLE f_h5i_mm4qt1bs (
+    marker_name text
+)
+SERVER idatafilesrvr
+OPTIONS (
+    delimiter '	',
+    filename '/Users/KevinPalis/Work/Datafiles/IFL_TestData/hdf5_idx/34_GSL-INF_MSWAMMY_marker_list.h5i',
+    format 'csv',
+    header 'true'
+);
 
 
 --
@@ -3890,6 +3927,14 @@ ALTER TABLE ONLY role ALTER COLUMN role_id SET DEFAULT nextval('role_role_id_seq
 --
 
 ALTER TABLE ONLY variant ALTER COLUMN variant_id SET DEFAULT nextval('variant_variant_id_seq'::regclass);
+
+
+--
+-- Name: group_term_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY cv
+    ADD CONSTRAINT group_term_key UNIQUE ("group", term);
 
 
 --
