@@ -3109,22 +3109,6 @@ ALTER SEQUENCE experiment_experiment_id_seq OWNED BY experiment.experiment_id;
 
 
 --
--- Name: f_h5i_mm4qt1bs; Type: FOREIGN TABLE; Schema: public; Owner: -
---
-
-CREATE FOREIGN TABLE f_h5i_mm4qt1bs (
-    marker_name text
-)
-SERVER idatafilesrvr
-OPTIONS (
-    delimiter '	',
-    filename '/Users/KevinPalis/Work/Datafiles/IFL_TestData/hdf5_idx/34_GSL-INF_MSWAMMY_marker_list.h5i',
-    format 'csv',
-    header 'true'
-);
-
-
---
 -- Name: germplasm; Type: TABLE; Schema: public; Owner: -
 --
 

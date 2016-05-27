@@ -35,10 +35,13 @@ COPY cv (cv_id, "group", term, definition, rank) FROM stdin;
 25	marker_prop	source	The source of this marker.	0
 26	marker_prop	beadset_id	The beadset_id of this marker.	0
 27	species	oryza_sativa_japonica	rice	0
+52	germplasm_type	f2	F2: the actual definition	7
 29	germplasm_prop	generation	Generation	0
 30	dnasample_prop	sentrix_barcode_a	sentrixBarcodeA	0
 31	dnasample_prop	sentrix_position_a	sentrixPositionA	0
 32	dnasample_prop	sample_group	sample group	0
+46	mapset_prop	subtype	Map Type: further properties of the map beyond genetic or physical	0
+57	germplasm_prop	group_cycle	cycle of population improvement	0
 36	project_prop	date_sampled	Date tissue sampled and approx date of field trial	0
 33	analysis_type	calling	Calling	0
 34	analysis_type	imputation	Imputation	0
@@ -53,22 +56,16 @@ COPY cv (cv_id, "group", term, definition, rank) FROM stdin;
 43	platform_type	affymetrix_axiom	 	0
 44	platform_type	illumina_goldengate_bxp	 	0
 45	platform_type	ssr	 SSR	0
-46	mapset_prop	map_type2	further properties of the map beyond genetic or physical	0
 47	germplasm_type	accession	Type of material for GID/Germplasm name - describes level of outbreeding/heterozygosity we would expect	1
 48	germplasm_type	population		3
 49	germplasm_type	f1_hybrid		4
 50	germplasm_type	3_way_hybrid		5
 51	germplasm_type	4_way_hybrid		6
-52	germplasm_type	f2		7
 53	germplasm_type	f3		8
 54	germplasm_type	f4		9
 55	germplasm_type	f5		10
-56	germplasm_prop	germplasm_group	Group of samples that can be grouped into a population for analysis. Can include parents for grouping and analysis purposes.	0
-57	germplasm_prop	germplasm_group_cycle	cycle of population improvement	0
 58	germplasm_prop	germplasm_id	this will be a higher level GID eg MGID describing a group of similar lines/genotypes	0
 59	germplasm_prop	seed_source_id	is GID for BMS and B4R	0
-60	germplasm_prop	germplasm_subsp	Sub-set of species	0
-61	germplasm_prop	germplasm_heterotic_group	groups within species	0
 62	strand	forward	Used by most technologies apart from Illumina and Affymetrix	0
 63	strand	+	Positive strand used by Affymetrix	0
 64	marker_prop	gene_id	The gene the marker was designed to	0
@@ -76,6 +73,9 @@ COPY cv (cv_id, "group", term, definition, rank) FROM stdin;
 66	marker_prop	clone_id_pos	used for Dart only - SNP position in the sequence	0
 67	marker_prop	synonym	Another name for the marker	0
 68	marker_prop	polymorphism_type	SSR;SNP;Indel. This describes the underlying polymorphism, not the marker assay used to interrogate the polymorphism	0
+56	germplasm_prop	group	Group of samples that can be grouped into a population for analysis. Can include parents for grouping and analysis purposes.	0
+60	germplasm_prop	subspecies	Sub-set of species	0
+61	germplasm_prop	heterotic_group	groups within species	0
 69	marker_prop	marker_dom	Is the marker dominant ie does it only detect presence/absence?	0
 70	marker_prop	gene_annotation	Type of gene	0
 71	marker_prop	polymorphism_annotation	synonymous etc	0
@@ -90,7 +90,6 @@ COPY cv (cv_id, "group", term, definition, rank) FROM stdin;
 80	dnasample_prop	plant_id	could be from sample tracker	0
 81	dnasample_prop	trial_name	Trial name for field experiment that the sample is coming from, or fieldbook 	0
 82	dnarun_prop	barcode	eg ACAATGGA - how we find the sample sequence, for GbS technologies	0
-83	species	zea_mays	 Zea Mays (Wheat)	0
 84	species	triticum_aestivum_subsp_aestivum	 Triticum Aestivum subsp. Aestivum (Wheat)	0
 85	species	triticum_turgidum_subsp_durum  	 Triticum Turgidum subsp. Durum (Wheat)	0
 86	species	triticosecale_spp 	 Triticosecale spp. (Wheat)	0
@@ -105,7 +104,8 @@ COPY cv (cv_id, "group", term, definition, rank) FROM stdin;
 95	dataset_type	dominant_non-nucleotide	Dominant Non-nucleotide	3
 96	dataset_type	codominant_non-nucleotide	Codominant non-nucleotide (1 is het)	4
 97	dataset_type	ssr_allele_size	SSR Allele Size	5
-98	platform_prop	date	placeholder property	0
+98	platform_prop	subtype	placeholder property	0
+83	species	zea_mays	 Zea Mays (Maize)	0
 \.
 
 
@@ -113,7 +113,7 @@ COPY cv (cv_id, "group", term, definition, rank) FROM stdin;
 -- Name: cv_cv_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('cv_cv_id_seq', 98, true);
+SELECT pg_catalog.setval('cv_cv_id_seq', 99, true);
 
 
 --

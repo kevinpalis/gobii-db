@@ -3109,22 +3109,6 @@ ALTER SEQUENCE experiment_experiment_id_seq OWNED BY experiment.experiment_id;
 
 
 --
--- Name: f_h5i_mm4qt1bs; Type: FOREIGN TABLE; Schema: public; Owner: -
---
-
-CREATE FOREIGN TABLE f_h5i_mm4qt1bs (
-    marker_name text
-)
-SERVER idatafilesrvr
-OPTIONS (
-    delimiter '	',
-    filename '/Users/KevinPalis/Work/Datafiles/IFL_TestData/hdf5_idx/34_GSL-INF_MSWAMMY_marker_list.h5i',
-    format 'csv',
-    header 'true'
-);
-
-
---
 -- Name: germplasm; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -3960,6 +3944,7 @@ COPY contact (contact_id, lastname, firstname, code, email, roles, created_by, c
 6	Palis	Kevin	kdp44_updated	kdp44@cornell.edu	{1,2}	1	2016-04-04	1	2016-04-04
 5	Kretzschmar	Tobias	dummycode	t.kretzschmar@irri.org	{1,2}	1	2016-04-08	\N	2016-04-08
 2	Thomson	Michael	dummycode	m.thomson@irri.org	{1,2}	1	2016-04-03	\N	2016-04-03
+8	GOBII	User	gobii_user_1	user.gobii@gobii.com	\N	1	2016-05-27	\N	2016-05-27
 \.
 
 
@@ -3967,7 +3952,7 @@ COPY contact (contact_id, lastname, firstname, code, email, roles, created_by, c
 -- Name: contact_contact_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('contact_contact_id_seq', 7, true);
+SELECT pg_catalog.setval('contact_contact_id_seq', 8, true);
 
 
 --
@@ -3995,7 +3980,8 @@ COPY cv (cv_id, "group", term, definition, rank) FROM stdin;
 30	dnasample_prop	sentrix_barcode_a	sentrixBarcodeA	0
 31	dnasample_prop	sentrix_position_a	sentrixPositionA	0
 32	dnasample_prop	sample_group	sample group	0
-46	mapset_prop	map_type2	Map Type: further properties of the map beyond genetic or physical	0
+46	mapset_prop	subtype	Map Type: further properties of the map beyond genetic or physical	0
+57	germplasm_prop	group_cycle	cycle of population improvement	0
 36	project_prop	date_sampled	Date tissue sampled and approx date of field trial	0
 33	analysis_type	calling	Calling	0
 34	analysis_type	imputation	Imputation	0
@@ -4018,12 +4004,8 @@ COPY cv (cv_id, "group", term, definition, rank) FROM stdin;
 53	germplasm_type	f3		8
 54	germplasm_type	f4		9
 55	germplasm_type	f5		10
-56	germplasm_prop	germplasm_group	Group of samples that can be grouped into a population for analysis. Can include parents for grouping and analysis purposes.	0
-57	germplasm_prop	germplasm_group_cycle	cycle of population improvement	0
 58	germplasm_prop	germplasm_id	this will be a higher level GID eg MGID describing a group of similar lines/genotypes	0
 59	germplasm_prop	seed_source_id	is GID for BMS and B4R	0
-60	germplasm_prop	germplasm_subsp	Sub-set of species	0
-61	germplasm_prop	germplasm_heterotic_group	groups within species	0
 62	strand	forward	Used by most technologies apart from Illumina and Affymetrix	0
 63	strand	+	Positive strand used by Affymetrix	0
 64	marker_prop	gene_id	The gene the marker was designed to	0
@@ -4031,6 +4013,9 @@ COPY cv (cv_id, "group", term, definition, rank) FROM stdin;
 66	marker_prop	clone_id_pos	used for Dart only - SNP position in the sequence	0
 67	marker_prop	synonym	Another name for the marker	0
 68	marker_prop	polymorphism_type	SSR;SNP;Indel. This describes the underlying polymorphism, not the marker assay used to interrogate the polymorphism	0
+56	germplasm_prop	group	Group of samples that can be grouped into a population for analysis. Can include parents for grouping and analysis purposes.	0
+60	germplasm_prop	subspecies	Sub-set of species	0
+61	germplasm_prop	heterotic_group	groups within species	0
 69	marker_prop	marker_dom	Is the marker dominant ie does it only detect presence/absence?	0
 70	marker_prop	gene_annotation	Type of gene	0
 71	marker_prop	polymorphism_annotation	synonymous etc	0
@@ -4045,7 +4030,6 @@ COPY cv (cv_id, "group", term, definition, rank) FROM stdin;
 80	dnasample_prop	plant_id	could be from sample tracker	0
 81	dnasample_prop	trial_name	Trial name for field experiment that the sample is coming from, or fieldbook 	0
 82	dnarun_prop	barcode	eg ACAATGGA - how we find the sample sequence, for GbS technologies	0
-83	species	zea_mays	 Zea Mays (Wheat)	0
 84	species	triticum_aestivum_subsp_aestivum	 Triticum Aestivum subsp. Aestivum (Wheat)	0
 85	species	triticum_turgidum_subsp_durum  	 Triticum Turgidum subsp. Durum (Wheat)	0
 86	species	triticosecale_spp 	 Triticosecale spp. (Wheat)	0
@@ -4060,7 +4044,8 @@ COPY cv (cv_id, "group", term, definition, rank) FROM stdin;
 95	dataset_type	dominant_non-nucleotide	Dominant Non-nucleotide	3
 96	dataset_type	codominant_non-nucleotide	Codominant non-nucleotide (1 is het)	4
 97	dataset_type	ssr_allele_size	SSR Allele Size	5
-98	platform_prop	date	placeholder property	0
+98	platform_prop	subtype	placeholder property	0
+83	species	zea_mays	 Zea Mays (Maize)	0
 \.
 
 
@@ -4068,7 +4053,7 @@ COPY cv (cv_id, "group", term, definition, rank) FROM stdin;
 -- Name: cv_cv_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('cv_cv_id_seq', 98, true);
+SELECT pg_catalog.setval('cv_cv_id_seq', 99, true);
 
 
 --
@@ -34877,6 +34862,218 @@ SELECT pg_catalog.setval('dataset_marker_dataset_marker_id_seq', 27636, true);
 --
 
 COPY display (display_id, table_name, column_name, display_name, created_by, created_date, modified_by, modified_date, rank) FROM stdin;
+4	contact	contact_id	contact_id	\N	\N	\N	\N	\N
+5	contact	lastname	lastname	\N	\N	\N	\N	\N
+6	contact	firstname	firstname	\N	\N	\N	\N	\N
+7	contact	code	code	\N	\N	\N	\N	\N
+8	contact	email	email	\N	\N	\N	\N	\N
+9	contact	roles	roles	\N	\N	\N	\N	\N
+10	contact	created_by	created_by	\N	\N	\N	\N	\N
+11	contact	created_date	created_date	\N	\N	\N	\N	\N
+12	contact	modified_by	modified_by	\N	\N	\N	\N	\N
+13	contact	modified_date	modified_date	\N	\N	\N	\N	\N
+14	dnarun	dnarun_id	dnarun_id	\N	\N	\N	\N	\N
+15	dnarun	experiment_id	experiment_id	\N	\N	\N	\N	\N
+16	dnarun	dnasample_id	dnasample_id	\N	\N	\N	\N	\N
+17	dnarun	name	name	\N	\N	\N	\N	\N
+18	dnarun	code	code	\N	\N	\N	\N	\N
+19	dataset_marker	dataset_marker_id	dataset_marker_id	\N	\N	\N	\N	\N
+20	dataset_marker	dataset_id	dataset_id	\N	\N	\N	\N	\N
+21	dataset_marker	marker_id	marker_id	\N	\N	\N	\N	\N
+22	dataset_marker	call_rate	call_rate	\N	\N	\N	\N	\N
+23	dataset_marker	maf	maf	\N	\N	\N	\N	\N
+24	dataset_marker	reproducibility	reproducibility	\N	\N	\N	\N	\N
+25	dataset_marker	scores	scores	\N	\N	\N	\N	\N
+26	dataset_marker	marker_idx	marker_idx	\N	\N	\N	\N	\N
+27	dnasample	dnasample_id	dnasample_id	\N	\N	\N	\N	\N
+28	dnasample	name	name	\N	\N	\N	\N	\N
+29	dnasample	code	code	\N	\N	\N	\N	\N
+30	dnasample	platename	platename	\N	\N	\N	\N	\N
+31	dnasample	num	num	\N	\N	\N	\N	\N
+32	dnasample	well_row	well_row	\N	\N	\N	\N	\N
+33	dnasample	well_col	well_col	\N	\N	\N	\N	\N
+34	dnasample	project_id	project_id	\N	\N	\N	\N	\N
+35	dnasample	germplasm_id	germplasm_id	\N	\N	\N	\N	\N
+36	dnasample	created_by	created_by	\N	\N	\N	\N	\N
+37	dnasample	created_date	created_date	\N	\N	\N	\N	\N
+38	dnasample	modified_by	modified_by	\N	\N	\N	\N	\N
+39	dnasample	modified_date	modified_date	\N	\N	\N	\N	\N
+40	dnasample	status	status	\N	\N	\N	\N	\N
+41	display	display_id	display_id	\N	\N	\N	\N	\N
+42	display	table_name	table_name	\N	\N	\N	\N	\N
+43	display	column_name	column_name	\N	\N	\N	\N	\N
+44	display	display_name	display_name	\N	\N	\N	\N	\N
+45	display	created_by	created_by	\N	\N	\N	\N	\N
+46	display	created_date	created_date	\N	\N	\N	\N	\N
+47	display	modified_by	modified_by	\N	\N	\N	\N	\N
+48	display	modified_date	modified_date	\N	\N	\N	\N	\N
+49	display	rank	rank	\N	\N	\N	\N	\N
+50	dataset	dataset_id	dataset_id	\N	\N	\N	\N	\N
+51	dataset	experiment_id	experiment_id	\N	\N	\N	\N	\N
+52	dataset	callinganalysis_id	callinganalysis_id	\N	\N	\N	\N	\N
+53	dataset	analyses	analyses	\N	\N	\N	\N	\N
+54	dataset	data_table	data_table	\N	\N	\N	\N	\N
+55	dataset	data_file	data_file	\N	\N	\N	\N	\N
+56	dataset	quality_table	quality_table	\N	\N	\N	\N	\N
+57	dataset	quality_file	quality_file	\N	\N	\N	\N	\N
+58	dataset	scores	scores	\N	\N	\N	\N	\N
+59	dataset	created_by	created_by	\N	\N	\N	\N	\N
+60	dataset	created_date	created_date	\N	\N	\N	\N	\N
+61	dataset	modified_by	modified_by	\N	\N	\N	\N	\N
+62	dataset	modified_date	modified_date	\N	\N	\N	\N	\N
+63	dataset	status	status	\N	\N	\N	\N	\N
+64	dataset	type_id	type_id	\N	\N	\N	\N	\N
+65	dataset	name	name	\N	\N	\N	\N	\N
+66	dnarun_prop	dnarun_prop_id	dnarun_prop_id	\N	\N	\N	\N	\N
+67	dnarun_prop	dnarun_id	dnarun_id	\N	\N	\N	\N	\N
+68	dnarun_prop	props	props	\N	\N	\N	\N	\N
+69	dnasample_prop	dnasample_prop_id	dnasample_prop_id	\N	\N	\N	\N	\N
+70	dnasample_prop	dnasample_id	dnasample_id	\N	\N	\N	\N	\N
+71	dnasample_prop	props	props	\N	\N	\N	\N	\N
+72	germplasm_prop	germplasm_prop_id	germplasm_prop_id	\N	\N	\N	\N	\N
+73	germplasm_prop	germplasm_id	germplasm_id	\N	\N	\N	\N	\N
+74	germplasm_prop	props	props	\N	\N	\N	\N	\N
+75	mapset	mapset_id	mapset_id	\N	\N	\N	\N	\N
+76	mapset	name	name	\N	\N	\N	\N	\N
+77	mapset	code	code	\N	\N	\N	\N	\N
+78	mapset	description	description	\N	\N	\N	\N	\N
+79	mapset	reference_id	reference_id	\N	\N	\N	\N	\N
+80	mapset	type_id	type_id	\N	\N	\N	\N	\N
+81	mapset	created_by	created_by	\N	\N	\N	\N	\N
+82	mapset	created_date	created_date	\N	\N	\N	\N	\N
+83	mapset	modified_by	modified_by	\N	\N	\N	\N	\N
+84	mapset	modified_date	modified_date	\N	\N	\N	\N	\N
+85	mapset	status	status	\N	\N	\N	\N	\N
+86	marker_group	marker_group_id	marker_group_id	\N	\N	\N	\N	\N
+87	marker_group	name	name	\N	\N	\N	\N	\N
+88	marker_group	code	code	\N	\N	\N	\N	\N
+89	marker_group	markers	markers	\N	\N	\N	\N	\N
+90	marker_group	germplasm_group	germplasm_group	\N	\N	\N	\N	\N
+91	marker_group	created_by	created_by	\N	\N	\N	\N	\N
+92	marker_group	created_date	created_date	\N	\N	\N	\N	\N
+93	marker_group	modified_by	modified_by	\N	\N	\N	\N	\N
+94	marker_group	modified_date	modified_date	\N	\N	\N	\N	\N
+95	marker_group	status	status	\N	\N	\N	\N	\N
+96	platform	platform_id	platform_id	\N	\N	\N	\N	\N
+97	platform	name	name	\N	\N	\N	\N	\N
+98	platform	code	code	\N	\N	\N	\N	\N
+99	platform	vendor_id	vendor_id	\N	\N	\N	\N	\N
+100	platform	description	description	\N	\N	\N	\N	\N
+101	platform	created_by	created_by	\N	\N	\N	\N	\N
+102	platform	created_date	created_date	\N	\N	\N	\N	\N
+103	platform	modified_by	modified_by	\N	\N	\N	\N	\N
+104	platform	modified_date	modified_date	\N	\N	\N	\N	\N
+105	platform	status	status	\N	\N	\N	\N	\N
+106	platform	type_id	type_id	\N	\N	\N	\N	\N
+107	marker_prop	marker_prop_id	marker_prop_id	\N	\N	\N	\N	\N
+108	marker_prop	marker_id	marker_id	\N	\N	\N	\N	\N
+109	marker_prop	props	props	\N	\N	\N	\N	\N
+110	marker_linkage_group	marker_linkage_group_id	marker_linkage_group_id	\N	\N	\N	\N	\N
+111	marker_linkage_group	marker_id	marker_id	\N	\N	\N	\N	\N
+112	marker_linkage_group	start	start	\N	\N	\N	\N	\N
+113	marker_linkage_group	stop	stop	\N	\N	\N	\N	\N
+114	marker_linkage_group	linkage_group_id	linkage_group_id	\N	\N	\N	\N	\N
+115	project_prop	project_prop_id	project_prop_id	\N	\N	\N	\N	\N
+116	project_prop	project_id	project_id	\N	\N	\N	\N	\N
+117	project_prop	props	props	\N	\N	\N	\N	\N
+118	role	role_id	role_id	\N	\N	\N	\N	\N
+119	role	role_name	role_name	\N	\N	\N	\N	\N
+120	role	role_code	role_code	\N	\N	\N	\N	\N
+121	role	read_tables	read_tables	\N	\N	\N	\N	\N
+122	role	write_tables	write_tables	\N	\N	\N	\N	\N
+123	map_prop	map_prop_id	map_prop_id	\N	\N	\N	\N	\N
+124	map_prop	map_id	map_id	\N	\N	\N	\N	\N
+125	map_prop	props	props	\N	\N	\N	\N	\N
+126	manifest	manifest_id	manifest_id	\N	\N	\N	\N	\N
+127	manifest	name	name	\N	\N	\N	\N	\N
+128	manifest	code	code	\N	\N	\N	\N	\N
+129	manifest	file_path	file_path	\N	\N	\N	\N	\N
+130	manifest	created_by	created_by	\N	\N	\N	\N	\N
+131	manifest	created_date	created_date	\N	\N	\N	\N	\N
+132	manifest	modified_by	modified_by	\N	\N	\N	\N	\N
+133	manifest	modified_date	modified_date	\N	\N	\N	\N	\N
+134	marker	marker_id	marker_id	\N	\N	\N	\N	\N
+135	marker	platform_id	platform_id	\N	\N	\N	\N	\N
+136	marker	variant_id	variant_id	\N	\N	\N	\N	\N
+137	marker	name	name	\N	\N	\N	\N	\N
+138	marker	code	code	\N	\N	\N	\N	\N
+139	marker	ref	ref	\N	\N	\N	\N	\N
+140	marker	alts	alts	\N	\N	\N	\N	\N
+141	marker	sequence	sequence	\N	\N	\N	\N	\N
+142	marker	reference_id	reference_id	\N	\N	\N	\N	\N
+143	marker	primers	primers	\N	\N	\N	\N	\N
+144	marker	strand_id	strand_id	\N	\N	\N	\N	\N
+145	marker	status	status	\N	\N	\N	\N	\N
+146	marker	probsets	probsets	\N	\N	\N	\N	\N
+147	analysis	analysis_id	analysis_id	\N	\N	\N	\N	\N
+148	analysis	name	name	\N	\N	\N	\N	\N
+149	analysis	description	description	\N	\N	\N	\N	\N
+150	analysis	type_id	type_id	\N	\N	\N	\N	\N
+151	analysis	program	program	\N	\N	\N	\N	\N
+152	analysis	programversion	programversion	\N	\N	\N	\N	\N
+153	analysis	algorithm	algorithm	\N	\N	\N	\N	\N
+154	analysis	sourcename	sourcename	\N	\N	\N	\N	\N
+155	analysis	sourceversion	sourceversion	\N	\N	\N	\N	\N
+156	analysis	sourceuri	sourceuri	\N	\N	\N	\N	\N
+157	analysis	reference_id	reference_id	\N	\N	\N	\N	\N
+158	analysis	parameters	parameters	\N	\N	\N	\N	\N
+159	analysis	timeexecuted	timeexecuted	\N	\N	\N	\N	\N
+160	analysis	status	status	\N	\N	\N	\N	\N
+161	experiment	experiment_id	experiment_id	\N	\N	\N	\N	\N
+162	experiment	name	name	\N	\N	\N	\N	\N
+163	experiment	code	code	\N	\N	\N	\N	\N
+164	experiment	project_id	project_id	\N	\N	\N	\N	\N
+165	experiment	platform_id	platform_id	\N	\N	\N	\N	\N
+166	experiment	manifest_id	manifest_id	\N	\N	\N	\N	\N
+167	experiment	data_file	data_file	\N	\N	\N	\N	\N
+168	experiment	created_by	created_by	\N	\N	\N	\N	\N
+169	experiment	created_date	created_date	\N	\N	\N	\N	\N
+170	experiment	modified_by	modified_by	\N	\N	\N	\N	\N
+171	experiment	modified_date	modified_date	\N	\N	\N	\N	\N
+172	experiment	status	status	\N	\N	\N	\N	\N
+173	reference	reference_id	reference_id	\N	\N	\N	\N	\N
+174	reference	name	name	\N	\N	\N	\N	\N
+175	reference	version	version	\N	\N	\N	\N	\N
+176	reference	link	link	\N	\N	\N	\N	\N
+177	reference	file_path	file_path	\N	\N	\N	\N	\N
+178	germplasm	germplasm_id	germplasm_id	\N	\N	\N	\N	\N
+179	germplasm	name	name	\N	\N	\N	\N	\N
+180	germplasm	external_code	external_code	\N	\N	\N	\N	\N
+181	germplasm	species_id	species_id	\N	\N	\N	\N	\N
+182	germplasm	type_id	type_id	\N	\N	\N	\N	\N
+183	germplasm	created_by	created_by	\N	\N	\N	\N	\N
+184	germplasm	created_date	created_date	\N	\N	\N	\N	\N
+185	germplasm	modified_by	modified_by	\N	\N	\N	\N	\N
+186	germplasm	modified_date	modified_date	\N	\N	\N	\N	\N
+187	germplasm	status	status	\N	\N	\N	\N	\N
+188	germplasm	code	code	\N	\N	\N	\N	\N
+189	linkage_group	linkage_group_id	linkage_group_id	\N	\N	\N	\N	\N
+190	linkage_group	name	name	\N	\N	\N	\N	\N
+191	linkage_group	start	start	\N	\N	\N	\N	\N
+192	linkage_group	stop	stop	\N	\N	\N	\N	\N
+193	linkage_group	map_id	map_id	\N	\N	\N	\N	\N
+194	platform_prop	platform_prop_id	platform_prop_id	\N	\N	\N	\N	\N
+195	platform_prop	platform_id	platform_id	\N	\N	\N	\N	\N
+196	platform_prop	props	props	\N	\N	\N	\N	\N
+197	cv	cv_id	cv_id	\N	\N	\N	\N	\N
+198	cv	group	group	\N	\N	\N	\N	\N
+199	cv	term	term	\N	\N	\N	\N	\N
+200	cv	definition	definition	\N	\N	\N	\N	\N
+201	cv	rank	rank	\N	\N	\N	\N	\N
+202	project	project_id	project_id	\N	\N	\N	\N	\N
+203	project	name	name	\N	\N	\N	\N	\N
+204	project	code	code	\N	\N	\N	\N	\N
+205	project	description	description	\N	\N	\N	\N	\N
+206	project	pi_contact	pi_contact	\N	\N	\N	\N	\N
+207	project	created_by	created_by	\N	\N	\N	\N	\N
+208	project	created_date	created_date	\N	\N	\N	\N	\N
+209	project	modified_by	modified_by	\N	\N	\N	\N	\N
+210	project	modified_date	modified_date	\N	\N	\N	\N	\N
+211	project	status	status	\N	\N	\N	\N	\N
+212	dataset_dnarun	dataset_dnarun_id	dataset_dnarun_id	\N	\N	\N	\N	\N
+213	dataset_dnarun	dataset_id	dataset_id	\N	\N	\N	\N	\N
+214	dataset_dnarun	dnarun_id	dnarun_id	\N	\N	\N	\N	\N
+215	dataset_dnarun	dnarun_idx	dnarun_idx	\N	\N	\N	\N	\N
 \.
 
 
@@ -34884,7 +35081,7 @@ COPY display (display_id, table_name, column_name, display_name, created_by, cre
 -- Name: display_display_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('display_display_id_seq', 3, true);
+SELECT pg_catalog.setval('display_display_id_seq', 215, true);
 
 
 --
@@ -64868,6 +65065,8 @@ COPY role (role_id, role_name, role_code, read_tables, write_tables) FROM stdin;
 1	PI	PI_code	\N	\N
 3	Read-only	Readonly_code	\N	\N
 2	Curator	Curator_code	\N	\N
+5	Vendor	Vendor	\N	\N
+7	Admin	Admin	\N	\N
 \.
 
 
@@ -64875,7 +65074,7 @@ COPY role (role_id, role_name, role_code, read_tables, write_tables) FROM stdin;
 -- Name: role_role_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('role_role_id_seq', 4, true);
+SELECT pg_catalog.setval('role_role_id_seq', 7, true);
 
 
 --

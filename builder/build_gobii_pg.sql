@@ -3,4 +3,7 @@
 \i gobii_pg.sql
 \i views.sql
 \i functions.sql
-\i cv_builder.sql
+\i cvs.sql
+\i roles.sql
+\i contacts.sql
+\i displays.sql
