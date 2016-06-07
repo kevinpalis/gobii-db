@@ -154,15 +154,15 @@ $$;
 
 
 --
--- Name: createcontact(text, text, text, text, integer[], integer, date, integer, date); Type: FUNCTION; Schema: public; Owner: -
+-- Name: createcontact(text, text, text, text, integer[], integer, date, integer, date, integer); Type: FUNCTION; Schema: public; Owner: -
 --
 
-CREATE FUNCTION createcontact(lastname text, firstname text, contactcode text, contactemail text, contactroles integer[], createdby integer, createddate date, modifiedby integer, modifieddate date, OUT id integer) RETURNS integer
+CREATE FUNCTION createcontact(lastname text, firstname text, contactcode text, contactemail text, contactroles integer[], createdby integer, createddate date, modifiedby integer, modifieddate date, organizationid integer, OUT id integer) RETURNS integer
     LANGUAGE plpgsql
     AS $$
   BEGIN
-    insert into contact (lastname, firstname, code, email, roles, created_by, created_date, modified_by, modified_date)
-      values (lastName, firstName, contactCode, contactEmail, contactRoles, createdBy, createdDate, modifiedBy, modifiedDate); 
+    insert into contact (lastname, firstname, code, email, roles, created_by, created_date, modified_by, modified_date, organization_id)
+      values (lastName, firstName, contactCode, contactEmail, contactRoles, createdBy, createdDate, modifiedBy, modifiedDate, organizationId); 
     select lastval() into id;
   END;
 $$;
@@ -437,6 +437,21 @@ CREATE FUNCTION createmarkerlinkagegroup(markerid integer, markerlinkagegroupsta
   BEGIN
     insert into marker_linkage_group (marker_id, start, stop, linkage_group_id)
       values (markerId, markerLinkageGroupStart, markerLinkageGroupStop, linkageGroupId); 
+    select lastval() into id;
+  END;
+$$;
+
+
+--
+-- Name: createorganization(text, text, text, integer, date, integer, date, integer); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION createorganization(orgname text, orgaddress text, orgwebsite text, createdby integer, createddate date, modifiedby integer, modifieddate date, orgstatus integer, OUT id integer) RETURNS integer
+    LANGUAGE plpgsql
+    AS $$
+  BEGIN
+    insert into organization (name, address, website, created_by, created_date, modified_by, modified_date, status)
+      values (orgName, orgAddress, orgWebsite, createdBy, createdDate, modifiedBy, modifiedDate, orgStatus); 
     select lastval() into id;
   END;
 $$;
@@ -977,6 +992,20 @@ $$;
 
 
 --
+-- Name: deleteorganization(integer); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION deleteorganization(id integer) RETURNS integer
+    LANGUAGE plpgsql
+    AS $$
+    BEGIN
+    delete from organization where organization_id = id;
+    return id;
+    END;
+$$;
+
+
+--
 -- Name: deleteplatform(integer); Type: FUNCTION; Schema: public; Owner: -
 --
 
@@ -1173,7 +1202,8 @@ CREATE TABLE contact (
     created_by integer,
     created_date date DEFAULT ('now'::text)::date,
     modified_by integer,
-    modified_date date DEFAULT ('now'::text)::date
+    modified_date date DEFAULT ('now'::text)::date,
+    organization_id integer
 );
 
 
@@ -1858,15 +1888,15 @@ $$;
 
 
 --
--- Name: updatecontact(integer, text, text, text, text, integer[], integer, date, integer, date); Type: FUNCTION; Schema: public; Owner: -
+-- Name: updatecontact(integer, text, text, text, text, integer[], integer, date, integer, integer, date); Type: FUNCTION; Schema: public; Owner: -
 --
 
-CREATE FUNCTION updatecontact(contactid integer, contactlastname text, contactfirstname text, contactcode text, contactemail text, contactroles integer[], createdby integer, createddate date, modifiedby integer, modifieddate date) RETURNS void
+CREATE FUNCTION updatecontact(contactid integer, contactlastname text, contactfirstname text, contactcode text, contactemail text, contactroles integer[], createdby integer, createddate date, modifiedby integer, organizationid integer, modifieddate date) RETURNS void
     LANGUAGE plpgsql
     AS $$
     BEGIN
     update contact set lastname=contactLastName, firstname=contactFirstName, code=contactCode, email=contactEmail, roles=contactRoles, created_by=createdBy, created_date=createdDate, 
-      modified_by=modifiedBy, modified_date=modifiedDate
+      modified_by=modifiedBy, modified_date=modifiedDate, organization_id=organizationId
      where contact_id = contactId;
     END;
 $$;
@@ -2292,6 +2322,20 @@ CREATE FUNCTION updatemarkerpropertybyname(id integer, propertyname text, proper
       from property
       where marker_id=id;
   END;
+$$;
+
+
+--
+-- Name: updateorganization(integer, text, text, text, integer, date, integer, date, integer); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION updateorganization(orgid integer, orgname text, orgaddress text, orgwebsite text, createdby integer, createddate date, modifiedby integer, modifieddate date, orgstatus integer) RETURNS void
+    LANGUAGE plpgsql
+    AS $$
+    BEGIN
+    update organization set name=orgName, address=orgAddress, website=orgWebsite, created_by=createdBy, created_date=createdDate, modified_by=modifiedBy, modified_date=modifiedDate, status=orgStatus
+     where organization_id = orgId;
+    END;
 $$;
 
 
@@ -3471,6 +3515,42 @@ ALTER SEQUENCE marker_prop_marker_prop_id_seq OWNED BY marker_prop.marker_prop_i
 
 
 --
+-- Name: organization; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE organization (
+    organization_id integer NOT NULL,
+    name text NOT NULL,
+    address text,
+    website text,
+    created_by integer,
+    created_date date DEFAULT ('now'::text)::date,
+    modified_by integer,
+    modified_date date DEFAULT ('now'::text)::date,
+    status integer DEFAULT 1 NOT NULL
+);
+
+
+--
+-- Name: organization_organization_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE organization_organization_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: organization_organization_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE organization_organization_id_seq OWNED BY organization.organization_id;
+
+
+--
 -- Name: platform; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -3865,6 +3945,13 @@ ALTER TABLE ONLY marker_prop ALTER COLUMN marker_prop_id SET DEFAULT nextval('ma
 
 
 --
+-- Name: organization_id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY organization ALTER COLUMN organization_id SET DEFAULT nextval('organization_organization_id_seq'::regclass);
+
+
+--
 -- Name: platform_id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -3938,13 +4025,13 @@ SELECT pg_catalog.setval('analysis_analysis_id_seq', 6, true);
 -- Data for Name: contact; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY contact (contact_id, lastname, firstname, code, email, roles, created_by, created_date, modified_by, modified_date) FROM stdin;
-1	User	Loader	dummycode	loader.user@temp.com	\N	0	2016-04-03	\N	2016-04-03
-3	Inc.	Illumina	dummycode	info@illumina.com	\N	1	2016-04-05	\N	2016-04-05
-6	Palis	Kevin	kdp44_updated	kdp44@cornell.edu	{1,2}	1	2016-04-04	1	2016-04-04
-5	Kretzschmar	Tobias	dummycode	t.kretzschmar@irri.org	{1,2}	1	2016-04-08	\N	2016-04-08
-2	Thomson	Michael	dummycode	m.thomson@irri.org	{1,2}	1	2016-04-03	\N	2016-04-03
-8	GOBII	User	gobii_user_1	user.gobii@gobii.com	\N	1	2016-05-27	\N	2016-05-27
+COPY contact (contact_id, lastname, firstname, code, email, roles, created_by, created_date, modified_by, modified_date, organization_id) FROM stdin;
+1	User	Loader	dummycode	loader.user@temp.com	\N	0	2016-04-03	\N	2016-04-03	\N
+3	Inc.	Illumina	dummycode	info@illumina.com	\N	1	2016-04-05	\N	2016-04-05	\N
+6	Palis	Kevin	kdp44_updated	kdp44@cornell.edu	{1,2}	1	2016-04-04	1	2016-04-04	\N
+5	Kretzschmar	Tobias	dummycode	t.kretzschmar@irri.org	{1,2}	1	2016-04-08	\N	2016-04-08	\N
+2	Thomson	Michael	dummycode	m.thomson@irri.org	{1,2}	1	2016-04-03	\N	2016-04-03	\N
+8	GOBII	User	gobii_user_1	user.gobii@gobii.com	\N	1	2016-05-27	\N	2016-05-27	\N
 \.
 
 
@@ -4061,13 +4148,13 @@ SELECT pg_catalog.setval('cv_cv_id_seq', 99, true);
 --
 
 COPY dataset (dataset_id, experiment_id, callinganalysis_id, analyses, data_table, data_file, quality_table, quality_file, scores, created_by, created_date, modified_by, modified_date, status, type_id, name) FROM stdin;
-1	2	1	\N	genotype_710_OYT_1	genotype_710_OYT_1.hdf5	\N	\N	\N	1	2016-04-07	1	2016-04-07	\N	93	\N
-2	3	2	\N	genotype_10_GSL	genotype_10_GSL.hdf5	\N	\N	\N	1	2016-04-08	1	2016-04-08	1	93	\N
-4	5	4	\N	genotype_7_GSL-INF_MARGAYOSO	genotype-7_GSL-INF_MARGAYOSO.hdf5	\N	\N	\N	1	2016-04-08	1	2016-04-08	1	93	\N
-5	6	5	\N	genotype_5_GSL-INF_JJKIM_GUVA	genotype_5_GSL-INF_JJKIM_GUVA.hdf5	\N	\N	\N	1	2016-04-08	1	2016-04-08	1	93	\N
-8	7	6	{2,5}	test-INF_RDIOCTON	test-INF_RDIOCTON.hdf5	\N	\N	\N	1	2016-04-08	1	2016-04-08	1	93	\N
-6	7	6	{5}	genotype_4_GSL-INF_RDIOCTON	genotpye_4_GSL-INF_RDIOCTON.hdf5	\N	\N	\N	1	2016-04-08	1	2016-04-08	1	93	\N
-3	4	3	\N	genotype_34_GSL-INF_MSWAMMY	/shared_data/HDF5/Rice/34-GSL-INF_MSWAMMY.h5	\N	\N	\N	1	2016-04-08	1	2016-04-08	1	93	\N
+1	2	1	\N	genotype_710_OYT_1	genotype_710_OYT_1.hdf5	\N	\N	\N	1	2016-04-07	1	2016-04-07	\N	93	genotype_710_OYT_1
+2	3	2	\N	genotype_10_GSL	genotype_10_GSL.hdf5	\N	\N	\N	1	2016-04-08	1	2016-04-08	1	93	genotype_10_GSL
+4	5	4	\N	genotype_7_GSL-INF_MARGAYOSO	genotype-7_GSL-INF_MARGAYOSO.hdf5	\N	\N	\N	1	2016-04-08	1	2016-04-08	1	93	genotype_7_GSL-INF_MARGAYOSO
+5	6	5	\N	genotype_5_GSL-INF_JJKIM_GUVA	genotype_5_GSL-INF_JJKIM_GUVA.hdf5	\N	\N	\N	1	2016-04-08	1	2016-04-08	1	93	genotype_5_GSL-INF_JJKIM_GUVA
+8	7	6	{2,5}	test-INF_RDIOCTON	test-INF_RDIOCTON.hdf5	\N	\N	\N	1	2016-04-08	1	2016-04-08	1	93	test-INF_RDIOCTON
+6	7	6	{5}	genotype_4_GSL-INF_RDIOCTON	genotpye_4_GSL-INF_RDIOCTON.hdf5	\N	\N	\N	1	2016-04-08	1	2016-04-08	1	93	genotype_4_GSL-INF_RDIOCTON
+3	4	3	\N	genotype_34_GSL-INF_MSWAMMY	/shared_data/HDF5/Rice/34-GSL-INF_MSWAMMY.h5	\N	\N	\N	1	2016-04-08	1	2016-04-08	1	93	genotype_34_GSL-INF_MSWAMMY
 \.
 
 
@@ -64967,6 +65054,22 @@ SELECT pg_catalog.setval('marker_prop_marker_prop_id_seq', 10453, true);
 
 
 --
+-- Data for Name: organization; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+COPY organization (organization_id, name, address, website, created_by, created_date, modified_by, modified_date, status) FROM stdin;
+1	International Rice Research Institute	Los Banos, Laguna, Philippines 4030	www.irri.org	1	2016-06-07	1	2016-06-07	1
+\.
+
+
+--
+-- Name: organization_organization_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('organization_organization_id_seq', 2, true);
+
+
+--
 -- Data for Name: platform; Type: TABLE DATA; Schema: public; Owner: -
 --
 
@@ -65162,6 +65265,22 @@ ALTER TABLE ONLY project_prop
 
 ALTER TABLE ONLY experiment
     ADD CONSTRAINT name_project_id_platform_id_key UNIQUE (name, project_id, platform_id);
+
+
+--
+-- Name: organization_name_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY organization
+    ADD CONSTRAINT organization_name_key UNIQUE (name);
+
+
+--
+-- Name: organization_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY organization
+    ADD CONSTRAINT organization_pkey PRIMARY KEY (organization_id);
 
 
 --
@@ -65633,6 +65752,14 @@ ALTER TABLE ONLY marker_linkage_group
 
 ALTER TABLE ONLY marker
     ADD CONSTRAINT fk_marker_reference FOREIGN KEY (reference_id) REFERENCES reference(reference_id);
+
+
+--
+-- Name: fk_organization_contact; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY contact
+    ADD CONSTRAINT fk_organization_contact FOREIGN KEY (organization_id) REFERENCES organization(organization_id);
 
 
 --

@@ -124,3 +124,20 @@ ALTER TABLE variant ALTER COLUMN created_date DROP NOT NULL;
 ALTER TABLE dataset ALTER COLUMN data_table DROP NOT NULL;
 ALTER TABLE dataset ALTER COLUMN data_file DROP NOT NULL;
 
+--adding new table: Organization
+CREATE TABLE organization (
+    organization_id serial PRIMARY KEY NOT NULL,
+    name text NOT NULL,
+    address text,
+    website text,
+    created_by integer,
+    created_date date DEFAULT ('now'::text)::date,
+    modified_by integer,
+    modified_date date DEFAULT ('now'::text)::date,
+    status integer NOT NULL DEFAULT 1
+);
+
+ALTER TABLE organization ADD CONSTRAINT organization_name_key UNIQUE (name);
+
+ALTER TABLE contact ADD COLUMN organization_id integer;
+ALTER TABLE contact ADD CONSTRAINT fk_organization_contact FOREIGN KEY (organization_id) REFERENCES organization(organization_id);

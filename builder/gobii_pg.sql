@@ -154,15 +154,15 @@ $$;
 
 
 --
--- Name: createcontact(text, text, text, text, integer[], integer, date, integer, date); Type: FUNCTION; Schema: public; Owner: -
+-- Name: createcontact(text, text, text, text, integer[], integer, date, integer, date, integer); Type: FUNCTION; Schema: public; Owner: -
 --
 
-CREATE FUNCTION createcontact(lastname text, firstname text, contactcode text, contactemail text, contactroles integer[], createdby integer, createddate date, modifiedby integer, modifieddate date, OUT id integer) RETURNS integer
+CREATE FUNCTION createcontact(lastname text, firstname text, contactcode text, contactemail text, contactroles integer[], createdby integer, createddate date, modifiedby integer, modifieddate date, organizationid integer, OUT id integer) RETURNS integer
     LANGUAGE plpgsql
     AS $$
   BEGIN
-    insert into contact (lastname, firstname, code, email, roles, created_by, created_date, modified_by, modified_date)
-      values (lastName, firstName, contactCode, contactEmail, contactRoles, createdBy, createdDate, modifiedBy, modifiedDate); 
+    insert into contact (lastname, firstname, code, email, roles, created_by, created_date, modified_by, modified_date, organization_id)
+      values (lastName, firstName, contactCode, contactEmail, contactRoles, createdBy, createdDate, modifiedBy, modifiedDate, organizationId); 
     select lastval() into id;
   END;
 $$;
@@ -437,6 +437,21 @@ CREATE FUNCTION createmarkerlinkagegroup(markerid integer, markerlinkagegroupsta
   BEGIN
     insert into marker_linkage_group (marker_id, start, stop, linkage_group_id)
       values (markerId, markerLinkageGroupStart, markerLinkageGroupStop, linkageGroupId); 
+    select lastval() into id;
+  END;
+$$;
+
+
+--
+-- Name: createorganization(text, text, text, integer, date, integer, date, integer); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION createorganization(orgname text, orgaddress text, orgwebsite text, createdby integer, createddate date, modifiedby integer, modifieddate date, orgstatus integer, OUT id integer) RETURNS integer
+    LANGUAGE plpgsql
+    AS $$
+  BEGIN
+    insert into organization (name, address, website, created_by, created_date, modified_by, modified_date, status)
+      values (orgName, orgAddress, orgWebsite, createdBy, createdDate, modifiedBy, modifiedDate, orgStatus); 
     select lastval() into id;
   END;
 $$;
@@ -977,6 +992,20 @@ $$;
 
 
 --
+-- Name: deleteorganization(integer); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION deleteorganization(id integer) RETURNS integer
+    LANGUAGE plpgsql
+    AS $$
+    BEGIN
+    delete from organization where organization_id = id;
+    return id;
+    END;
+$$;
+
+
+--
 -- Name: deleteplatform(integer); Type: FUNCTION; Schema: public; Owner: -
 --
 
@@ -1173,7 +1202,8 @@ CREATE TABLE contact (
     created_by integer,
     created_date date DEFAULT ('now'::text)::date,
     modified_by integer,
-    modified_date date DEFAULT ('now'::text)::date
+    modified_date date DEFAULT ('now'::text)::date,
+    organization_id integer
 );
 
 
@@ -1858,15 +1888,15 @@ $$;
 
 
 --
--- Name: updatecontact(integer, text, text, text, text, integer[], integer, date, integer, date); Type: FUNCTION; Schema: public; Owner: -
+-- Name: updatecontact(integer, text, text, text, text, integer[], integer, date, integer, integer, date); Type: FUNCTION; Schema: public; Owner: -
 --
 
-CREATE FUNCTION updatecontact(contactid integer, contactlastname text, contactfirstname text, contactcode text, contactemail text, contactroles integer[], createdby integer, createddate date, modifiedby integer, modifieddate date) RETURNS void
+CREATE FUNCTION updatecontact(contactid integer, contactlastname text, contactfirstname text, contactcode text, contactemail text, contactroles integer[], createdby integer, createddate date, modifiedby integer, organizationid integer, modifieddate date) RETURNS void
     LANGUAGE plpgsql
     AS $$
     BEGIN
     update contact set lastname=contactLastName, firstname=contactFirstName, code=contactCode, email=contactEmail, roles=contactRoles, created_by=createdBy, created_date=createdDate, 
-      modified_by=modifiedBy, modified_date=modifiedDate
+      modified_by=modifiedBy, modified_date=modifiedDate, organization_id=organizationId
      where contact_id = contactId;
     END;
 $$;
@@ -2292,6 +2322,20 @@ CREATE FUNCTION updatemarkerpropertybyname(id integer, propertyname text, proper
       from property
       where marker_id=id;
   END;
+$$;
+
+
+--
+-- Name: updateorganization(integer, text, text, text, integer, date, integer, date, integer); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION updateorganization(orgid integer, orgname text, orgaddress text, orgwebsite text, createdby integer, createddate date, modifiedby integer, modifieddate date, orgstatus integer) RETURNS void
+    LANGUAGE plpgsql
+    AS $$
+    BEGIN
+    update organization set name=orgName, address=orgAddress, website=orgWebsite, created_by=createdBy, created_date=createdDate, modified_by=modifiedBy, modified_date=modifiedDate, status=orgStatus
+     where organization_id = orgId;
+    END;
 $$;
 
 
@@ -3471,6 +3515,42 @@ ALTER SEQUENCE marker_prop_marker_prop_id_seq OWNED BY marker_prop.marker_prop_i
 
 
 --
+-- Name: organization; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE organization (
+    organization_id integer NOT NULL,
+    name text NOT NULL,
+    address text,
+    website text,
+    created_by integer,
+    created_date date DEFAULT ('now'::text)::date,
+    modified_by integer,
+    modified_date date DEFAULT ('now'::text)::date,
+    status integer DEFAULT 1 NOT NULL
+);
+
+
+--
+-- Name: organization_organization_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE organization_organization_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: organization_organization_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE organization_organization_id_seq OWNED BY organization.organization_id;
+
+
+--
 -- Name: platform; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -3865,6 +3945,13 @@ ALTER TABLE ONLY marker_prop ALTER COLUMN marker_prop_id SET DEFAULT nextval('ma
 
 
 --
+-- Name: organization_id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY organization ALTER COLUMN organization_id SET DEFAULT nextval('organization_organization_id_seq'::regclass);
+
+
+--
 -- Name: platform_id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -3983,6 +4070,22 @@ ALTER TABLE ONLY project_prop
 
 ALTER TABLE ONLY experiment
     ADD CONSTRAINT name_project_id_platform_id_key UNIQUE (name, project_id, platform_id);
+
+
+--
+-- Name: organization_name_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY organization
+    ADD CONSTRAINT organization_name_key UNIQUE (name);
+
+
+--
+-- Name: organization_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY organization
+    ADD CONSTRAINT organization_pkey PRIMARY KEY (organization_id);
 
 
 --
@@ -4454,6 +4557,14 @@ ALTER TABLE ONLY marker_linkage_group
 
 ALTER TABLE ONLY marker
     ADD CONSTRAINT fk_marker_reference FOREIGN KEY (reference_id) REFERENCES reference(reference_id);
+
+
+--
+-- Name: fk_organization_contact; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY contact
+    ADD CONSTRAINT fk_organization_contact FOREIGN KEY (organization_id) REFERENCES organization(organization_id);
 
 
 --

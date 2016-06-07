@@ -255,11 +255,11 @@ $$ LANGUAGE plpgsql;
 --### Contact ###--
 
 --create a new contact, you may supply null for columns that are nullable
-CREATE OR REPLACE FUNCTION createContact(lastName text, firstName text, contactCode text, contactEmail text, contactRoles integer[], createdBy integer, createdDate date, modifiedBy integer, modifiedDate date, OUT id integer)
+CREATE OR REPLACE FUNCTION createContact(lastName text, firstName text, contactCode text, contactEmail text, contactRoles integer[], createdBy integer, createdDate date, modifiedBy integer, modifiedDate date, organizationId integer, OUT id integer)
 RETURNS integer AS $$
   BEGIN
-    insert into contact (lastname, firstname, code, email, roles, created_by, created_date, modified_by, modified_date)
-      values (lastName, firstName, contactCode, contactEmail, contactRoles, createdBy, createdDate, modifiedBy, modifiedDate); 
+    insert into contact (lastname, firstname, code, email, roles, created_by, created_date, modified_by, modified_date, organization_id)
+      values (lastName, firstName, contactCode, contactEmail, contactRoles, createdBy, createdDate, modifiedBy, modifiedDate, organizationId); 
     select lastval() into id;
   END;
 $$ LANGUAGE plpgsql;
@@ -267,11 +267,11 @@ $$ LANGUAGE plpgsql;
 --update all contact columns
 --You can "avoid" updating certain columns by passing the same value as what's currently in that column
 --OR I can create update functions that updates only certain columns, just let me know.
-CREATE OR REPLACE FUNCTION updateContact(contactId integer,contactLastName text, contactFirstName text, contactCode text, contactEmail text, contactRoles integer[], createdBy integer, createdDate date, modifiedBy integer, modifiedDate date)
+CREATE OR REPLACE FUNCTION updateContact(contactId integer,contactLastName text, contactFirstName text, contactCode text, contactEmail text, contactRoles integer[], createdBy integer, createdDate date, modifiedBy integer, organizationId integer, modifiedDate date)
 RETURNS void AS $$
     BEGIN
     update contact set lastname=contactLastName, firstname=contactFirstName, code=contactCode, email=contactEmail, roles=contactRoles, created_by=createdBy, created_date=createdDate, 
-      modified_by=modifiedBy, modified_date=modifiedDate
+      modified_by=modifiedBy, modified_date=modifiedDate, organization_id=organizationId
      where contact_id = contactId;
     END;
 $$ LANGUAGE plpgsql;
