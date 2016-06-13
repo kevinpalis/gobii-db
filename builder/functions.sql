@@ -1689,6 +1689,59 @@ RETURNS integer AS $$
     END;
 $$ LANGUAGE plpgsql;
 
+--### Organization ###--
+
+--create a new manifest, you may supply null for columns that are nullable
+CREATE OR REPLACE FUNCTION createOrganization(orgName text, orgAddress text, orgWebsite text, createdBy integer, createdDate date, modifiedBy integer, modifiedDate date, orgStatus integer, OUT id integer)
+RETURNS integer AS $$
+  BEGIN
+    insert into organization (name, address, website, created_by, created_date, modified_by, modified_date, status)
+      values (orgName, orgAddress, orgWebsite, createdBy, createdDate, modifiedBy, modifiedDate, orgStatus); 
+    select lastval() into id;
+  END;
+$$ LANGUAGE plpgsql;
+
+--update all manifest columns
+--You can "avoid" updating certain columns by passing the same value as what's currently in that column
+--OR I can create update functions that updates only certain columns, just let me know.
+CREATE OR REPLACE FUNCTION updateOrganization(orgId integer, orgName text, orgAddress text, orgWebsite text, createdBy integer, createdDate date, modifiedBy integer, modifiedDate date, orgStatus integer)
+RETURNS void AS $$
+    BEGIN
+    update organization set name=orgName, address=orgAddress, website=orgWebsite, created_by=createdBy, created_date=createdDate, modified_by=modifiedBy, modified_date=modifiedDate, status=orgStatus
+     where organization_id = orgId;
+    END;
+$$ LANGUAGE plpgsql;
+
+
+--delete
+CREATE OR REPLACE FUNCTION deleteOrganization(id integer)
+RETURNS integer AS $$
+    BEGIN
+    delete from organization where organization_id = id;
+    return id;
+    END;
+$$ LANGUAGE plpgsql;
+
+
+--######################################################################
+-- Extraction functions 
+--######################################################################
+--drop function getAllMarkerMetadataByDataset(datasetId integer);
+CREATE OR REPLACE FUNCTION getAllMarkerMetadataByDataset(datasetId integer)
+RETURNS table (marker_id integer, linkage_group_name varchar, start numeric, stop numeric, platform_name text, variant_id integer, name text, code text, ref text, alts text[], sequence text, reference_name text, primers jsonb, probsets jsonb, strand_name text, status integer) AS $$
+  BEGIN
+    return query
+    select m.marker_id, mlp.linkage_group_name, mlp.start, mlp.stop, p.name as platform_name, m.variant_id, m.name, m.code, m.ref, m.alts, m.sequence, r.name as reference_name, m.primers, m.probsets, cv.term as strand_name, m.status
+      from marker m, platform p, reference r, cv, v_marker_linkage_physical mlp
+      where m.marker_id in (select dm.marker_id from dataset_marker dm where dm.dataset_id=datasetId)
+      and m.platform_id = p.platform_id
+      and m.reference_id = r.reference_id
+      and m.strand_id = cv.cv_id
+      and m.marker_id = mlp.marker_id;
+  END;
+$$ LANGUAGE plpgsql;
+
+
 --######################################################################
 -- Phil's functions
 -- select get_contacts('');

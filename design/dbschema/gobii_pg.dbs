@@ -38,9 +38,13 @@
 			<column name="modified_date" type="date" length="13" decimal="0" jt="91" >
 				<defo>(&#039;now&#039;::text)::date</defo>
 			</column>
+			<column name="organization_id" type="integer" length="10" decimal="0" jt="4" />
 			<index name="pk_contact" unique="PRIMARY_KEY" >
 				<column name="contact_id" />
 			</index>
+			<fk name="fk_organization_contact" to_schema="public" to_table="organization" >
+				<fk_column name="organization_id" pk="organization_id" />
+			</fk>
 		</table>
 		<table name="cv" >
 			<column name="cv_id" type="serial" length="10" decimal="0" jt="4" mandatory="y" />
@@ -463,6 +467,29 @@
 				<fk_column name="marker_id" pk="marker_id" />
 			</fk>
 		</table>
+		<table name="organization" >
+			<column name="organization_id" type="serial" length="10" decimal="0" jt="4" mandatory="y" />
+			<column name="name" type="text" length="2147483647" decimal="0" jt="12" mandatory="y" />
+			<column name="address" type="text" length="2147483647" decimal="0" jt="12" />
+			<column name="website" type="text" length="2147483647" decimal="0" jt="12" />
+			<column name="created_by" type="integer" length="10" decimal="0" jt="4" />
+			<column name="created_date" type="date" length="13" decimal="0" jt="91" >
+				<defo>(&#039;now&#039;::text)::date</defo>
+			</column>
+			<column name="modified_by" type="integer" length="10" decimal="0" jt="4" />
+			<column name="modified_date" type="date" length="13" decimal="0" jt="91" >
+				<defo>(&#039;now&#039;::text)::date</defo>
+			</column>
+			<column name="status" type="integer" length="10" decimal="0" jt="4" mandatory="y" >
+				<defo>1</defo>
+			</column>
+			<index name="organization_pkey" unique="PRIMARY_KEY" >
+				<column name="organization_id" />
+			</index>
+			<index name="organization_name_key" unique="UNIQUE" >
+				<column name="name" />
+			</index>
+		</table>
 		<table name="platform" >
 			<column name="platform_id" type="serial" length="10" decimal="0" jt="4" mandatory="y" />
 			<column name="name" type="text" length="2147483647" decimal="0" jt="12" mandatory="y" />
@@ -633,6 +660,7 @@
 		<sequence name="marker_map_marker_map_id_seq" start="1" />
 		<sequence name="marker_marker_id_seq" start="1" />
 		<sequence name="marker_prop_marker_prop_id_seq" start="1" />
+		<sequence name="organization_organization_id_seq" start="1" />
 		<sequence name="platform_platform_id_seq" start="1" />
 		<sequence name="platform_prop_platform_prop_id_seq" start="1" />
 		<sequence name="project_project_id_seq" start="1" />
@@ -700,29 +728,6 @@ AS $function$
 $function$
 ]]></string>
 		</function>
-		<function name="createanalysis" id="Function_366ad665" isSystem="false" >
-			<string><![CDATA[CREATE OR REPLACE FUNCTION public.createanalysis(analysisname text, analysisdescription text, typeid integer, analysisprogram text, analysisprogramversion text, aanalysisalgorithm text, analysissourcename text, analysissourceversion text, analysissourceuri text, referenceid integer, analysistimeexecuted timestamp without time zone, analysisstatus integer, OUT id integer)
- RETURNS integer
- LANGUAGE plpgsql
-AS $function$
-  BEGIN
-    insert into analysis (name, description, type_id, program, programversion, algorithm, sourcename, sourceversion, sourceuri, reference_id, parameters, timeexecuted, status)
-      values (analysisName, analysisDescription, typeId, analysisProgram, analysisProgramversion, aanalysisAlgorithm, analysisSourcename, analysisSourceversion, analysisSourceuri, referenceId, '{}'::jsonb, analysisTimeexecuted, analysisStatus); 
-    select lastval() into id;
-  END;
-$function$
-CREATE OR REPLACE FUNCTION public.createanalysis(analysisname text, analysisdescription text, typeid integer, analysisprogram text, analysisprogramversion text, aanalysisalgorithm text, analysissourcename text, analysissourceversion text, analysissourceuri text, referenceid integer, analysisparameters jsonb, analysistimeexecuted timestamp without time zone, analysisstatus integer, OUT id integer)
- RETURNS integer
- LANGUAGE plpgsql
-AS $function$
-  BEGIN
-    insert into analysis (name, description, type_id, program, programversion, algorithm, sourcename, sourceversion, sourceuri, reference_id, parameters, timeexecuted, status)
-      values (analysisName, analysisDescription, typeId, analysisProgram, analysisProgramversion, aanalysisAlgorithm, analysisSourcename, analysisSourceversion, analysisSourceuri, referenceId, analysisParameters, analysisTimeexecuted, analysisStatus); 
-    select lastval() into id;
-  END;
-$function$
-]]></string>
-		</function>
 		<function name="createanalysis" id="Function_321ce063" isSystem="false" >
 			<string><![CDATA[CREATE OR REPLACE FUNCTION public.createanalysis(analysisname text, analysisdescription text, typeid integer, analysisprogram text, analysisprogramversion text, aanalysisalgorithm text, analysissourcename text, analysissourceversion text, analysissourceuri text, referenceid integer, analysistimeexecuted timestamp without time zone, analysisstatus integer, OUT id integer)
  RETURNS integer
@@ -746,14 +751,37 @@ AS $function$
 $function$
 ]]></string>
 		</function>
-		<function name="createcontact" id="Function_c4528e0" isSystem="false" >
-			<string><![CDATA[CREATE OR REPLACE FUNCTION public.createcontact(lastname text, firstname text, contactcode text, contactemail text, contactroles integer[], createdby integer, createddate date, modifiedby integer, modifieddate date, OUT id integer)
+		<function name="createanalysis" id="Function_366ad665" isSystem="false" >
+			<string><![CDATA[CREATE OR REPLACE FUNCTION public.createanalysis(analysisname text, analysisdescription text, typeid integer, analysisprogram text, analysisprogramversion text, aanalysisalgorithm text, analysissourcename text, analysissourceversion text, analysissourceuri text, referenceid integer, analysistimeexecuted timestamp without time zone, analysisstatus integer, OUT id integer)
  RETURNS integer
  LANGUAGE plpgsql
 AS $function$
   BEGIN
-    insert into contact (lastname, firstname, code, email, roles, created_by, created_date, modified_by, modified_date)
-      values (lastName, firstName, contactCode, contactEmail, contactRoles, createdBy, createdDate, modifiedBy, modifiedDate); 
+    insert into analysis (name, description, type_id, program, programversion, algorithm, sourcename, sourceversion, sourceuri, reference_id, parameters, timeexecuted, status)
+      values (analysisName, analysisDescription, typeId, analysisProgram, analysisProgramversion, aanalysisAlgorithm, analysisSourcename, analysisSourceversion, analysisSourceuri, referenceId, '{}'::jsonb, analysisTimeexecuted, analysisStatus); 
+    select lastval() into id;
+  END;
+$function$
+CREATE OR REPLACE FUNCTION public.createanalysis(analysisname text, analysisdescription text, typeid integer, analysisprogram text, analysisprogramversion text, aanalysisalgorithm text, analysissourcename text, analysissourceversion text, analysissourceuri text, referenceid integer, analysisparameters jsonb, analysistimeexecuted timestamp without time zone, analysisstatus integer, OUT id integer)
+ RETURNS integer
+ LANGUAGE plpgsql
+AS $function$
+  BEGIN
+    insert into analysis (name, description, type_id, program, programversion, algorithm, sourcename, sourceversion, sourceuri, reference_id, parameters, timeexecuted, status)
+      values (analysisName, analysisDescription, typeId, analysisProgram, analysisProgramversion, aanalysisAlgorithm, analysisSourcename, analysisSourceversion, analysisSourceuri, referenceId, analysisParameters, analysisTimeexecuted, analysisStatus); 
+    select lastval() into id;
+  END;
+$function$
+]]></string>
+		</function>
+		<function name="createcontact" id="Function_c4528e0" isSystem="false" >
+			<string><![CDATA[CREATE OR REPLACE FUNCTION public.createcontact(lastname text, firstname text, contactcode text, contactemail text, contactroles integer[], createdby integer, createddate date, modifiedby integer, modifieddate date, organizationid integer, OUT id integer)
+ RETURNS integer
+ LANGUAGE plpgsql
+AS $function$
+  BEGIN
+    insert into contact (lastname, firstname, code, email, roles, created_by, created_date, modified_by, modified_date, organization_id)
+      values (lastName, firstName, contactCode, contactEmail, contactRoles, createdBy, createdDate, modifiedBy, modifiedDate, organizationId); 
     select lastval() into id;
   END;
 $function$
@@ -772,7 +800,7 @@ AS $function$
 $function$
 ]]></string>
 		</function>
-		<function name="createdataset" id="Function_ad278b" isSystem="false" >
+		<function name="createdataset" id="Function_f92f286" isSystem="false" >
 			<string><![CDATA[CREATE OR REPLACE FUNCTION public.createdataset(datasetname text, experimentid integer, callinganalysisid integer, datasetanalyses integer[], datatable text, datafile text, qualitytable text, qualityfile text, createdby integer, createddate date, modifiedby integer, modifieddate date, datasetstatus integer, typeid integer, OUT id integer)
  RETURNS integer
  LANGUAGE plpgsql
@@ -785,7 +813,7 @@ AS $function$
 $function$
 ]]></string>
 		</function>
-		<function name="createdataset" id="Function_f92f286" isSystem="false" >
+		<function name="createdataset" id="Function_ad278b" isSystem="false" >
 			<string><![CDATA[CREATE OR REPLACE FUNCTION public.createdataset(datasetname text, experimentid integer, callinganalysisid integer, datasetanalyses integer[], datatable text, datafile text, qualitytable text, qualityfile text, createdby integer, createddate date, modifiedby integer, modifieddate date, datasetstatus integer, typeid integer, OUT id integer)
  RETURNS integer
  LANGUAGE plpgsql
@@ -811,7 +839,7 @@ AS $function$
 $function$
 ]]></string>
 		</function>
-		<function name="createdatasetmarker" id="Function_2fbae617" isSystem="false" >
+		<function name="createdatasetmarker" id="Function_3723ef10" isSystem="false" >
 			<string><![CDATA[CREATE OR REPLACE FUNCTION public.createdatasetmarker(datasetid integer, markerid integer, callrate real, datasetmarkermaf real, datasetmarkerreproducibility real, datasetmarkeridx integer, OUT id integer)
  RETURNS integer
  LANGUAGE plpgsql
@@ -834,7 +862,7 @@ AS $function$
 $function$
 ]]></string>
 		</function>
-		<function name="createdatasetmarker" id="Function_3723ef10" isSystem="false" >
+		<function name="createdatasetmarker" id="Function_2fbae617" isSystem="false" >
 			<string><![CDATA[CREATE OR REPLACE FUNCTION public.createdatasetmarker(datasetid integer, markerid integer, callrate real, datasetmarkermaf real, datasetmarkerreproducibility real, datasetmarkeridx integer, OUT id integer)
  RETURNS integer
  LANGUAGE plpgsql
@@ -965,29 +993,6 @@ AS $function$
 $function$
 ]]></string>
 		</function>
-		<function name="createmarker" id="Function_22d079df" isSystem="false" >
-			<string><![CDATA[CREATE OR REPLACE FUNCTION public.createmarker(platformid integer, variantid integer, markername text, markercode text, markerref text, markeralts text[], markersequence text, referenceid integer, strandid integer, markerstatus integer, OUT id integer)
- RETURNS integer
- LANGUAGE plpgsql
-AS $function$
-  BEGIN
-    insert into marker (marker_id, platform_id, variant_id, name, code, ref, alts, sequence, reference_id, primers, probsets, strand_id, status)
-      values (markerId, platformId, variantId, markerName, markerCode, markerRef, markerAlts, markerSequence, referenceId, '{}'::jsonb, '{}'::jsonb, strandId, markerStatus); 
-    select lastval() into id;
-  END;
-$function$
-CREATE OR REPLACE FUNCTION public.createmarker(platformid integer, variantid integer, markername text, markercode text, markerref text, markeralts text[], markersequence text, referenceid integer, markerprimers jsonb, markerprobsets text[], strandid integer, markerstatus integer, OUT id integer)
- RETURNS integer
- LANGUAGE plpgsql
-AS $function$
-  BEGIN
-    insert into marker (marker_id, platform_id, variant_id, name, code, ref, alts, sequence, reference_id, primers, probsets, strand_id, status)
-      values (markerId, platformId, variantId, markerName, markerCode, markerRef, markerAlts, markerSequence, referenceId, markerPrimers, markerProbsets, strandId, markerStatus); 
-    select lastval() into id;
-  END;
-$function$
-]]></string>
-		</function>
 		<function name="createmarker" id="Function_2a807050" isSystem="false" >
 			<string><![CDATA[CREATE OR REPLACE FUNCTION public.createmarker(platformid integer, variantid integer, markername text, markercode text, markerref text, markeralts text[], markersequence text, referenceid integer, strandid integer, markerstatus integer, OUT id integer)
  RETURNS integer
@@ -1011,7 +1016,30 @@ AS $function$
 $function$
 ]]></string>
 		</function>
-		<function name="createmarkergroup" id="Function_c03cafb" isSystem="false" >
+		<function name="createmarker" id="Function_22d079df" isSystem="false" >
+			<string><![CDATA[CREATE OR REPLACE FUNCTION public.createmarker(platformid integer, variantid integer, markername text, markercode text, markerref text, markeralts text[], markersequence text, referenceid integer, strandid integer, markerstatus integer, OUT id integer)
+ RETURNS integer
+ LANGUAGE plpgsql
+AS $function$
+  BEGIN
+    insert into marker (marker_id, platform_id, variant_id, name, code, ref, alts, sequence, reference_id, primers, probsets, strand_id, status)
+      values (markerId, platformId, variantId, markerName, markerCode, markerRef, markerAlts, markerSequence, referenceId, '{}'::jsonb, '{}'::jsonb, strandId, markerStatus); 
+    select lastval() into id;
+  END;
+$function$
+CREATE OR REPLACE FUNCTION public.createmarker(platformid integer, variantid integer, markername text, markercode text, markerref text, markeralts text[], markersequence text, referenceid integer, markerprimers jsonb, markerprobsets text[], strandid integer, markerstatus integer, OUT id integer)
+ RETURNS integer
+ LANGUAGE plpgsql
+AS $function$
+  BEGIN
+    insert into marker (marker_id, platform_id, variant_id, name, code, ref, alts, sequence, reference_id, primers, probsets, strand_id, status)
+      values (markerId, platformId, variantId, markerName, markerCode, markerRef, markerAlts, markerSequence, referenceId, markerPrimers, markerProbsets, strandId, markerStatus); 
+    select lastval() into id;
+  END;
+$function$
+]]></string>
+		</function>
+		<function name="createmarkergroup" id="Function_1405edf3" isSystem="false" >
 			<string><![CDATA[CREATE OR REPLACE FUNCTION public.createmarkergroup(markergroupname text, markergroupcode text, germplasmgroup text, createdby integer, createddate date, modifiedby integer, modifieddate date, markergroupstatus integer, OUT id integer)
  RETURNS integer
  LANGUAGE plpgsql
@@ -1024,7 +1052,7 @@ AS $function$
 $function$
 ]]></string>
 		</function>
-		<function name="createmarkergroup" id="Function_1405edf3" isSystem="false" >
+		<function name="createmarkergroup" id="Function_c03cafb" isSystem="false" >
 			<string><![CDATA[CREATE OR REPLACE FUNCTION public.createmarkergroup(markergroupname text, markergroupcode text, germplasmgroup text, createdby integer, createddate date, modifiedby integer, modifieddate date, markergroupstatus integer, OUT id integer)
  RETURNS integer
  LANGUAGE plpgsql
@@ -1055,6 +1083,19 @@ AS $function$
   BEGIN
     insert into marker_linkage_group (marker_id, start, stop, linkage_group_id)
       values (markerId, markerLinkageGroupStart, markerLinkageGroupStop, linkageGroupId); 
+    select lastval() into id;
+  END;
+$function$
+]]></string>
+		</function>
+		<function name="createorganization" id="Function_21364ffc" isSystem="false" >
+			<string><![CDATA[CREATE OR REPLACE FUNCTION public.createorganization(orgname text, orgaddress text, orgwebsite text, createdby integer, createddate date, modifiedby integer, modifieddate date, orgstatus integer, OUT id integer)
+ RETURNS integer
+ LANGUAGE plpgsql
+AS $function$
+  BEGIN
+    insert into organization (name, address, website, created_by, created_date, modified_by, modified_date, status)
+      values (orgName, orgAddress, orgWebsite, createdBy, createdDate, modifiedBy, modifiedDate, orgStatus); 
     select lastval() into id;
   END;
 $function$
@@ -1521,6 +1562,18 @@ AS $function$
       where marker_id=id;
     return propertyName;
   END;
+$function$
+]]></string>
+		</function>
+		<function name="deleteorganization" id="Function_17a09287" isSystem="false" >
+			<string><![CDATA[CREATE OR REPLACE FUNCTION public.deleteorganization(id integer)
+ RETURNS integer
+ LANGUAGE plpgsql
+AS $function$
+    BEGIN
+    delete from organization where organization_id = id;
+    return id;
+    END;
 $function$
 ]]></string>
 		</function>
@@ -2226,27 +2279,6 @@ AS $function$
 $function$
 ]]></string>
 		</function>
-		<function name="updateanalysis" id="Function_28afd5a2" isSystem="false" >
-			<string><![CDATA[CREATE OR REPLACE FUNCTION public.updateanalysis(id integer, analysisname text, analysisdescription text, typeid integer, analysisprogram text, analysisprogramversion text, aanalysisalgorithm text, analysissourcename text, analysissourceversion text, analysissourceuri text, referenceid integer, analysistimeexecuted timestamp without time zone, analysisstatus integer)
- RETURNS void
- LANGUAGE plpgsql
-AS $function$
-    BEGIN
-    update analysis set name=analysisName, description=analysisDescription, type_id=typeId, program=analysisProgram, programversion=analysisProgramversion, algorithm=aanalysisAlgorithm, sourcename=analysisSourcename, sourceversion=analysisSourceversion, sourceuri=analysisSourceuri, reference_id=referenceId, parameters='{}'::jsonb, timeexecuted=analysisTimeexecuted, status=analysisStatus
-     where analysis_id = id;
-    END;
-$function$
-CREATE OR REPLACE FUNCTION public.updateanalysis(id integer, analysisname text, analysisdescription text, typeid integer, analysisprogram text, analysisprogramversion text, aanalysisalgorithm text, analysissourcename text, analysissourceversion text, analysissourceuri text, referenceid integer, analysisparameters jsonb, analysistimeexecuted timestamp without time zone, analysisstatus integer)
- RETURNS void
- LANGUAGE plpgsql
-AS $function$
-    BEGIN
-    update analysis set name=analysisName, description=analysisDescription, type_id=typeId, program=analysisProgram, programversion=analysisProgramversion, algorithm=aanalysisAlgorithm, sourcename=analysisSourcename, sourceversion=analysisSourceversion, sourceuri=analysisSourceuri, reference_id=referenceId, parameters=analysisParameters, timeexecuted=analysisTimeexecuted, status=analysisStatus
-     where analysis_id = id;
-    END;
-$function$
-]]></string>
-		</function>
 		<function name="updateanalysis" id="Function_8374a5a" isSystem="false" >
 			<string><![CDATA[CREATE OR REPLACE FUNCTION public.updateanalysis(id integer, analysisname text, analysisdescription text, typeid integer, analysisprogram text, analysisprogramversion text, aanalysisalgorithm text, analysissourcename text, analysissourceversion text, analysissourceuri text, referenceid integer, analysistimeexecuted timestamp without time zone, analysisstatus integer)
  RETURNS void
@@ -2268,14 +2300,35 @@ AS $function$
 $function$
 ]]></string>
 		</function>
+		<function name="updateanalysis" id="Function_28afd5a2" isSystem="false" >
+			<string><![CDATA[CREATE OR REPLACE FUNCTION public.updateanalysis(id integer, analysisname text, analysisdescription text, typeid integer, analysisprogram text, analysisprogramversion text, aanalysisalgorithm text, analysissourcename text, analysissourceversion text, analysissourceuri text, referenceid integer, analysistimeexecuted timestamp without time zone, analysisstatus integer)
+ RETURNS void
+ LANGUAGE plpgsql
+AS $function$
+    BEGIN
+    update analysis set name=analysisName, description=analysisDescription, type_id=typeId, program=analysisProgram, programversion=analysisProgramversion, algorithm=aanalysisAlgorithm, sourcename=analysisSourcename, sourceversion=analysisSourceversion, sourceuri=analysisSourceuri, reference_id=referenceId, parameters='{}'::jsonb, timeexecuted=analysisTimeexecuted, status=analysisStatus
+     where analysis_id = id;
+    END;
+$function$
+CREATE OR REPLACE FUNCTION public.updateanalysis(id integer, analysisname text, analysisdescription text, typeid integer, analysisprogram text, analysisprogramversion text, aanalysisalgorithm text, analysissourcename text, analysissourceversion text, analysissourceuri text, referenceid integer, analysisparameters jsonb, analysistimeexecuted timestamp without time zone, analysisstatus integer)
+ RETURNS void
+ LANGUAGE plpgsql
+AS $function$
+    BEGIN
+    update analysis set name=analysisName, description=analysisDescription, type_id=typeId, program=analysisProgram, programversion=analysisProgramversion, algorithm=aanalysisAlgorithm, sourcename=analysisSourcename, sourceversion=analysisSourceversion, sourceuri=analysisSourceuri, reference_id=referenceId, parameters=analysisParameters, timeexecuted=analysisTimeexecuted, status=analysisStatus
+     where analysis_id = id;
+    END;
+$function$
+]]></string>
+		</function>
 		<function name="updatecontact" id="Function_1c8f4435" isSystem="false" >
-			<string><![CDATA[CREATE OR REPLACE FUNCTION public.updatecontact(contactid integer, contactlastname text, contactfirstname text, contactcode text, contactemail text, contactroles integer[], createdby integer, createddate date, modifiedby integer, modifieddate date)
+			<string><![CDATA[CREATE OR REPLACE FUNCTION public.updatecontact(contactid integer, contactlastname text, contactfirstname text, contactcode text, contactemail text, contactroles integer[], createdby integer, createddate date, modifiedby integer, organizationid integer, modifieddate date)
  RETURNS void
  LANGUAGE plpgsql
 AS $function$
     BEGIN
     update contact set lastname=contactLastName, firstname=contactFirstName, code=contactCode, email=contactEmail, roles=contactRoles, created_by=createdBy, created_date=createdDate, 
-      modified_by=modifiedBy, modified_date=modifiedDate
+      modified_by=modifiedBy, modified_date=modifiedDate, organization_id=organizationId
      where contact_id = contactId;
     END;
 $function$
@@ -2293,7 +2346,7 @@ AS $function$
 $function$
 ]]></string>
 		</function>
-		<function name="updatedataset" id="Function_fc57b8b" isSystem="false" >
+		<function name="updatedataset" id="Function_2b392710" isSystem="false" >
 			<string><![CDATA[CREATE OR REPLACE FUNCTION public.updatedataset(id integer, datasetname text, experimentid integer, callinganalysisid integer, datasetanalyses integer[], datatable text, datafile text, qualitytable text, qualityfile text, createdby integer, createddate date, modifiedby integer, modifieddate date, datasetstatus integer, typeid integer)
  RETURNS void
  LANGUAGE plpgsql
@@ -2305,7 +2358,7 @@ AS $function$
 $function$
 ]]></string>
 		</function>
-		<function name="updatedataset" id="Function_2b392710" isSystem="false" >
+		<function name="updatedataset" id="Function_fc57b8b" isSystem="false" >
 			<string><![CDATA[CREATE OR REPLACE FUNCTION public.updatedataset(id integer, datasetname text, experimentid integer, callinganalysisid integer, datasetanalyses integer[], datatable text, datafile text, qualitytable text, qualityfile text, createdby integer, createddate date, modifiedby integer, modifieddate date, datasetstatus integer, typeid integer)
  RETURNS void
  LANGUAGE plpgsql
@@ -2329,7 +2382,7 @@ AS $function$
 $function$
 ]]></string>
 		</function>
-		<function name="updatedatasetmarker" id="Function_2c9781cd" isSystem="false" >
+		<function name="updatedatasetmarker" id="Function_277c926c" isSystem="false" >
 			<string><![CDATA[CREATE OR REPLACE FUNCTION public.updatedatasetmarker(id integer, datasetid integer, markerid integer, callrate real, datasetmarkermaf real, datasetmarkerreproducibility real, datasetmarkeridx integer)
  RETURNS void
  LANGUAGE plpgsql
@@ -2350,7 +2403,7 @@ AS $function$
 $function$
 ]]></string>
 		</function>
-		<function name="updatedatasetmarker" id="Function_277c926c" isSystem="false" >
+		<function name="updatedatasetmarker" id="Function_2c9781cd" isSystem="false" >
 			<string><![CDATA[CREATE OR REPLACE FUNCTION public.updatedatasetmarker(id integer, datasetid integer, markerid integer, callrate real, datasetmarkermaf real, datasetmarkerreproducibility real, datasetmarkeridx integer)
  RETURNS void
  LANGUAGE plpgsql
@@ -2577,27 +2630,6 @@ AS $function$
 $function$
 ]]></string>
 		</function>
-		<function name="updatemarker" id="Function_5571bcc" isSystem="false" >
-			<string><![CDATA[CREATE OR REPLACE FUNCTION public.updatemarker(id integer, platformid integer, variantid integer, markername text, markercode text, markerref text, markeralts text[], markersequence text, referenceid integer, strandid integer, markerstatus integer)
- RETURNS void
- LANGUAGE plpgsql
-AS $function$
-    BEGIN
-    update marker set  platform_id=platformId, variant_id=variantId, name=markerName, code=markerCode, ref=markerRef, alts=markerAlts, sequence=markerSequence, reference_id=referenceId, primers='{}'::jsonb, probsets='{}'::jsonb, strand_id=strandId, status=markerStatus
-     where marker_id = id;
-    END;
-$function$
-CREATE OR REPLACE FUNCTION public.updatemarker(id integer, platformid integer, variantid integer, markername text, markercode text, markerref text, markeralts text[], markersequence text, referenceid integer, markerprimers jsonb, markerprobsets text[], strandid integer, markerstatus integer)
- RETURNS void
- LANGUAGE plpgsql
-AS $function$
-    BEGIN
-    update marker set  platform_id=platformId, variant_id=variantId, name=markerName, code=markerCode, ref=markerRef, alts=markerAlts, sequence=markerSequence, reference_id=referenceId, primers=markerPrimers, probsets=markerProbsets, strand_id=strandId, status=markerStatus
-     where marker_id = id;
-    END;
-$function$
-]]></string>
-		</function>
 		<function name="updatemarker" id="Function_2d42179c" isSystem="false" >
 			<string><![CDATA[CREATE OR REPLACE FUNCTION public.updatemarker(id integer, platformid integer, variantid integer, markername text, markercode text, markerref text, markeralts text[], markersequence text, referenceid integer, strandid integer, markerstatus integer)
  RETURNS void
@@ -2619,7 +2651,28 @@ AS $function$
 $function$
 ]]></string>
 		</function>
-		<function name="updatemarkergroup" id="Function_21eb206b" isSystem="false" >
+		<function name="updatemarker" id="Function_5571bcc" isSystem="false" >
+			<string><![CDATA[CREATE OR REPLACE FUNCTION public.updatemarker(id integer, platformid integer, variantid integer, markername text, markercode text, markerref text, markeralts text[], markersequence text, referenceid integer, strandid integer, markerstatus integer)
+ RETURNS void
+ LANGUAGE plpgsql
+AS $function$
+    BEGIN
+    update marker set  platform_id=platformId, variant_id=variantId, name=markerName, code=markerCode, ref=markerRef, alts=markerAlts, sequence=markerSequence, reference_id=referenceId, primers='{}'::jsonb, probsets='{}'::jsonb, strand_id=strandId, status=markerStatus
+     where marker_id = id;
+    END;
+$function$
+CREATE OR REPLACE FUNCTION public.updatemarker(id integer, platformid integer, variantid integer, markername text, markercode text, markerref text, markeralts text[], markersequence text, referenceid integer, markerprimers jsonb, markerprobsets text[], strandid integer, markerstatus integer)
+ RETURNS void
+ LANGUAGE plpgsql
+AS $function$
+    BEGIN
+    update marker set  platform_id=platformId, variant_id=variantId, name=markerName, code=markerCode, ref=markerRef, alts=markerAlts, sequence=markerSequence, reference_id=referenceId, primers=markerPrimers, probsets=markerProbsets, strand_id=strandId, status=markerStatus
+     where marker_id = id;
+    END;
+$function$
+]]></string>
+		</function>
+		<function name="updatemarkergroup" id="Function_328bb7fb" isSystem="false" >
 			<string><![CDATA[CREATE OR REPLACE FUNCTION public.updatemarkergroup(id integer, markergroupname text, markergroupcode text, germplasmgroup text, createdby integer, createddate date, modifiedby integer, modifieddate date, markergroupstatus integer)
  RETURNS void
  LANGUAGE plpgsql
@@ -2640,7 +2693,7 @@ AS $function$
 $function$
 ]]></string>
 		</function>
-		<function name="updatemarkergroup" id="Function_328bb7fb" isSystem="false" >
+		<function name="updatemarkergroup" id="Function_21eb206b" isSystem="false" >
 			<string><![CDATA[CREATE OR REPLACE FUNCTION public.updatemarkergroup(id integer, markergroupname text, markergroupcode text, germplasmgroup text, createdby integer, createddate date, modifiedby integer, modifieddate date, markergroupstatus integer)
  RETURNS void
  LANGUAGE plpgsql
@@ -2706,6 +2759,18 @@ AS $function$
       from property
       where marker_id=id;
   END;
+$function$
+]]></string>
+		</function>
+		<function name="updateorganization" id="Function_35f5cf9b" isSystem="false" >
+			<string><![CDATA[CREATE OR REPLACE FUNCTION public.updateorganization(orgid integer, orgname text, orgaddress text, orgwebsite text, createdby integer, createddate date, modifiedby integer, modifieddate date, orgstatus integer)
+ RETURNS void
+ LANGUAGE plpgsql
+AS $function$
+    BEGIN
+    update organization set name=orgName, address=orgAddress, website=orgWebsite, created_by=createdBy, created_date=createdDate, modified_by=modifiedBy, modified_date=modifiedDate, status=orgStatus
+     where organization_id = orgId;
+    END;
 $function$
 ]]></string>
 		</function>
@@ -3235,7 +3300,6 @@ FROM
 	</layout>
 	<layout id="Layout_2de8caa3" name="gobii_rice" show_relation_columns="y" >
 		<comment><![CDATA[gobii_pg_erd]]></comment>
-		<entity schema="public" name="contact" color="bfd4f5" x="420" y="990" />
 		<entity schema="public" name="dataset" color="f5ddbf" x="420" y="660" />
 		<entity schema="public" name="dnarun" color="f5ddbf" x="600" y="675" />
 		<entity schema="public" name="dataset_dnarun" color="f5ddbf" x="600" y="825" />
@@ -3264,6 +3328,8 @@ FROM
 		<entity schema="public" name="platform" color="00cbff" x="1185" y="240" />
 		<entity schema="public" name="germplasm" color="d2bff5" x="60" y="75" />
 		<entity schema="public" name="marker_group" color="ffe2c6" x="825" y="225" />
+		<entity schema="public" name="contact" color="bfd4f5" x="420" y="990" />
+		<entity schema="public" name="organization" color="b7c8e3" x="840" y="1035" />
 		<group name="dataset/dnarun" color="f7f4f0" >
 			<entity schema="public" name="dnarun" />
 			<entity schema="public" name="dataset" />
@@ -3300,6 +3366,7 @@ FROM
 			<entity schema="public" name="contact" />
 			<entity schema="public" name="role" />
 			<entity schema="public" name="display" />
+			<entity schema="public" name="organization" />
 		</group>
 		<group name="project" color="c4e0f9" >
 			<entity schema="public" name="project" />

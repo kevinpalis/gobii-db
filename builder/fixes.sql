@@ -141,3 +141,5 @@ ALTER TABLE organization ADD CONSTRAINT organization_name_key UNIQUE (name);
 
 ALTER TABLE contact ADD COLUMN organization_id integer;
 ALTER TABLE contact ADD CONSTRAINT fk_organization_contact FOREIGN KEY (organization_id) REFERENCES organization(organization_id);
+
+
