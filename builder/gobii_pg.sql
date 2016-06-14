@@ -54,6 +54,19 @@ CREATE TYPE keyvaluepair_type AS (
 
 
 --
+-- Name: myrowtype; Type: TYPE; Schema: public; Owner: -
+--
+
+CREATE TYPE myrowtype AS (
+	"23" text,
+	"24" text,
+	"25" text,
+	"26" text,
+	"27" text
+);
+
+
+--
 -- Name: addanalysistodataset(integer, integer); Type: FUNCTION; Schema: public; Owner: -
 --
 
@@ -1217,6 +1230,26 @@ CREATE FUNCTION getallcontactsbyrole(roleid integer) RETURNS SETOF contact
   BEGIN
     return query
     select c.* from contact c, role r where r.role_id = roleId and r.role_id = any(c.roles);
+  END;
+$$;
+
+
+--
+-- Name: getallmarkermetadatabydataset(integer); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION getallmarkermetadatabydataset(datasetid integer) RETURNS TABLE(marker_id integer, linkage_group_name character varying, start numeric, stop numeric, platform_name text, variant_id integer, name text, code text, ref text, alts text[], sequence text, reference_name text, primers jsonb, probsets jsonb, strand_name text, status integer)
+    LANGUAGE plpgsql
+    AS $$
+  BEGIN
+    return query
+    select m.marker_id, mlp.linkage_group_name, mlp.start, mlp.stop, p.name as platform_name, m.variant_id, m.name, m.code, m.ref, m.alts, m.sequence, r.name as reference_name, m.primers, m.probsets, cv.term as strand_name, m.status
+      from marker m, platform p, reference r, cv, v_marker_linkage_physical mlp
+      where m.marker_id in (select dm.marker_id from dataset_marker dm where dm.dataset_id=datasetId)
+      and m.platform_id = p.platform_id
+      and m.reference_id = r.reference_id
+      and m.strand_id = cv.cv_id
+      and m.marker_id = mlp.marker_id;
   END;
 $$;
 
@@ -3755,6 +3788,61 @@ CREATE VIEW v_all_projects_full_details AS
     p.status
    FROM (project p
      JOIN contact c ON ((p.pi_contact = c.contact_id)));
+
+
+--
+-- Name: v_marker_linkage_genetic; Type: VIEW; Schema: public; Owner: -
+--
+
+CREATE VIEW v_marker_linkage_genetic AS
+ SELECT mlg.marker_id,
+    lg.name AS linkage_group_name,
+    (mlg.start)::integer AS start,
+    (mlg.stop)::integer AS stop
+   FROM marker_linkage_group mlg,
+    linkage_group lg
+  WHERE (mlg.linkage_group_id = lg.linkage_group_id);
+
+
+--
+-- Name: v_marker_linkage_physical; Type: VIEW; Schema: public; Owner: -
+--
+
+CREATE VIEW v_marker_linkage_physical AS
+ SELECT mlg.marker_id,
+    lg.name AS linkage_group_name,
+    mlg.start,
+    mlg.stop
+   FROM marker_linkage_group mlg,
+    linkage_group lg
+  WHERE (mlg.linkage_group_id = lg.linkage_group_id);
+
+
+--
+-- Name: v_marker_metadata_by_dataset; Type: VIEW; Schema: public; Owner: -
+--
+
+CREATE VIEW v_marker_metadata_by_dataset AS
+ SELECT m.marker_id,
+    dm.dataset_id,
+    p.name AS platform_name,
+    m.variant_id,
+    m.name,
+    m.code,
+    m.ref,
+    m.alts,
+    m.sequence,
+    r.name AS reference_name,
+    m.primers,
+    m.probsets,
+    cv.term AS strand_name,
+    m.status
+   FROM marker m,
+    platform p,
+    reference r,
+    cv,
+    dataset_marker dm
+  WHERE ((m.marker_id = dm.marker_id) AND (m.platform_id = p.platform_id) AND (m.reference_id = r.reference_id) AND (m.strand_id = cv.cv_id));
 
 
 --
