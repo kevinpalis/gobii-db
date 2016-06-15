@@ -11,16 +11,22 @@ import traceback
 from util.mde_utility import MDEUtility
 from db.extract_metadata_manager import ExtractMetadataManager
 
-def main(isVerbose, connectionStr, datasetId, outputFile):
+def main(isVerbose, connectionStr, datasetId, outputFile, allMeta):
 	if isVerbose:
 		print("Getting marker metadata for dataset with ID: %s" % datasetId)
 		print("Output File: ", outputFile)
 	exMgr = ExtractMetadataManager(connectionStr)
 	try:
-		exMgr.createAllMarkerMetadataFile(outputFile, datasetId)
+		if allMeta:
+			exMgr.createAllMarkerMetadataFile(outputFile, datasetId)
+		else:
+			exMgr.createMinimalMarkerMetadataFile(outputFile, datasetId)
 		exMgr.commitTransaction()
 		exMgr.closeConnection()
-		print("Created marker metadata file successfully.")
+		if allMeta:
+			print("Created full marker metadata file successfully.")
+		else:
+			print("Created minimal marker metadata file successfully.")
 		return outputFile
 	except Exception as e:
 		MDEUtility.printError('Failed to create marker metadata file. Error: %s' % (str(e)))
@@ -28,7 +34,7 @@ def main(isVerbose, connectionStr, datasetId, outputFile):
 		traceback.print_exc(file=sys.stderr)
 
 if __name__ == "__main__":
-	if len(sys.argv) < 4:
-		print("Please supply the parameters. \nUsage: preprocess_ifile <db_connection_string> <dataset_id> <output_file_abs_path>")
+	if len(sys.argv) < 5:
+		print("Please supply the parameters. \nUsage: extract_marker_metadata <db_connection_string> <dataset_id> <output_file_abs_path> <all_meta>")
 		sys.exit()
-	main(True, str(sys.argv[1]), str(sys.argv[2]), str(sys.argv[3]))
+	main(True, str(sys.argv[1]), str(sys.argv[2]), str(sys.argv[3]), str(sys.argv[4]))

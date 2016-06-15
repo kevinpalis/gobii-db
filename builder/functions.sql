@@ -1741,8 +1741,8 @@ RETURNS table (marker_id integer, linkage_group_name varchar, start numeric, sto
   END;
 $$ LANGUAGE plpgsql;
 
-
-CREATE OR REPLACE FUNCTION getHapmapMarkerMetadataByDataset(datasetId integer)
+--drop function getHapmapMarkerMetadataByDataset(integer)
+CREATE OR REPLACE FUNCTION getMinimalMarkerMetadataByDataset(datasetId integer)
 RETURNS table (marker_name text, alleles text, chrom varchar, pos integer, strand text) AS $$
   BEGIN
     return query

@@ -2,7 +2,6 @@
 
 from __future__ import print_function
 import sys
-import os
 import getopt
 import extract_marker_metadata
 from util.mde_utility import MDEUtility
@@ -13,9 +12,10 @@ def main(argv):
 		markerOutputFile = ""
 		sampleOutputFile = ""
 		datasetId = ""
+		allMeta = False
 		#print("Args count: ", len(argv))
 		try:
-			opts, args = getopt.getopt(argv, "hc:m:s:d:vl", ["connectionString=", "markerOutputFile=", "sampleOutputFile=", "datasetId=" "verbose"])
+			opts, args = getopt.getopt(argv, "hc:m:s:d:av", ["connectionString=", "markerOutputFile=", "sampleOutputFile=", "datasetId=", "all", "verbose"])
 			#print (opts, args)
 			if len(args) < 2 and len(opts) < 2:
 				printUsageHelp()
@@ -33,6 +33,8 @@ def main(argv):
 				sampleOutputFile = arg
 			elif opt in ("-d", "--datasetId"):
 				datasetId = arg
+			elif opt in ("-a", "--all"):
+				allMeta = True
 			elif opt in ("-v", "--verbose"):
 				verbose = True
 
@@ -43,7 +45,7 @@ def main(argv):
 				try:
 					if verbose:
 						print("Generating marker metadata file...")
-					extract_marker_metadata.main(verbose, connectionStr, datasetId, markerOutputFile)
+					extract_marker_metadata.main(verbose, connectionStr, datasetId, markerOutputFile, allMeta)
 				except Exception as e1:
 					MDEUtility.printError("Error: %s" % (str(e1)))
 			elif connectionStr != "" and sampleOutputFile != "":
@@ -71,12 +73,13 @@ def checkDataIntegrity(iFile, pFile, verbose):
 		return False
 
 def printUsageHelp():
-	print ("gobii_ifl.py -c <connectionString> -m <markerOutputFile> -s <sampleOutputFile> -v")
+	print ("gobii_ifl.py -c <connectionString> -m <markerOutputFile> -s <sampleOutputFile> -d <dataset_id> -all -v")
 	print ("\t-h = Usage help")
 	print ("\t-c or --connectionString = Database connection string (RFC 3986 URI).\n\t\tFormat: postgresql://[user[:password]@][netloc][:port][/dbname][?param1=value1&...]")
 	print ("\t-m or --markerOutputFile = The marker output file. This should be an absolute path.")
 	print ("\t-s or --sampleOutputFile = The sample output file. This should be an absolute path.")
 	print ("\t-d or --datasetId = The dataset ID of which marker metadata will be extracted from. This should be a valid integer ID.")
+	print ("\t-a or --all = Get all metadata information available, regardless if they are relevant to HMP, Flapjack, etc. formats.")
 	print ("\t-v or --verbose = Print the status of the MDE in more detail")
 	sys.exit()
 
