@@ -17,6 +17,7 @@ ALTER TABLE mapset ALTER COLUMN status SET DEFAULT 1;
 ALTER TABLE marker ALTER COLUMN status SET DEFAULT 1;
 ALTER TABLE dataset ALTER COLUMN status SET DEFAULT 1;
 ALTER TABLE mapset ALTER COLUMN status SET DEFAULT 1;
+ALTER TABLE linkage_group ALTER COLUMN stop SET DEFAULT 0;
 
 ALTER TABLE dataset_marker ADD COLUMN marker_idx integer;
 ALTER TABLE dataset_dnarun ADD COLUMN dnarun_idx integer;
@@ -124,6 +125,8 @@ ALTER TABLE variant ALTER COLUMN created_date DROP NOT NULL;
 ALTER TABLE dataset ALTER COLUMN data_table DROP NOT NULL;
 ALTER TABLE dataset ALTER COLUMN data_file DROP NOT NULL;
 
+ALTER TABLE platform ALTER COLUMN vendor_id DROP NOT NULL;
+ALTER TABLE germplasm ALTER COLUMN species_id DROP NOT NULL;
 --adding new table: Organization
 CREATE TABLE organization (
     organization_id serial PRIMARY KEY NOT NULL,

@@ -9,14 +9,16 @@
 
 --
 CREATE OR REPLACE VIEW v_marker_linkage_genetic AS
-	select mlg.marker_id, lg.name as linkage_group_name, mlg.start::integer, mlg.stop::integer
-	from marker_linkage_group mlg, linkage_group lg
-	where mlg.linkage_group_id = lg.linkage_group_id;
+	select mlg.marker_id, lg.name as linkage_group_name, mlg.start::integer, mlg.stop::integer, ms.name as mapset_name
+	from marker_linkage_group mlg, linkage_group lg, mapset ms
+	where mlg.linkage_group_id = lg.linkage_group_id
+	and lg.map_id = ms.mapset_id;
 
 CREATE OR REPLACE VIEW v_marker_linkage_physical AS
-	select mlg.marker_id, lg.name as linkage_group_name, mlg.start, mlg.stop
-	from marker_linkage_group mlg, linkage_group lg
-	where mlg.linkage_group_id = lg.linkage_group_id;
+	select mlg.marker_id, lg.name as linkage_group_name, mlg.start, mlg.stop, ms.name as mapset_name
+	from marker_linkage_group mlg, linkage_group lg, mapset ms
+	where mlg.linkage_group_id = lg.linkage_group_id
+	and lg.map_id = ms.mapset_id;
 
 --In progress. Test views for converting JSONB props column of varying length to records. Quite a pain.
 -- Need to find a dynamic way to generate the rowtype, although it seems impossible with the current version

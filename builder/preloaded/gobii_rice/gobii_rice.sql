@@ -1238,12 +1238,12 @@ $$;
 -- Name: getallmarkermetadatabydataset(integer); Type: FUNCTION; Schema: public; Owner: -
 --
 
-CREATE FUNCTION getallmarkermetadatabydataset(datasetid integer) RETURNS TABLE(marker_id integer, linkage_group_name character varying, start numeric, stop numeric, platform_name text, variant_id integer, name text, code text, ref text, alts text[], sequence text, reference_name text, primers jsonb, probsets jsonb, strand_name text, status integer)
+CREATE FUNCTION getallmarkermetadatabydataset(datasetid integer) RETURNS TABLE(marker_id integer, linkage_group_name character varying, start numeric, stop numeric, mapset_name text, platform_name text, variant_id integer, name text, code text, ref text, alts text, sequence text, reference_name text, primers jsonb, probsets jsonb, strand_name text, status integer)
     LANGUAGE plpgsql
     AS $$
   BEGIN
     return query
-    select m.marker_id, mlp.linkage_group_name, mlp.start, mlp.stop, p.name as platform_name, m.variant_id, m.name, m.code, m.ref, m.alts, m.sequence, r.name as reference_name, m.primers, m.probsets, cv.term as strand_name, m.status
+    select m.marker_id, mlp.linkage_group_name, mlp.start, mlp.stop, mlp.mapset_name, p.name as platform_name, m.variant_id, m.name, m.code, m.ref, array_to_string(m.alts, ',', '?'), m.sequence, r.name as reference_name, m.primers, m.probsets, cv.term as strand_name, m.status
       from marker m, platform p, reference r, cv, v_marker_linkage_physical mlp
       where m.marker_id in (select dm.marker_id from dataset_marker dm where dm.dataset_id=datasetId)
       and m.platform_id = p.platform_id
@@ -1921,10 +1921,10 @@ $$;
 
 
 --
--- Name: updatecontact(integer, text, text, text, text, integer[], integer, date, integer, integer, date); Type: FUNCTION; Schema: public; Owner: -
+-- Name: updatecontact(integer, text, text, text, text, integer[], integer, date, integer, date, integer); Type: FUNCTION; Schema: public; Owner: -
 --
 
-CREATE FUNCTION updatecontact(contactid integer, contactlastname text, contactfirstname text, contactcode text, contactemail text, contactroles integer[], createdby integer, createddate date, modifiedby integer, organizationid integer, modifieddate date) RETURNS void
+CREATE FUNCTION updatecontact(contactid integer, contactlastname text, contactfirstname text, contactcode text, contactemail text, contactroles integer[], createdby integer, createddate date, modifiedby integer, modifieddate date, organizationid integer) RETURNS void
     LANGUAGE plpgsql
     AS $$
     BEGIN
@@ -3193,7 +3193,7 @@ CREATE TABLE germplasm (
     germplasm_id integer NOT NULL,
     name text NOT NULL,
     external_code text,
-    species_id integer NOT NULL,
+    species_id integer,
     type_id integer,
     created_by integer,
     created_date date DEFAULT ('now'::text)::date,
@@ -3261,7 +3261,7 @@ CREATE TABLE linkage_group (
     linkage_group_id integer NOT NULL,
     name character varying NOT NULL,
     start integer DEFAULT 0 NOT NULL,
-    stop integer NOT NULL,
+    stop integer DEFAULT 0 NOT NULL,
     map_id integer NOT NULL
 );
 
@@ -3591,7 +3591,7 @@ CREATE TABLE platform (
     platform_id integer NOT NULL,
     name text NOT NULL,
     code text NOT NULL,
-    vendor_id integer NOT NULL,
+    vendor_id integer,
     description text,
     created_by integer,
     created_date date DEFAULT ('now'::text)::date,
@@ -3798,10 +3798,12 @@ CREATE VIEW v_marker_linkage_genetic AS
  SELECT mlg.marker_id,
     lg.name AS linkage_group_name,
     (mlg.start)::integer AS start,
-    (mlg.stop)::integer AS stop
+    (mlg.stop)::integer AS stop,
+    ms.name AS mapset_name
    FROM marker_linkage_group mlg,
-    linkage_group lg
-  WHERE (mlg.linkage_group_id = lg.linkage_group_id);
+    linkage_group lg,
+    mapset ms
+  WHERE ((mlg.linkage_group_id = lg.linkage_group_id) AND (lg.map_id = ms.mapset_id));
 
 
 --
@@ -3812,10 +3814,12 @@ CREATE VIEW v_marker_linkage_physical AS
  SELECT mlg.marker_id,
     lg.name AS linkage_group_name,
     mlg.start,
-    mlg.stop
+    mlg.stop,
+    ms.name AS mapset_name
    FROM marker_linkage_group mlg,
-    linkage_group lg
-  WHERE (mlg.linkage_group_id = lg.linkage_group_id);
+    linkage_group lg,
+    mapset ms
+  WHERE ((mlg.linkage_group_id = lg.linkage_group_id) AND (lg.map_id = ms.mapset_id));
 
 
 --
