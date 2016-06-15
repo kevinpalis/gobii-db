@@ -1743,14 +1743,12 @@ $$ LANGUAGE plpgsql;
 
 
 CREATE OR REPLACE FUNCTION getHapmapMarkerMetadataByDataset(datasetId integer)
-RETURNS table (marker_id integer, linkage_group_name varchar, start numeric, stop numeric, platform_name text, variant_id integer, name text, code text, ref text, alts text[], sequence text, reference_name text, primers jsonb, probsets jsonb, strand_name text, status integer) AS $$
+RETURNS table (marker_name text, alleles text, chrom varchar, pos integer, strand text) AS $$
   BEGIN
     return query
-    select m.name as marker_name, m.ref, array_to_string(m.alts, ',', '?'), mlp.linkage_group_name as chrom, mlp.start as pos, cv.term as strand, p.name as platform, m.variant_id, m.code, m.sequence, r.name as reference_name, m.primers, m.probsets, m.status
-      from marker m, platform p, reference r, cv, v_marker_linkage_genetic mlp
+    select m.name as marker_name, m.ref || '/' || array_to_string(m.alts, ',', '?') as alleles, mlp.linkage_group_name as chrom, mlp.start as pos, cv.term as strand
+      from marker m, cv, v_marker_linkage_genetic mlp
       where m.marker_id in (select dm.marker_id from dataset_marker dm where dm.dataset_id=datasetId)
-      and m.platform_id = p.platform_id
-      and m.reference_id = r.reference_id
       and m.strand_id = cv.cv_id
       and m.marker_id = mlp.marker_id;
   END;
