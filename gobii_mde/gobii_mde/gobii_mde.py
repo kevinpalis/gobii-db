@@ -5,6 +5,7 @@ import sys
 import getopt
 import extract_marker_metadata
 import extract_sample_metadata
+import extract_project_metadata
 from util.mde_utility import MDEUtility
 
 def main(argv):
@@ -13,10 +14,11 @@ def main(argv):
 		markerOutputFile = ""
 		sampleOutputFile = ""
 		datasetId = ""
+		projectOutputFile = ""
 		allMeta = False
 		#print("Args count: ", len(argv))
 		try:
-			opts, args = getopt.getopt(argv, "hc:m:s:d:av", ["connectionString=", "markerOutputFile=", "sampleOutputFile=", "datasetId=", "all", "verbose"])
+			opts, args = getopt.getopt(argv, "hc:m:s:d:p:av", ["connectionString=", "markerOutputFile=", "sampleOutputFile=", "datasetId=", "projectOutputFile=", "all", "verbose"])
 			#print (opts, args)
 			if len(args) < 2 and len(opts) < 2:
 				printUsageHelp()
@@ -34,6 +36,8 @@ def main(argv):
 				sampleOutputFile = arg
 			elif opt in ("-d", "--datasetId"):
 				datasetId = arg
+			elif opt in ("-p", "--projectOutputFile"):
+				projectOutputFile = arg
 			elif opt in ("-a", "--all"):
 				allMeta = True
 			elif opt in ("-v", "--verbose"):
@@ -59,6 +63,14 @@ def main(argv):
 				except Exception as e:
 					MDEUtility.printError("Error: %s" % str(e))
 				rn = True
+			if connectionStr != "" and projectOutputFile != "":
+				try:
+					if verbose:
+						print("Generating project metadata file...")
+					extract_project_metadata.main(verbose, connectionStr, datasetId, projectOutputFile, allMeta)
+				except Exception as e:
+					MDEUtility.printError("Error: %s" % str(e))
+				rn = True
 			if not rn:
 				print("At least one of -m, -s, or -p is required for the extractor to run.")
 				printUsageHelp()
@@ -79,11 +91,12 @@ def checkDataIntegrity(iFile, pFile, verbose):
 		return False
 
 def printUsageHelp():
-	print ("gobii_ifl.py -c <connectionString> -m <markerOutputFile> -s <sampleOutputFile> -d <dataset_id> -a -v")
+	print ("gobii_ifl.py -c <connectionString> -m <markerOutputFile> -s <sampleOutputFile> -p <projectOutputFile> -d <dataset_id> -a -v")
 	print ("\t-h = Usage help")
 	print ("\t-c or --connectionString = Database connection string (RFC 3986 URI).\n\t\tFormat: postgresql://[user[:password]@][netloc][:port][/dbname][?param1=value1&...]")
-	print ("\t-m or --markerOutputFile = The marker output file. This should be an absolute path.")
-	print ("\t-s or --sampleOutputFile = The sample output file. This should be an absolute path.")
+	print ("\t-m or --markerOutputFile = The marker metadata output file. This should be an absolute path.")
+	print ("\t-s or --sampleOutputFile = The sample metadata output file. This should be an absolute path.")
+	print ("\t-p or --projectOutputFile = The project metadata output file. This should be an absolute path.")
 	print ("\t-d or --datasetId = The dataset ID of which marker metadata will be extracted from. This should be a valid integer ID.")
 	print ("\t-a or --all = Get all metadata information available, regardless if they are relevant to HMP, Flapjack, etc. formats.")
 	print ("\t-v or --verbose = Print the status of the MDE in more detail")

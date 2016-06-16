@@ -1793,10 +1793,17 @@ RETURNS table (sample_name text, platename text, num text, well_row text, well_c
 $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION getAllProjectMetadataByDataset(datasetId integer)
-RETURNS table (dnarun_name text, dnasample_name text, platename text, num text, well_row text, well_col text, germplasm_name text, external_code text, germplasm_type text, species text) AS $$
+RETURNS table (project_name text, description text, PI text, experiment_name text, platform_name text, dataset_name text, analysis_name text) AS $$
   BEGIN
     return query
-    
+    select p.name as project_name, p.description, c.firstname || ' ' || c.lastname as PI, e.name as experiment_name, pf.name as platform_name, d.name as dataset_name, a.name as analysis_name
+      from dataset d, experiment e, project p, contact c, platform pf, analysis a
+      where d.dataset_id = datasetId
+      and d.callinganalysis_id = a.analysis_id
+      and d.experiment_id = e.experiment_id
+      and e.project_id = p.project_id
+      and p.pi_contact = c.contact_id
+      and e.platform_id = pf.platform_id
   END;
 $$ LANGUAGE plpgsql;
 

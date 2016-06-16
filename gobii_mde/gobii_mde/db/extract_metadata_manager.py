@@ -41,6 +41,11 @@ class ExtractMetadataManager:
 		#print("copyStmt = "+copyStmt)
 		self.cur.execute(sql)
 
+	def createAllProjectMetadataFile(self, outputFilePath, datasetId):
+		sql = "copy (select * from getAllProjectMetadataByDataset("+datasetId+")) to '"+outputFilePath+"' with delimiter E'\\t'"+" csv header;"
+		#print("copyStmt = "+copyStmt)
+		self.cur.execute(sql)
+
 	def commitTransaction(self):
 		self.conn.commit()
 
