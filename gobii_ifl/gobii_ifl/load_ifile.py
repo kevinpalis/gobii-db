@@ -75,7 +75,7 @@ def main(isVerbose, connectionStr, iFile, outputPath):
 			if(joinStr == ""):
 				joinStr += fTableName+"."+file_column_name+"::"+data_type+"="+tableName+"."+table_column_name
 			else:
-				joinStr += " and "+fTableName+"."+file_column_name+"="+tableName+"."+table_column_name
+				joinStr += " and "+fTableName+"."+file_column_name+"::"+data_type+"="+tableName+"."+table_column_name
 			if(conditionStr == ""):
 				conditionStr += tableName+"."+table_column_name+" is null"
 			else:
