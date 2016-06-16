@@ -73,7 +73,7 @@ def checkDataIntegrity(iFile, pFile, verbose):
 		return False
 
 def printUsageHelp():
-	print ("gobii_ifl.py -c <connectionString> -m <markerOutputFile> -s <sampleOutputFile> -d <dataset_id> -all -v")
+	print ("gobii_ifl.py -c <connectionString> -m <markerOutputFile> -s <sampleOutputFile> -d <dataset_id> -a -v")
 	print ("\t-h = Usage help")
 	print ("\t-c or --connectionString = Database connection string (RFC 3986 URI).\n\t\tFormat: postgresql://[user[:password]@][netloc][:port][/dbname][?param1=value1&...]")
 	print ("\t-m or --markerOutputFile = The marker output file. This should be an absolute path.")

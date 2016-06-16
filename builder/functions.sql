@@ -1754,6 +1754,19 @@ RETURNS table (marker_name text, alleles text, chrom varchar, pos integer, stran
   END;
 $$ LANGUAGE plpgsql;
 
+CREATE OR REPLACE FUNCTION getAllSampleMetadataByDataset(datasetId integer)
+RETURNS table (marker_name text, alleles text, chrom varchar, pos integer, strand text) AS $$
+  BEGIN
+    return query
+    select dr.name as dnarun_name, ds.name as dnasample_name, ds.platename, ds.num, ds.well_row, ds.well_col, g.name as germplasm_name, g.external_code, c1.term as germplasm_type, c2.term as species
+      from dnarun dr, dnasample ds, germplasm g, cv as c1, cv as c2
+      where dr.dnarun_id in (select dd.dnarun_id from dataset_dnarun dd where dd.dataset_id=datasetId);
+      and dr.dnasample_id = ds.dnasample_id
+      and dr.germplasm_id = g.germplasm_id
+      and g.type_id = c1.cv_id
+      and g.species_id = c2.cv_id
+  END;
+$$ LANGUAGE plpgsql;
 
 --######################################################################
 -- Phil's functions
