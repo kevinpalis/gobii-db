@@ -1728,43 +1728,75 @@ $$ LANGUAGE plpgsql;
 --######################################################################
 --drop function getAllMarkerMetadataByDataset(datasetId integer);
 CREATE OR REPLACE FUNCTION getAllMarkerMetadataByDataset(datasetId integer)
-RETURNS table (marker_id integer, linkage_group_name varchar, start numeric, stop numeric, mapset_name text, platform_name text, variant_id integer, name text, code text, ref text, alts text, sequence text, reference_name text, primers jsonb, probsets jsonb, strand_name text, status integer) AS $$
+RETURNS table (marker_name text, linkage_group_name varchar, start numeric, stop numeric, mapset_name text, platform_name text, variant_id integer, code text, ref text, alts text, sequence text, reference_name text, primers jsonb, probsets jsonb, strand_name text) AS $$
   BEGIN
     return query
-    select m.marker_id, mlp.linkage_group_name, mlp.start, mlp.stop, mlp.mapset_name, p.name as platform_name, m.variant_id, m.name, m.code, m.ref, array_to_string(m.alts, ',', '?'), m.sequence, r.name as reference_name, m.primers, m.probsets, cv.term as strand_name, m.status
-      from marker m, platform p, reference r, cv, v_marker_linkage_physical mlp
-      where m.marker_id in (select dm.marker_id from dataset_marker dm where dm.dataset_id=datasetId)
+    with dm as (select dm.marker_id, dm.marker_idx from dataset_marker dm where dm.dataset_id=datasetId)
+    select m.name as marker_name, mlp.linkage_group_name, mlp.start, mlp.stop, mlp.mapset_name, p.name as platform_name, m.variant_id, m.code, m.ref, array_to_string(m.alts, ',', '?'), m.sequence, r.name as reference_name, m.primers, m.probsets, cv.term as strand_name
+      from marker m, platform p, reference r, cv, v_marker_linkage_physical mlp, dm
+      where m.marker_id = dm.marker_id 
       and m.platform_id = p.platform_id
       and m.reference_id = r.reference_id
       and m.strand_id = cv.cv_id
-      and m.marker_id = mlp.marker_id;
+      and m.marker_id = mlp.marker_id
+      order by dm.marker_idx;
   END;
 $$ LANGUAGE plpgsql;
 
---drop function getHapmapMarkerMetadataByDataset(integer)
+--drop function getMinimalMarkerMetadataByDataset(integer)
 CREATE OR REPLACE FUNCTION getMinimalMarkerMetadataByDataset(datasetId integer)
 RETURNS table (marker_name text, alleles text, chrom varchar, pos integer, strand text) AS $$
   BEGIN
     return query
-    select m.name as marker_name, m.ref || '/' || array_to_string(m.alts, ',', '?') as alleles, mlp.linkage_group_name as chrom, mlp.start as pos, cv.term as strand
-      from marker m, cv, v_marker_linkage_genetic mlp
-      where m.marker_id in (select dm.marker_id from dataset_marker dm where dm.dataset_id=datasetId)
+    with dm as (select dm.marker_id, dm.marker_idx from dataset_marker dm where dm.dataset_id=datasetId)
+    select m.name as marker_name, m.ref || '/' || array_to_string(m.alts, ',', '?') as alleles, mlp.linkage_group_name as chrom, mlp.stop as pos, cv.term as strand
+      from marker m, cv, v_marker_linkage_genetic mlp, dm
+      where m.marker_id = dm.marker_id 
       and m.strand_id = cv.cv_id
-      and m.marker_id = mlp.marker_id;
+      and m.marker_id = mlp.marker_id
+      order by dm.marker_idx;
   END;
 $$ LANGUAGE plpgsql;
 
+--drop function getAllSampleMetadataByDataset(datasetId integer);
 CREATE OR REPLACE FUNCTION getAllSampleMetadataByDataset(datasetId integer)
-RETURNS table (marker_name text, alleles text, chrom varchar, pos integer, strand text) AS $$
+RETURNS table (dnarun_name text, dnasample_name text, platename text, num text, well_row text, well_col text, germplasm_name text, external_code text, germplasm_type text, species text, dnarun_idx integer) AS $$
   BEGIN
     return query
-    select dr.name as dnarun_name, ds.name as dnasample_name, ds.platename, ds.num, ds.well_row, ds.well_col, g.name as germplasm_name, g.external_code, c1.term as germplasm_type, c2.term as species
-      from dnarun dr, dnasample ds, germplasm g, cv as c1, cv as c2
-      where dr.dnarun_id in (select dd.dnarun_id from dataset_dnarun dd where dd.dataset_id=datasetId);
+    with dd as (select dd.dnarun_id, dd.dnarun_idx from dataset_dnarun dd where dd.dataset_id=datasetId)
+    select dr.name as dnarun_name, ds.name as dnasample_name, ds.platename, ds.num, ds.well_row, ds.well_col, g.name as germplasm_name, g.external_code, c1.term as germplasm_type, c2.term as species, dd.dnarun_idx
+      from dnarun dr, dnasample ds, germplasm g, cv as c1, cv as c2, dd
+      where dr.dnarun_id = dd.dnarun_id
       and dr.dnasample_id = ds.dnasample_id
-      and dr.germplasm_id = g.germplasm_id
+      and ds.germplasm_id = g.germplasm_id
       and g.type_id = c1.cv_id
       and g.species_id = c2.cv_id
+      order by dd.dnarun_idx;
+  END;
+$$ LANGUAGE plpgsql;
+
+--drop function getMinimalSampleMetadataByDataset(datasetId integer);
+CREATE OR REPLACE FUNCTION getMinimalSampleMetadataByDataset(datasetId integer)
+RETURNS table (sample_name text, platename text, num text, well_row text, well_col text, germplasm_name text, germplasm_type text, species text) AS $$
+  BEGIN
+    return query
+    with dd as (select dd.dnarun_id, dd.dnarun_idx from dataset_dnarun dd where dd.dataset_id=datasetId)
+    select ds.name as sample_name, ds.platename, ds.num, ds.well_row, ds.well_col, g.name as germplasm_name, c1.term as germplasm_type, c2.term as species
+      from dnarun dr, dnasample ds, germplasm g, cv as c1, cv as c2, dd
+      where dr.dnarun_id = dd.dnarun_id
+      and dr.dnasample_id = ds.dnasample_id
+      and ds.germplasm_id = g.germplasm_id
+      and g.type_id = c1.cv_id
+      and g.species_id = c2.cv_id
+      order by dd.dnarun_idx;
+  END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION getAllProjectMetadataByDataset(datasetId integer)
+RETURNS table (dnarun_name text, dnasample_name text, platename text, num text, well_row text, well_col text, germplasm_name text, external_code text, germplasm_type text, species text) AS $$
+  BEGIN
+    return query
+    
   END;
 $$ LANGUAGE plpgsql;
 

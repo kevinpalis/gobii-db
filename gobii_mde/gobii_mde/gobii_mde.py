@@ -4,6 +4,7 @@ from __future__ import print_function
 import sys
 import getopt
 import extract_marker_metadata
+import extract_sample_metadata
 from util.mde_utility import MDEUtility
 
 def main(argv):
@@ -40,6 +41,7 @@ def main(argv):
 
 		#if verbose:
 		#print("Opts: ", opts)
+		rn = False
 		if datasetId.isdigit():
 			if connectionStr != "" and markerOutputFile != "":
 				try:
@@ -48,13 +50,17 @@ def main(argv):
 					extract_marker_metadata.main(verbose, connectionStr, datasetId, markerOutputFile, allMeta)
 				except Exception as e1:
 					MDEUtility.printError("Error: %s" % (str(e1)))
-			elif connectionStr != "" and sampleOutputFile != "":
+				rn = True
+			if connectionStr != "" and sampleOutputFile != "":
 				try:
 					if verbose:
 						print("Generating sample metadata file...")
+					extract_sample_metadata.main(verbose, connectionStr, datasetId, sampleOutputFile, allMeta)
 				except Exception as e:
 					MDEUtility.printError("Error: %s" % str(e))
-			else:
+				rn = True
+			if not rn:
+				print("At least one of -m, -s, or -p is required for the extractor to run.")
 				printUsageHelp()
 		else:
 			MDEUtility.printError("The supplied dataset ID is not valid.")

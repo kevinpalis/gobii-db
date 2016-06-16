@@ -21,11 +21,6 @@ class ExtractMetadataManager:
 		self.cur.execute(fdwScript)
 		return header
 
-	def createFileWithDerivedIds(self, outputFilePath, derivedIdSql):
-		copyStmt = "copy ("+derivedIdSql+") to '"+outputFilePath+"' with delimiter E'\\t'"+" csv header;"
-		#print("copyStmt = "+copyStmt)
-		self.cur.execute(copyStmt)
-
 	def createAllMarkerMetadataFile(self, outputFilePath, datasetId):
 		sql = "copy (select * from getAllMarkerMetadataByDataset("+datasetId+")) to '"+outputFilePath+"' with delimiter E'\\t'"+" csv header;"
 		#print("copyStmt = "+copyStmt)
@@ -33,6 +28,16 @@ class ExtractMetadataManager:
 
 	def createMinimalMarkerMetadataFile(self, outputFilePath, datasetId):
 		sql = "copy (select * from getMinimalMarkerMetadataByDataset("+datasetId+")) to '"+outputFilePath+"' with delimiter E'\\t'"+" csv header;"
+		#print("copyStmt = "+copyStmt)
+		self.cur.execute(sql)
+
+	def createAllSampleMetadataFile(self, outputFilePath, datasetId):
+		sql = "copy (select * from getAllSampleMetadataByDataset("+datasetId+")) to '"+outputFilePath+"' with delimiter E'\\t'"+" csv header;"
+		#print("copyStmt = "+copyStmt)
+		self.cur.execute(sql)
+
+	def createMinimalSampleMetadataFile(self, outputFilePath, datasetId):
+		sql = "copy (select * from getMinimalSampleMetadataByDataset("+datasetId+")) to '"+outputFilePath+"' with delimiter E'\\t'"+" csv header;"
 		#print("copyStmt = "+copyStmt)
 		self.cur.execute(sql)
 
