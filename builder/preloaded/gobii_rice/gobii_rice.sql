@@ -1238,18 +1238,20 @@ $$;
 -- Name: getallmarkermetadatabydataset(integer); Type: FUNCTION; Schema: public; Owner: -
 --
 
-CREATE FUNCTION getallmarkermetadatabydataset(datasetid integer) RETURNS TABLE(marker_id integer, linkage_group_name character varying, start numeric, stop numeric, mapset_name text, platform_name text, variant_id integer, name text, code text, ref text, alts text, sequence text, reference_name text, primers jsonb, probsets jsonb, strand_name text, status integer)
+CREATE FUNCTION getallmarkermetadatabydataset(datasetid integer) RETURNS TABLE(marker_name text, linkage_group_name character varying, start numeric, stop numeric, mapset_name text, platform_name text, variant_id integer, code text, ref text, alts text, sequence text, reference_name text, primers jsonb, probsets jsonb, strand_name text)
     LANGUAGE plpgsql
     AS $$
   BEGIN
     return query
-    select m.marker_id, mlp.linkage_group_name, mlp.start, mlp.stop, mlp.mapset_name, p.name as platform_name, m.variant_id, m.name, m.code, m.ref, array_to_string(m.alts, ',', '?'), m.sequence, r.name as reference_name, m.primers, m.probsets, cv.term as strand_name, m.status
-      from marker m, platform p, reference r, cv, v_marker_linkage_physical mlp
-      where m.marker_id in (select dm.marker_id from dataset_marker dm where dm.dataset_id=datasetId)
+    with dm as (select dm.marker_id, dm.marker_idx from dataset_marker dm where dm.dataset_id=datasetId)
+    select m.name as marker_name, mlp.linkage_group_name, mlp.start, mlp.stop, mlp.mapset_name, p.name as platform_name, m.variant_id, m.code, m.ref, array_to_string(m.alts, ',', '?'), m.sequence, r.name as reference_name, m.primers, m.probsets, cv.term as strand_name
+      from marker m, platform p, reference r, cv, v_marker_linkage_physical mlp, dm
+      where m.marker_id = dm.marker_id 
       and m.platform_id = p.platform_id
       and m.reference_id = r.reference_id
       and m.strand_id = cv.cv_id
-      and m.marker_id = mlp.marker_id;
+      and m.marker_id = mlp.marker_id
+      order by dm.marker_idx;
   END;
 $$;
 
@@ -1267,6 +1269,27 @@ CREATE FUNCTION getallmarkersinmarkergroup(id integer) RETURNS TABLE(marker_id i
     from marker, (select (jsonb_each_text(markers)).* from marker_group where marker_group_id=id) as p1
     where marker.marker_id = p1.key::int;
     END;
+$$;
+
+
+--
+-- Name: getallprojectmetadatabydataset(integer); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION getallprojectmetadatabydataset(datasetid integer) RETURNS TABLE(project_name text, description text, pi text, experiment_name text, platform_name text, dataset_name text, analysis_name text)
+    LANGUAGE plpgsql
+    AS $$
+  BEGIN
+    return query
+    select p.name as project_name, p.description, c.firstname || ' ' || c.lastname as PI, e.name as experiment_name, pf.name as platform_name, d.name as dataset_name, a.name as analysis_name
+      from dataset d, experiment e, project p, contact c, platform pf, analysis a
+      where d.dataset_id = datasetId
+      and d.callinganalysis_id = a.analysis_id
+      and d.experiment_id = e.experiment_id
+      and e.project_id = p.project_id
+      and p.pi_contact = c.contact_id
+      and e.platform_id = pf.platform_id;
+  END;
 $$;
 
 
@@ -1379,6 +1402,28 @@ CREATE FUNCTION getallpropertiesofproject(projectid integer) RETURNS TABLE(prope
     from cv, (select (jsonb_each_text(props)).* from project_prop where project_id=projectId) as p1
     where cv.cv_id = p1.key::int;
     END;
+$$;
+
+
+--
+-- Name: getallsamplemetadatabydataset(integer); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION getallsamplemetadatabydataset(datasetid integer) RETURNS TABLE(dnarun_name text, dnasample_name text, platename text, num text, well_row text, well_col text, germplasm_name text, external_code text, germplasm_type text, species text)
+    LANGUAGE plpgsql
+    AS $$
+  BEGIN
+    return query
+    with dd as (select dd.dnarun_id, dd.dnarun_idx from dataset_dnarun dd where dd.dataset_id=datasetId)
+    select dr.name as dnarun_name, ds.name as dnasample_name, ds.platename, ds.num, ds.well_row, ds.well_col, g.name as germplasm_name, g.external_code, c1.term as germplasm_type, c2.term as species
+      from dnarun dr, dnasample ds, germplasm g, cv as c1, cv as c2, dd
+      where dr.dnarun_id = dd.dnarun_id
+      and dr.dnasample_id = ds.dnasample_id
+      and ds.germplasm_id = g.germplasm_id
+      and g.type_id = c1.cv_id
+      and g.species_id = c2.cv_id
+      order by dd.dnarun_idx;
+  END;
 $$;
 
 
@@ -1703,6 +1748,48 @@ CREATE FUNCTION getmarkerpropertybyname(id integer, propertyname text) RETURNS T
     select property.cv_id, (props->property.cv_id::text)::text as value
       from marker_prop, property
       where marker_id=id);
+  END;
+$$;
+
+
+--
+-- Name: getminimalmarkermetadatabydataset(integer); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION getminimalmarkermetadatabydataset(datasetid integer) RETURNS TABLE(marker_name text, alleles text, chrom character varying, pos integer, strand text)
+    LANGUAGE plpgsql
+    AS $$
+  BEGIN
+    return query
+    with dm as (select dm.marker_id, dm.marker_idx from dataset_marker dm where dm.dataset_id=datasetId)
+    select m.name as marker_name, m.ref || '/' || array_to_string(m.alts, ',', '?') as alleles, mlp.linkage_group_name as chrom, mlp.stop as pos, cv.term as strand
+      from marker m, cv, v_marker_linkage_genetic mlp, dm
+      where m.marker_id = dm.marker_id 
+      and m.strand_id = cv.cv_id
+      and m.marker_id = mlp.marker_id
+      order by dm.marker_idx;
+  END;
+$$;
+
+
+--
+-- Name: getminimalsamplemetadatabydataset(integer); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION getminimalsamplemetadatabydataset(datasetid integer) RETURNS TABLE(sample_name text, platename text, num text, well_row text, well_col text, germplasm_name text, germplasm_type text, species text)
+    LANGUAGE plpgsql
+    AS $$
+  BEGIN
+    return query
+    with dd as (select dd.dnarun_id, dd.dnarun_idx from dataset_dnarun dd where dd.dataset_id=datasetId)
+    select ds.name as sample_name, ds.platename, ds.num, ds.well_row, ds.well_col, g.name as germplasm_name, c1.term as germplasm_type, c2.term as species
+      from dnarun dr, dnasample ds, germplasm g, cv as c1, cv as c2, dd
+      where dr.dnarun_id = dd.dnarun_id
+      and dr.dnasample_id = ds.dnasample_id
+      and ds.germplasm_id = g.germplasm_id
+      and g.type_id = c1.cv_id
+      and g.species_id = c2.cv_id
+      order by dd.dnarun_idx;
   END;
 $$;
 
