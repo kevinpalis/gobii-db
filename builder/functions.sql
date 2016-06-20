@@ -1760,11 +1760,11 @@ $$ LANGUAGE plpgsql;
 
 --drop function getAllSampleMetadataByDataset(datasetId integer);
 CREATE OR REPLACE FUNCTION getAllSampleMetadataByDataset(datasetId integer)
-RETURNS table (dnarun_name text, dnasample_name text, platename text, num text, well_row text, well_col text, germplasm_name text, external_code text, germplasm_type text, species text, dnarun_idx integer) AS $$
+RETURNS table (dnarun_name text, dnasample_name text, platename text, num text, well_row text, well_col text, germplasm_name text, external_code text, germplasm_type text, species text) AS $$
   BEGIN
     return query
     with dd as (select dd.dnarun_id, dd.dnarun_idx from dataset_dnarun dd where dd.dataset_id=datasetId)
-    select dr.name as dnarun_name, ds.name as dnasample_name, ds.platename, ds.num, ds.well_row, ds.well_col, g.name as germplasm_name, g.external_code, c1.term as germplasm_type, c2.term as species, dd.dnarun_idx
+    select dr.name as dnarun_name, ds.name as dnasample_name, ds.platename, ds.num, ds.well_row, ds.well_col, g.name as germplasm_name, g.external_code, c1.term as germplasm_type, c2.term as species
       from dnarun dr, dnasample ds, germplasm g, cv as c1, cv as c2, dd
       where dr.dnarun_id = dd.dnarun_id
       and dr.dnasample_id = ds.dnasample_id
@@ -1803,7 +1803,7 @@ RETURNS table (project_name text, description text, PI text, experiment_name tex
       and d.experiment_id = e.experiment_id
       and e.project_id = p.project_id
       and p.pi_contact = c.contact_id
-      and e.platform_id = pf.platform_id
+      and e.platform_id = pf.platform_id;
   END;
 $$ LANGUAGE plpgsql;
 
