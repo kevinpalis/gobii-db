@@ -24,13 +24,14 @@ setup(
     long_description=readme + '\n\n' + history,
     author="Kevin Palis",
     author_email='kdp44@cornell.edu',
-    url='https://github.com/kevinpalis/gobii_mde',
+    url='http://cbsugobii05.tc.cornell.edu:6083/scm/gm/data-warehouse-postgresql',
     packages=[
-        'gobii_mde',
+        'gobii_mde', 'gobii_mde.db', 'gobii_mde.res', 'gobii_mde.res.map', 'gobii_mde.util'
     ],
     package_dir={'gobii_mde':
-                 'gobii_mde'},
+                 'gobii_mde', 'gobii_mde.db': 'gobii_mde/db', 'gobii_mde.res': 'gobii_mde/res', 'gobii_mde.res.map': 'gobii_mde/res/map', 'gobii_mde.util': 'gobii_mde/util'},
     include_package_data=True,
+    package_data={'gobii_mde/res/map': ['*']},
     install_requires=requirements,
     license="GNU General Public License v3",
     zip_safe=False,
