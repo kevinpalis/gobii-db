@@ -618,7 +618,7 @@ mapset ref reference ( reference_id )' style='fill:#b6b696;'>reference_id</text>
 	<title>Fk fk_platform_contact
 platform ref contact ( vendor_id -&gt; contact_id )</title>
 </path>
-<path class='defo' transform='translate(7,0)' marker-start='url(#foot1p)' marker-end='url(#arrow1)'    d='M 1170 345 L 982,345 Q 975,345 975,352 L 975,607 Q 975,615 967,615 L 907,615 Q 900,615 900,622 L 900,982 Q 900,990 892,990 L 562,990 Q 555,990 555,997 L 555,1012 Q 555,1020 547,1020 L 540,1020' ></path>
+<path class='defo' transform='translate(7,0)' marker-start='url(#foot0p)' marker-end='url(#arrow1)'    d='M 1170 345 L 982,345 Q 975,345 975,352 L 975,607 Q 975,615 967,615 L 907,615 Q 900,615 900,622 L 900,982 Q 900,990 892,990 L 562,990 Q 555,990 555,997 L 555,1012 Q 555,1020 547,1020 L 540,1020' ></path>
 <text x='1118' y='340' transform='rotate(0 1118,340)' title='Fk fk_platform_contact
 platform ref contact ( vendor_id -&gt; contact_id )' style='fill:#b6b696;'>vendor_id</text>
 <!-- ============= Fk 'platform_fk_platform_cv' ============= -->
@@ -642,7 +642,7 @@ germplasm ref cv ( type_id -&gt; cv_id )' style='fill:#b6b696;'>type_id</text>
 	<title>Fk fk_germplasm_species_id_cv
 germplasm ref cv ( species_id -&gt; cv_id )</title>
 </path>
-<path class='defo' transform='translate(7,0)' marker-start='url(#foot1p)' marker-end='url(#arrow1)'    d='M 165 195 L 517,195 Q 525,195 525,187 L 525,165' ></path>
+<path class='defo' transform='translate(7,0)' marker-start='url(#foot0p)' marker-end='url(#arrow1)'    d='M 165 195 L 517,195 Q 525,195 525,187 L 525,165' ></path>
 <text x='172' y='190' transform='rotate(0 172,190)' title='Fk fk_germplasm_species_id_cv
 germplasm ref cv ( species_id -&gt; cv_id )' style='fill:#b6b696;'>species_id</text>
 <!-- ============= Fk 'contact_fk_organization_contact' ============= -->
@@ -1199,7 +1199,7 @@ ex. Chromosome 1, Chromosome 2, ..., ChromosomeN, LG01, LG02, etc.</title></a>
 * integer default 0
 Start of the linkage group. 0-based, interbased coordinates.</title></a>
   <use id='nn' x='662' y='462' xlink:href='#nn'/><a xlink:href='#linkage_group.stop'><text id='public.linkage_group.stop' x='678' y='472'>stop</text><title>stop
-* integer
+* integer default 0
 The maximum position in the linkage group, ex. 200, 200000000
 </title></a>
   <use id='nn' x='662' y='477' xlink:href='#nn'/><a xlink:href='#linkage_group.map_id'><use id='idx' x='662' y='476' xlink:href='#idx'/><title>idx_linkage_group ( map_id ) </title></a>
@@ -1331,9 +1331,9 @@ Referred by platform_prop ( platform_id ) </title></a>
 * text</title></a>
   <use id='nn' x='1187' y='297' xlink:href='#nn'/><a xlink:href='#platform.code'><text id='public.platform.code' x='1203' y='307'>code</text><title>code
 * text</title></a>
-  <use id='nn' x='1187' y='312' xlink:href='#nn'/><a xlink:href='#platform.vendor_id'><use id='idx' x='1187' y='311' xlink:href='#idx'/><title>idx_platform ( vendor_id ) </title></a>
+  <a xlink:href='#platform.vendor_id'><use id='idx' x='1187' y='311' xlink:href='#idx'/><title>idx_platform ( vendor_id ) </title></a>
 <a xlink:href='#platform.vendor_id'><text id='public.platform.vendor_id' x='1203' y='322' onmouseover="hghl(['platform_fk_platform_contact'])" onmouseout="uhghl(['platform_fk_platform_contact'])">vendor_id</text><title>vendor_id
-* integer</title></a>
+integer</title></a>
 <a xlink:href='#platform.vendor_id'><use id='fk' x='1278' y='311' xlink:href='#fk'/><title>References contact ( vendor_id -&gt; contact_id ) </title></a>
   <a xlink:href='#platform.description'><text id='public.platform.description' x='1203' y='337'>description</text><title>description
 text</title></a>
@@ -1368,9 +1368,9 @@ Referred by germplasm_prop ( germplasm_id ) </title></a>
 * text</title></a>
   <a xlink:href='#germplasm.external_code'><text id='public.germplasm.external_code' x='78' y='142'>external_code</text><title>external_code
 text</title></a>
-  <use id='nn' x='62' y='147' xlink:href='#nn'/><a xlink:href='#germplasm.species_id'><use id='idx' x='62' y='146' xlink:href='#idx'/><title>idx_germplasm_0 ( species_id ) </title></a>
+  <a xlink:href='#germplasm.species_id'><use id='idx' x='62' y='146' xlink:href='#idx'/><title>idx_germplasm_0 ( species_id ) </title></a>
 <a xlink:href='#germplasm.species_id'><text id='public.germplasm.species_id' x='78' y='157' onmouseover="hghl(['germplasm_fk_germplasm_species_id_cv'])" onmouseout="uhghl(['germplasm_fk_germplasm_species_id_cv'])">species_id</text><title>species_id
-* integer</title></a>
+integer</title></a>
 <a xlink:href='#germplasm.species_id'><use id='fk' x='153' y='146' xlink:href='#fk'/><title>References cv ( species_id -&gt; cv_id ) </title></a>
   <a xlink:href='#germplasm.type_id'><text id='public.germplasm.type_id' x='78' y='172' onmouseover="hghl(['germplasm_germplasm_germplasm_type_id_fkey'])" onmouseout="uhghl(['germplasm_germplasm_germplasm_type_id_fkey'])">type_id</text><title>type_id
 integer</title></a>
@@ -2855,7 +2855,7 @@ date default ('now'::text)::date</title></a>
 	<tr>
 		<td>*</td>
 		<td><a name='linkage_group.stop'>stop</a></td>
-		<td> integer   </td>
+		<td> integer   DEFO 0 </td>
 		<td> The maximum position in the linkage group&#44; ex&#46; 200&#44; 200000000
  </td>
 	</tr>
@@ -3150,7 +3150,7 @@ date default ('now'::text)::date</title></a>
 		<td>  </td>
 	</tr>
 	<tr>
-		<td>*</td>
+		<td>&nbsp;</td>
 		<td><a name='platform.vendor_id'>vendor&#95;id</a></td>
 		<td> integer   </td>
 		<td>  </td>
@@ -3249,7 +3249,7 @@ date default ('now'::text)::date</title></a>
 		<td>  </td>
 	</tr>
 	<tr>
-		<td>*</td>
+		<td>&nbsp;</td>
 		<td><a name='germplasm.species_id'>species&#95;id</a></td>
 		<td> integer   </td>
 		<td>  </td>
