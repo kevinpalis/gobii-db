@@ -145,4 +145,9 @@ ALTER TABLE organization ADD CONSTRAINT organization_name_key UNIQUE (name);
 ALTER TABLE contact ADD COLUMN organization_id integer;
 ALTER TABLE contact ADD CONSTRAINT fk_organization_contact FOREIGN KEY (organization_id) REFERENCES organization(organization_id);
 
+#temp - for the lack of proper organization of CV terms, and the lack of a proper DB revision control system
+UPDATE CV SET term = 'nucleotide_2_letter' WHERE CV_ID = 93;
+UPDATE CV SET term = 'dominant_non_nucleotide' WHERE CV_ID = 95;
+UPDATE CV SET term = 'codominant_non_nucleotide' WHERE CV_ID = 96;
+
 

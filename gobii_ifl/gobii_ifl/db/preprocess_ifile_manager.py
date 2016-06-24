@@ -29,6 +29,20 @@ class PreprocessIfileManager:
 		else:
 			return cv_id
 
+	#select data_type from information_schema.columns where table_name='marker' and column_name='platform_id';
+	def getTypeOfColumn(self, table, column):
+		self.cur.execute("select data_type from information_schema.columns where table_name=%s and column_name=%s", (table, column))
+		res = self.cur.fetchone()
+		if res is not None:
+			return res[0]
+		else:
+			return res
+
+	def getColumnListOfTable(self, table):
+		self.cur.execute("select column_name from information_schema.columns where table_name = %s", (table,))
+		res = self.cur.fetchall()
+		return res
+
 	def dropForeignTable(self, fdwTableName):
 		self.cur.execute("drop foreign table if exists "+fdwTableName)
 

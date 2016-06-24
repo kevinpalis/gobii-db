@@ -72,44 +72,69 @@ def main(isVerbose, connectionStr, iFile, outputPath):
 	selectStr = ""
 	conditionStr = ""
 	fromStr = fTableName
+	targetTableColumnList = [i[0] for i in ppMgr.getColumnListOfTable(tableName)]
+	print("Got targetTableColumnList = %s" % targetTableColumnList)
 	for fColumn in header:
-		if selectStr == "":
-			selectStr += fTableName+"."+fColumn
-		else:
-			selectStr += ", "+fTableName+"."+fColumn
+		if fColumn in targetTableColumnList:
+			if selectStr == "":
+				selectStr += fTableName+"."+fColumn
+			else:
+				selectStr += ", "+fTableName+"."+fColumn
 	try:
 		reader = csv.reader(nameMappingFile, delimiter='\t')
-		for file_column_name, column_alias, table_name, table_column, id_column, table_alias in reader:
+		for file_column_names, column_alias, table_name, table_columns, id_column, table_alias in reader:
 			if IS_VERBOSE:
-				print("Processing column(s): FILECOLS: %s | TABLECOLS: %s" % (file_column_name, table_column))
-			fileColumns = file_column_name.split(",")
-			tableColumns = table_column.split(",")
+				print("Processing column(s): FILECOLS: %s | TABLECOLS: %s" % (file_column_names, table_columns))
+			fileColumns = file_column_names.split(",")
+			tableColumns = table_columns.split(",")
+			mainFileCol = ""
 			print("File Columns: %s \nTable Columns: %s" % (fileColumns, tableColumns))
 			for fileCol, tableCol in itertools.izip(fileColumns, tableColumns):
 				print("Processing column mapping %s = %s" % (fileCol, tableCol))
-			if file_column_name not in header:
-				if IS_VERBOSE:
-					print("Column is not present in input file. Skipping...")
-				continue
-			cond = table_name+"."+table_column+"="+fTableName+"."+file_column_name
-			if(conditionStr == ""):
-				conditionStr += cond
-			else:
-				conditionStr += " and "+cond
-			selectStr = selectStr.replace(fTableName+"."+file_column_name, table_name+"."+id_column+" as "+column_alias)
+				if fileCol not in header:
+					if IS_VERBOSE:
+						print("Column is not present in input file. Skipping...")
+					continue
+				if mainFileCol == "":
+					mainFileCol = fileCol
+				colType = ppMgr.getTypeOfColumn(table_name, tableCol)
+				cond = table_name+"."+tableCol+"="+fTableName+"."+fileCol
+				if colType != 'text':
+					cond += "::"+colType
+				if(conditionStr == ""):
+					conditionStr += cond
+				else:
+					conditionStr += " and "+cond
+			selectStr = selectStr.replace(fTableName+"."+mainFileCol, table_name+"."+id_column+" as "+column_alias)
 			if table_alias is not None and table_alias.strip() != '':
 				selectStr = selectStr.replace(table_name+".", table_alias+".")
 				fromStr += ", "+table_name+" as "+table_alias
 				conditionStr = conditionStr.replace(table_name+".", table_alias+".")
 			else:
 				fromStr += ", "+table_name
-		#if(conditionStr != ""):
-		#	conditionStr += ";"
+
+			# if file_column_name not in header:
+			# 	if IS_VERBOSE:
+			# 		print("Column is not present in input file. Skipping...")
+			# 	continue
+			# cond = table_name+"."+table_column+"="+fTableName+"."+file_column_name
+			# if(conditionStr == ""):
+			# 	conditionStr += cond
+			# else:
+			# 	conditionStr += " and "+cond
+			# selectStr = selectStr.replace(fTableName+"."+file_column_name, table_name+"."+id_column+" as "+column_alias)
+			# if table_alias is not None and table_alias.strip() != '':
+			# 	selectStr = selectStr.replace(table_name+".", table_alias+".")
+			# 	fromStr += ", "+table_name+" as "+table_alias
+			# 	conditionStr = conditionStr.replace(table_name+".", table_alias+".")
+			# else:
+			# 	fromStr += ", "+table_name
+
 		nameMappingFile.close()
 		deriveIdSql = "select "+selectStr+" from "+fromStr+" where "+conditionStr
-		#print ("deriveIdSql: "+deriveIdSql)
+		print ("deriveIdSql: "+deriveIdSql)
 		ppMgr.createFileWithDerivedIds(outputFile, deriveIdSql)
-		ppMgr.dropForeignTable(fTableName)
+		#ppMgr.dropForeignTable(fTableName)
 		ppMgr.commitTransaction()
 		ppMgr.closeConnection()
 		print("Preprocessed %s successfully." % iFile)
