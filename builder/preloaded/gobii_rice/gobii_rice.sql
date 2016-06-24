@@ -1477,6 +1477,24 @@ $$;
 
 
 --
+-- Name: getdnarunnamesbydataset(integer); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION getdnarunnamesbydataset(datasetid integer) RETURNS TABLE(dnarun_id integer, dnarun_name text)
+    LANGUAGE plpgsql
+    AS $$
+  BEGIN
+    return query
+    with dd as (select dd.dnarun_id, dd.dnarun_idx from dataset_dnarun dd where dd.dataset_id=datasetId)
+    select  dr.dnarun_id, dr.name as dnarun_name 
+      from dnarun dr, dd
+      where dr.dnarun_id = dd.dnarun_id
+      order by dd.dnarun_idx;
+  END;
+$$;
+
+
+--
 -- Name: getdnarunpropertybyid(integer, integer); Type: FUNCTION; Schema: public; Owner: -
 --
 
@@ -1715,6 +1733,24 @@ CREATE FUNCTION getmarkerinmarkergroupbyname(id integer, markername text) RETURN
     select markerInfo.marker_id, (props->markerInfo.marker_id::text)::text as favAllele
       from marker_group, markerInfo
       where marker_group_id=id;
+  END;
+$$;
+
+
+--
+-- Name: getmarkernamesbydataset(integer); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION getmarkernamesbydataset(datasetid integer) RETURNS TABLE(marker_id integer, marker_name text)
+    LANGUAGE plpgsql
+    AS $$
+  BEGIN
+    return query
+    with dm as (select dm.marker_id, dm.marker_idx from dataset_marker dm where dm.dataset_id=datasetId)
+    select m.marker_id, m.name as marker_name
+      from marker m, dm
+      where m.marker_id = dm.marker_id 
+      order by dm.marker_idx;
   END;
 $$;
 
@@ -4305,13 +4341,13 @@ COPY cv (cv_id, "group", term, definition, rank) FROM stdin;
 90	species	sorghum_bicolor	 Sorghum Bicolor (Sorghum)	0
 91	analysis_type	cleaning	Cleaning	0
 92	analysis_type	allele_sorting	Allele Sorting	0
-93	dataset_type	2_letter_nucleotide	Type of allele data. / and : will be removed	1
 94	dataset_type	iupac	IUPAC	2
-95	dataset_type	dominant_non-nucleotide	Dominant Non-nucleotide	3
-96	dataset_type	codominant_non-nucleotide	Codominant non-nucleotide (1 is het)	4
 97	dataset_type	ssr_allele_size	SSR Allele Size	5
 98	platform_prop	subtype	placeholder property	0
 83	species	zea_mays	 Zea Mays (Maize)	0
+93	dataset_type	nucleotide_2_letter	Type of allele data. / and : will be removed	1
+95	dataset_type	dominant_non_nucleotide	Dominant Non-nucleotide	3
+96	dataset_type	codominant_non_nucleotide	Codominant non-nucleotide (1 is het)	4
 \.
 
 
