@@ -99,13 +99,13 @@ COPY cv (cv_id, "group", term, definition, rank) FROM stdin;
 90	species	sorghum_bicolor	 Sorghum Bicolor (Sorghum)	0
 91	analysis_type	cleaning	Cleaning	0
 92	analysis_type	allele_sorting	Allele Sorting	0
-93	dataset_type	2_letter_nucleotide	Type of allele data. / and : will be removed	1
 94	dataset_type	iupac	IUPAC	2
-95	dataset_type	dominant_non-nucleotide	Dominant Non-nucleotide	3
-96	dataset_type	codominant_non-nucleotide	Codominant non-nucleotide (1 is het)	4
 97	dataset_type	ssr_allele_size	SSR Allele Size	5
 98	platform_prop	subtype	placeholder property	0
 83	species	zea_mays	 Zea Mays (Maize)	0
+93	dataset_type	nucleotide_2_letter	Type of allele data. / and : will be removed	1
+95	dataset_type	dominant_non_nucleotide	Dominant Non-nucleotide	3
+96	dataset_type	codominant_non_nucleotide	Codominant non-nucleotide (1 is het)	4
 \.
 
 
