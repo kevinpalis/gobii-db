@@ -37,6 +37,22 @@ gobii_ifl.preprocess_ifile module
     :undoc-members:
     :show-inheritance:
 
+gobii_ifl.update_dnarun_idx module
+----------------------------------
+
+.. automodule:: gobii_ifl.update_dnarun_idx
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+gobii_ifl.update_marker_idx module
+----------------------------------
+
+.. automodule:: gobii_ifl.update_marker_idx
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 
 Module contents
 ---------------

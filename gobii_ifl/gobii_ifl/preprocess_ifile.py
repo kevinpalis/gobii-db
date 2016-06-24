@@ -32,6 +32,7 @@ from __future__ import print_function
 import sys
 import csv
 import traceback
+import itertools
 from os.path import basename
 from os.path import splitext
 from pkg_resources import resource_stream
@@ -78,17 +79,23 @@ def main(isVerbose, connectionStr, iFile, outputPath):
 			selectStr += ", "+fTableName+"."+fColumn
 	try:
 		reader = csv.reader(nameMappingFile, delimiter='\t')
-		for file_column_name, column_alias, table_name, name_column, id_column, table_alias in reader:
+		for file_column_name, column_alias, table_name, table_column, id_column, table_alias in reader:
 			if IS_VERBOSE:
-				print("Processing column: %s" % file_column_name)
+				print("Processing column(s): FILECOLS: %s | TABLECOLS: %s" % (file_column_name, table_column))
+			fileColumns = file_column_name.split(",")
+			tableColumns = table_column.split(",")
+			print("File Columns: %s \nTable Columns: %s" % (fileColumns, tableColumns))
+			for fileCol, tableCol in itertools.izip(fileColumns, tableColumns):
+				print("Processing column mapping %s = %s" % (fileCol, tableCol))
 			if file_column_name not in header:
 				if IS_VERBOSE:
 					print("Column is not present in input file. Skipping...")
 				continue
+			cond = table_name+"."+table_column+"="+fTableName+"."+file_column_name
 			if(conditionStr == ""):
-				conditionStr += table_name+"."+name_column+"="+fTableName+"."+file_column_name
+				conditionStr += cond
 			else:
-				conditionStr += " and "+table_name+"."+name_column+"="+fTableName+"."+file_column_name
+				conditionStr += " and "+cond
 			selectStr = selectStr.replace(fTableName+"."+file_column_name, table_name+"."+id_column+" as "+column_alias)
 			if table_alias is not None and table_alias.strip() != '':
 				selectStr = selectStr.replace(table_name+".", table_alias+".")
