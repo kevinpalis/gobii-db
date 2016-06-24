@@ -26,6 +26,10 @@ class ExtractMetadataManager:
 		#print("copyStmt = "+copyStmt)
 		self.cur.execute(sql)
 
+	def createMarkerNamesFile(self, outputFilePath, datasetId):
+		sql = "copy (select * from getMarkerNamesByDataset("+datasetId+")) to '"+outputFilePath+"' with delimiter E'\\t'"+" csv header;"
+		self.cur.execute(sql)
+
 	def createMinimalMarkerMetadataFile(self, outputFilePath, datasetId):
 		sql = "copy (select * from getMinimalMarkerMetadataByDataset("+datasetId+")) to '"+outputFilePath+"' with delimiter E'\\t'"+" csv header;"
 		#print("copyStmt = "+copyStmt)
@@ -33,6 +37,11 @@ class ExtractMetadataManager:
 
 	def createAllSampleMetadataFile(self, outputFilePath, datasetId):
 		sql = "copy (select * from getAllSampleMetadataByDataset("+datasetId+")) to '"+outputFilePath+"' with delimiter E'\\t'"+" csv header;"
+		#print("copyStmt = "+copyStmt)
+		self.cur.execute(sql)
+
+	def createDnarunNamesFile(self, outputFilePath, datasetId):
+		sql = "copy (select * from getDnarunNamesByDataset("+datasetId+")) to '"+outputFilePath+"' with delimiter E'\\t'"+" csv header;"
 		#print("copyStmt = "+copyStmt)
 		self.cur.execute(sql)
 

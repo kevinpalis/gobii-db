@@ -16,9 +16,10 @@ def main(argv):
 		datasetId = ""
 		projectOutputFile = ""
 		allMeta = False
+		namesOnly = False
 		#print("Args count: ", len(argv))
 		try:
-			opts, args = getopt.getopt(argv, "hc:m:s:d:p:av", ["connectionString=", "markerOutputFile=", "sampleOutputFile=", "datasetId=", "projectOutputFile=", "all", "verbose"])
+			opts, args = getopt.getopt(argv, "hc:m:s:d:p:avn", ["connectionString=", "markerOutputFile=", "sampleOutputFile=", "datasetId=", "projectOutputFile=", "all", "verbose", "namesonly"])
 			#print (opts, args)
 			if len(args) < 2 and len(opts) < 2:
 				printUsageHelp()
@@ -42,6 +43,8 @@ def main(argv):
 				allMeta = True
 			elif opt in ("-v", "--verbose"):
 				verbose = True
+			elif opt in ("-n", "--namesonly"):
+				namesOnly = True
 
 		#if verbose:
 		#print("Opts: ", opts)
@@ -51,7 +54,7 @@ def main(argv):
 				try:
 					if verbose:
 						print("Generating marker metadata file...")
-					extract_marker_metadata.main(verbose, connectionStr, datasetId, markerOutputFile, allMeta)
+					extract_marker_metadata.main(verbose, connectionStr, datasetId, markerOutputFile, allMeta, namesOnly)
 				except Exception as e1:
 					MDEUtility.printError("Error: %s" % (str(e1)))
 				rn = True
@@ -59,7 +62,7 @@ def main(argv):
 				try:
 					if verbose:
 						print("Generating sample metadata file...")
-					extract_sample_metadata.main(verbose, connectionStr, datasetId, sampleOutputFile, allMeta)
+					extract_sample_metadata.main(verbose, connectionStr, datasetId, sampleOutputFile, allMeta, namesOnly)
 				except Exception as e:
 					MDEUtility.printError("Error: %s" % str(e))
 				rn = True
@@ -91,7 +94,7 @@ def checkDataIntegrity(iFile, pFile, verbose):
 		return False
 
 def printUsageHelp():
-	print ("gobii_ifl.py -c <connectionString> -m <markerOutputFile> -s <sampleOutputFile> -p <projectOutputFile> -d <dataset_id> -a -v")
+	print ("gobii_mde.py -c <connectionString> -m <markerOutputFile> -s <sampleOutputFile> -p <projectOutputFile> -d <dataset_id> -a -v -n")
 	print ("\t-h = Usage help")
 	print ("\t-c or --connectionString = Database connection string (RFC 3986 URI).\n\t\tFormat: postgresql://[user[:password]@][netloc][:port][/dbname][?param1=value1&...]")
 	print ("\t-m or --markerOutputFile = The marker metadata output file. This should be an absolute path.")
@@ -99,7 +102,8 @@ def printUsageHelp():
 	print ("\t-p or --projectOutputFile = The project metadata output file. This should be an absolute path.")
 	print ("\t-d or --datasetId = The dataset ID of which marker metadata will be extracted from. This should be a valid integer ID.")
 	print ("\t-a or --all = Get all metadata information available, regardless if they are relevant to HMP, Flapjack, etc. formats.")
-	print ("\t-v or --verbose = Print the status of the MDE in more detail")
+	print ("\t-v or --verbose = Print the status of the MDE in more detail.")
+	print ("\t-n or --namesonly = Generate only names metadata. This flag is ignored if -a / --all is set.")
 	sys.exit()
 
 if __name__ == "__main__":

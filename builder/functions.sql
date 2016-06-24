@@ -1758,6 +1758,18 @@ RETURNS table (marker_name text, alleles text, chrom varchar, pos integer, stran
   END;
 $$ LANGUAGE plpgsql;
 
+CREATE OR REPLACE FUNCTION getMarkerNamesByDataset(datasetId integer)
+RETURNS table (marker_id integer, marker_name text) AS $$
+  BEGIN
+    return query
+    with dm as (select dm.marker_id, dm.marker_idx from dataset_marker dm where dm.dataset_id=datasetId)
+    select m.marker_id, m.name as marker_name
+      from marker m, dm
+      where m.marker_id = dm.marker_id 
+      order by dm.marker_idx;
+  END;
+$$ LANGUAGE plpgsql;
+
 --drop function getAllSampleMetadataByDataset(datasetId integer);
 CREATE OR REPLACE FUNCTION getAllSampleMetadataByDataset(datasetId integer)
 RETURNS table (dnarun_name text, dnasample_name text, platename text, num text, well_row text, well_col text, germplasm_name text, external_code text, germplasm_type text, species text) AS $$
@@ -1788,6 +1800,18 @@ RETURNS table (sample_name text, platename text, num text, well_row text, well_c
       and ds.germplasm_id = g.germplasm_id
       and g.type_id = c1.cv_id
       and g.species_id = c2.cv_id
+      order by dd.dnarun_idx;
+  END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION getDnarunNamesByDataset(datasetId integer)
+RETURNS table (dnarun_id integer, dnarun_name text) AS $$
+  BEGIN
+    return query
+    with dd as (select dd.dnarun_id, dd.dnarun_idx from dataset_dnarun dd where dd.dataset_id=datasetId)
+    select  dr.dnarun_id, dr.name as dnarun_name 
+      from dnarun dr, dd
+      where dr.dnarun_id = dd.dnarun_id
       order by dd.dnarun_idx;
   END;
 $$ LANGUAGE plpgsql;
