@@ -61,7 +61,7 @@ def main(argv):
 						IFLUtility.printError("Failed to load file %s. Error: %s" % (f, str(e1)))
 			elif iFile != "":
 				preprocessedFile = preprocess_ifile.main(verbose, connectionStr, iFile, outputPath)
-				return
+				#return
 				loadFile = None
 				if flCheck and not checkDataIntegrity(iFile, preprocessedFile, verbose):
 					IFLUtility.printError("File length mismatch detected on %s. You have duplicate entries in the table where the NMAP file maps to, please fix it first. Loading will abort." % iFile)
