@@ -74,14 +74,17 @@ def main(isVerbose, connectionStr, iFile, outputPath):
 	fromStr = fTableName
 	targetTableColumnList = [i[0] for i in ppMgr.getColumnListOfTable(tableName)]
 	print("Got targetTableColumnList = %s" % targetTableColumnList)
-	for fColumn in header:
-		if fColumn in targetTableColumnList:
-			if selectStr == "":
-				selectStr += fTableName+"."+fColumn
-			else:
-				selectStr += ", "+fTableName+"."+fColumn
 	try:
 		reader = csv.reader(nameMappingFile, delimiter='\t')
+		mappedColList = [i[0].split(",")[0] for i in reader]
+		nameMappingFile.seek(0)
+		print("mappedColList: %s" % mappedColList)
+		for fColumn in header:
+			if fColumn in targetTableColumnList or fColumn in mappedColList:
+				if selectStr == "":
+					selectStr += fTableName+"."+fColumn
+				else:
+					selectStr += ", "+fTableName+"."+fColumn
 		for file_column_names, column_alias, table_name, table_columns, id_column, table_alias in reader:
 			if IS_VERBOSE:
 				print("Processing column(s): FILECOLS: %s | TABLECOLS: %s" % (file_column_names, table_columns))
