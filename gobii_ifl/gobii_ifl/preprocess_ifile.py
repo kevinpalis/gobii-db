@@ -87,9 +87,10 @@ def main(isVerbose, connectionStr, iFile, outputPath):
 					selectStr += fTableName+"."+fColumn
 				else:
 					selectStr += ", "+fTableName+"."+fColumn
+			#print("Current selectStr=%s" % selectStr)
 		for file_column_names, column_alias, table_name, table_columns, id_column, table_alias in reader:
 			#if IS_VERBOSE:
-				#print("Processing column(s): FILECOLS: %s | TABLECOLS: %s" % (file_column_names, table_columns))
+			#	print("Processing column(s): FILECOLS: %s | TABLECOLS: %s" % (file_column_names, table_columns))
 			fileColumns = file_column_names.split(",")
 			tableColumns = table_columns.split(",")
 			mainFileCol = ""
@@ -111,16 +112,21 @@ def main(isVerbose, connectionStr, iFile, outputPath):
 					conditionStr += cond
 				else:
 					conditionStr += " and "+cond
-			selectStr = selectStr.replace(fTableName+"."+mainFileCol, table_name+"."+id_column+" as "+column_alias)
-			if table_alias is not None and table_alias.strip() != '':
-				selectStr = selectStr.replace(table_name+".", table_alias+".")
-				fromStr += ", "+table_name+" as "+table_alias
-				conditionStr = conditionStr.replace(table_name+".", table_alias+".")
-			else:
-				fromStr += ", "+table_name
+			if mainFileCol != "":
+				#print("Current selectStr=%s will be replaced: %s BY %s" % (selectStr, fTableName+"."+mainFileCol, table_name+"."+id_column+" as "+column_alias))
+				selectStr = selectStr.replace(fTableName+"."+mainFileCol, table_name+"."+id_column+" as "+column_alias)
+				if table_alias is not None and table_alias.strip() != '':
+					selectStr = selectStr.replace(table_name+".", table_alias+".")
+					fromStr += ", "+table_name+" as "+table_alias
+					conditionStr = conditionStr.replace(table_name+".", table_alias+".")
+				else:
+					fromStr += ", "+table_name
 		nameMappingFile.close()
-		deriveIdSql = "select "+selectStr+" from "+fromStr+" where "+conditionStr
-		#print ("deriveIdSql: "+deriveIdSql)
+		deriveIdSql = "select "+selectStr+" from "+fromStr
+		if conditionStr.strip() != "":
+			deriveIdSql += " where "+conditionStr
+		if IS_VERBOSE:
+			print ("deriveIdSql: "+deriveIdSql)
 		ppMgr.createFileWithDerivedIds(outputFile, deriveIdSql)
 		ppMgr.dropForeignTable(fTableName)
 		ppMgr.commitTransaction()

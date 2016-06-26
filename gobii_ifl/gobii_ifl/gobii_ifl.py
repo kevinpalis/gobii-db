@@ -70,6 +70,7 @@ def main(argv):
 				try:
 					os.remove(preprocessedFile)
 					os.remove(loadFile)
+					print ("Temp files deleted.")
 				except Exception as e:
 					IFLUtility.printError("Failed to remove temporary files. Check file permissions. Error: %s" % str(e))
 			else:

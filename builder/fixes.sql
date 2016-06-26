@@ -127,6 +127,10 @@ ALTER TABLE dataset ALTER COLUMN data_file DROP NOT NULL;
 
 ALTER TABLE platform ALTER COLUMN vendor_id DROP NOT NULL;
 ALTER TABLE germplasm ALTER COLUMN species_id DROP NOT NULL;
+
+ALTER TABLE marker ALTER COLUMN ref DROP NOT NULL;
+ALTER TABLE marker ALTER COLUMN alts DROP NOT NULL;
+ALTER TABLE germplasm ALTER COLUMN name DROP NOT NULL;
 --adding new table: Organization
 CREATE TABLE organization (
     organization_id serial PRIMARY KEY NOT NULL,
