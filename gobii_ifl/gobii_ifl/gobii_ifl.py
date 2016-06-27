@@ -15,6 +15,7 @@ def main(argv):
 		iFile = ""
 		inputDir = ""
 		outputPath = ""
+		exitCode = 0
 		#print("Args count: ", len(argv))
 		try:
 			opts, args = getopt.getopt(argv, "hc:i:d:o:vl", ["connectionString=", "inputFile=", "inputDir=", "outputDir=", "verbose", "fileLengthCheck"])
@@ -23,7 +24,8 @@ def main(argv):
 				printUsageHelp()
 		except getopt.GetoptError:
 			printUsageHelp()
-			sys.exit(2)
+			exitCode = 1
+			sys.exit(exitCode)
 		for opt, arg in opts:
 			if opt == '-h':
 				printUsageHelp()
@@ -77,6 +79,7 @@ def main(argv):
 				printUsageHelp()
 		else:
 			printUsageHelp()
+		sys.exit(exitCode)
 		#cleanup
 
 def checkDataIntegrity(iFile, pFile, verbose):
