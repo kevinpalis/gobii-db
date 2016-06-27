@@ -102,7 +102,7 @@ def main(isVerbose, connectionStr, iFile, outputPath):
 if __name__ == "__main__":
 	if len(sys.argv) < 4:
 		print("Please supply the parameters. \nUsage: load_ifile <db_connection_str> <intermediate_file> <output_directory_path>")
-		sys.exit()
+		sys.exit(1)
 	connectionStr = str(sys.argv[1])
 	iFile = str(sys.argv[2])
 	#dupMappingFile = str(sys.argv[2])

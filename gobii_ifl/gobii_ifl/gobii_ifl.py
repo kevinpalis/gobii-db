@@ -24,8 +24,6 @@ def main(argv):
 				printUsageHelp()
 		except getopt.GetoptError:
 			printUsageHelp()
-			exitCode = 1
-			sys.exit(exitCode)
 		for opt, arg in opts:
 			if opt == '-h':
 				printUsageHelp()
@@ -59,8 +57,10 @@ def main(argv):
 							os.remove(loadFile)
 						except Exception as e:
 							IFLUtility.printError("Failed to remove temporary files. Check file permissions. Error: %s" % str(e))
+							exitCode = 2
 					except Exception as e1:
 						IFLUtility.printError("Failed to load file %s. Error: %s" % (f, str(e1)))
+						exitCode = 3
 			elif iFile != "":
 				preprocessedFile = preprocess_ifile.main(verbose, connectionStr, iFile, outputPath)
 				#return
@@ -75,6 +75,7 @@ def main(argv):
 					print ("Temp files deleted.")
 				except Exception as e:
 					IFLUtility.printError("Failed to remove temporary files. Check file permissions. Error: %s" % str(e))
+					exitCode = 2
 			else:
 				printUsageHelp()
 		else:
@@ -103,7 +104,7 @@ def printUsageHelp():
 	print ("\t-o or --outputDir = The output directory where preprocessed file and file for bulk loading (no duplicates) will be placed.\n\t\tEnsure that this path is writeable.")
 	print ("\t-v or --verbose = Print the status of the IFL in more detail")
 	print ("\t-l or --fileLengthCheck = This will check if the preprocessed file is of the same length as the input file. \n\t\tA mismatch indicates duplicate entries in the table where the NMAP file maps to.\n\t\tInput file should not be loaded in that case.")
-	sys.exit()
+	sys.exit(1)
 
 if __name__ == "__main__":
 	main(sys.argv[1:])
