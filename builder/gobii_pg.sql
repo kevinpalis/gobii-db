@@ -54,19 +54,6 @@ CREATE TYPE keyvaluepair_type AS (
 
 
 --
--- Name: myrowtype; Type: TYPE; Schema: public; Owner: -
---
-
-CREATE TYPE myrowtype AS (
-	"23" text,
-	"24" text,
-	"25" text,
-	"26" text,
-	"27" text
-);
-
-
---
 -- Name: addanalysistodataset(integer, integer); Type: FUNCTION; Schema: public; Owner: -
 --
 
@@ -3314,7 +3301,7 @@ ALTER SEQUENCE experiment_experiment_id_seq OWNED BY experiment.experiment_id;
 
 CREATE TABLE germplasm (
     germplasm_id integer NOT NULL,
-    name text NOT NULL,
+    name text,
     external_code text,
     species_id integer,
     type_id integer,
@@ -3541,8 +3528,8 @@ CREATE TABLE marker (
     variant_id integer,
     name text NOT NULL,
     code text,
-    ref text NOT NULL,
-    alts text[] NOT NULL,
+    ref text,
+    alts text[],
     sequence text,
     reference_id integer,
     primers jsonb,

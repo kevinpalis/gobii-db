@@ -754,7 +754,7 @@ $$ LANGUAGE plpgsql;
 --### Display ###--
 
 --create a new row, you may supply null for columns that are nullable
-DROP FUNCTION createDisplay(tableName text, columnName text, displayName text, createdBy integer, createdDate date, modifiedBy integer, modifiedDate date, OUT id integer);
+--DROP FUNCTION createDisplay(tableName text, columnName text, displayName text, createdBy integer, createdDate date, modifiedBy integer, modifiedDate date, OUT id integer);
 CREATE OR REPLACE FUNCTION createDisplay(tableName text, columnName text, displayName text, createdBy integer, createdDate date, modifiedBy integer, modifiedDate date, displayRank integer, OUT id integer)
 RETURNS integer AS $$
   BEGIN
@@ -767,7 +767,7 @@ $$ LANGUAGE plpgsql;
 --update all columns
 --You can "avoid" updating certain columns by passing the same value as what's currently in that column
 --OR I can create update functions that updates only certain columns, just let me know.
-DROP FUNCTION updateDisplay(id integer, tableName text, columnName text, displayName text, createdBy integer, createdDate date, modifiedBy integer, modifiedDate date);
+--DROP FUNCTION updateDisplay(id integer, tableName text, columnName text, displayName text, createdBy integer, createdDate date, modifiedBy integer, modifiedDate date);
 CREATE OR REPLACE FUNCTION updateDisplay(id integer, tableName text, columnName text, displayName text, createdBy integer, createdDate date, modifiedBy integer, modifiedDate date, displayRank integer)
 RETURNS void AS $$
     BEGIN
