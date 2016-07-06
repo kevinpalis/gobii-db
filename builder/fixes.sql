@@ -154,4 +154,4 @@ UPDATE CV SET term = 'nucleotide_2_letter' WHERE CV_ID = 93;
 UPDATE CV SET term = 'dominant_non_nucleotide' WHERE CV_ID = 95;
 UPDATE CV SET term = 'codominant_non_nucleotide' WHERE CV_ID = 96;
 
-
+select * from createRole('User', 'User', NULL, NULL);

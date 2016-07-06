@@ -25,6 +25,7 @@ COPY role (role_id, role_name, role_code, read_tables, write_tables) FROM stdin;
 3	Curator	Curator_code	\N	\N
 4	Vendor	Vendor	\N	\N
 5	Admin	Admin	\N	\N
+6	User	User	\N	\N
 \.
 
 
