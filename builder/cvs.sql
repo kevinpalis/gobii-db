@@ -20,92 +20,106 @@ SET search_path = public, pg_catalog;
 --
 
 COPY cv (cv_id, "group", term, definition, rank) FROM stdin;
-1	status	new	new row	0
-2	status	modified	modified row	0
-3	status	deleted	deleted row	0
-21	strand	top	Illumina's TOP strand	0
-4	project_prop	division	Department or division where the project was made	0
-5	project_prop	study_name	The name of the study	0
-6	project_prop	genotyping_purpose	The purpose of genotyping	0
-19	mapset_type	physical	Physical Map	0
-20	mapset_type	genetic	Genetic Map	0
-22	strand	bott	Illumina's BOTTOM strand	0
-23	marker_prop	genome_build	The marker's genome build	0
-24	marker_prop	species	Species	0
-25	marker_prop	source	The source of this marker.	0
-26	marker_prop	beadset_id	The beadset_id of this marker.	0
-27	species	oryza_sativa_japonica	rice	0
-52	germplasm_type	f2	F2: the actual definition	7
-29	germplasm_prop	generation	Generation	0
-30	dnasample_prop	sentrix_barcode_a	sentrixBarcodeA	0
-31	dnasample_prop	sentrix_position_a	sentrixPositionA	0
-32	dnasample_prop	sample_group	sample group	0
-46	mapset_prop	subtype	Map Type: further properties of the map beyond genetic or physical	0
-57	germplasm_prop	group_cycle	cycle of population improvement	0
-36	project_prop	date_sampled	Date tissue sampled and approx date of field trial	0
-33	analysis_type	calling	Calling	0
-34	analysis_type	imputation	Imputation	0
-35	platform_type	illumina_infinium	Illumina Infinium	0
-37	platform_type	gbs	GBS Platform	0
-28	germplasm_type	inbred_line	Inbred Line	2
-38	platform_type	kasp	KASP Platform	0
-39	platform_type	dartseq_snps	DaRTSeq SNPs Platform	0
-40	platform_type	silicodarts	 SilicoDarts Platform	0
-41	platform_type	dart_clone	 DartClone Platform	0
-42	platform_type	fluidigm	 	0
-43	platform_type	affymetrix_axiom	 	0
-44	platform_type	illumina_goldengate_bxp	 	0
-45	platform_type	ssr	 SSR	0
-47	germplasm_type	accession	Type of material for GID/Germplasm name - describes level of outbreeding/heterozygosity we would expect	1
-48	germplasm_type	population		3
-49	germplasm_type	f1_hybrid		4
-50	germplasm_type	3_way_hybrid		5
-51	germplasm_type	4_way_hybrid		6
-53	germplasm_type	f3		8
-54	germplasm_type	f4		9
-55	germplasm_type	f5		10
-58	germplasm_prop	germplasm_id	this will be a higher level GID eg MGID describing a group of similar lines/genotypes	0
-59	germplasm_prop	seed_source_id	is GID for BMS and B4R	0
-62	strand	forward	Used by most technologies apart from Illumina and Affymetrix	0
-63	strand	+	Positive strand used by Affymetrix	0
-64	marker_prop	gene_id	The gene the marker was designed to	0
-65	marker_prop	clone_id	used for Dart only  = the MarkerName for Dart-silico and Dart-seq/SNP (at least the first row for each marker allele dataset)	0
-66	marker_prop	clone_id_pos	used for Dart only - SNP position in the sequence	0
-67	marker_prop	synonym	Another name for the marker	0
-68	marker_prop	polymorphism_type	SSR;SNP;Indel. This describes the underlying polymorphism, not the marker assay used to interrogate the polymorphism	0
-56	germplasm_prop	group	Group of samples that can be grouped into a population for analysis. Can include parents for grouping and analysis purposes.	0
-60	germplasm_prop	subspecies	Sub-set of species	0
-61	germplasm_prop	heterotic_group	groups within species	0
-69	marker_prop	marker_dom	Is the marker dominant ie does it only detect presence/absence?	0
-70	marker_prop	gene_annotation	Type of gene	0
-71	marker_prop	polymorphism_annotation	synonymous etc	0
-72	marker_prop	typeofrefallele_alleleorder	There are multiple ways a reference allele can be called eg Is ref allele called on ToP/BOTT, F/R, +/-, first found, minor/major etc	0
-73	dnasample_prop	sample_group_cycle	can group multiple groups together eg across backcross cycles	0
-74	dnasample_prop	sample_type	type of tissue sampled	0
-75	dnasample_prop	par1	parent/progeny relationships	0
-76	dnasample_prop	par2	parent/progeny relationships	0
-77	dnasample_prop	donor_parent	parent/progeny relationships	0
-78	dnasample_prop	recurrent_parent	parent/progeny relationships	0
-79	dnasample_prop	ref_sample	standard sample against which all other germplasm is compared for this GID/MGID. Gold standard or Reference line.	0
-80	dnasample_prop	plant_id	could be from sample tracker	0
-81	dnasample_prop	trial_name	Trial name for field experiment that the sample is coming from, or fieldbook 	0
-82	dnarun_prop	barcode	eg ACAATGGA - how we find the sample sequence, for GbS technologies	0
-84	species	triticum_aestivum_subsp_aestivum	 Triticum Aestivum subsp. Aestivum (Wheat)	0
-85	species	triticum_turgidum_subsp_durum  	 Triticum Turgidum subsp. Durum (Wheat)	0
-86	species	triticosecale_spp 	 Triticosecale spp. (Wheat)	0
-87	species	oryza_sativa_indica	 Oryza Sativa Indica (Rice)	0
-88	species	oryza_sativa_aus	 Oryza Sativa Aus (Rice)	0
-89	species	cicer_arietinum	 Cicer Arietinum (Chickpea)	0
-90	species	sorghum_bicolor	 Sorghum Bicolor (Sorghum)	0
-91	analysis_type	cleaning	Cleaning	0
-92	analysis_type	allele_sorting	Allele Sorting	0
-94	dataset_type	iupac	IUPAC	2
-97	dataset_type	ssr_allele_size	SSR Allele Size	5
-98	platform_prop	subtype	placeholder property	0
-83	species	zea_mays	 Zea Mays (Maize)	0
-93	dataset_type	nucleotide_2_letter	Type of allele data. / and : will be removed	1
-95	dataset_type	dominant_non_nucleotide	Dominant Non-nucleotide	3
-96	dataset_type	codominant_non_nucleotide	Codominant non-nucleotide (1 is het)	4
+1	project_prop	genotyping_purpose	The purpose of genotyping such as MABC, MARS, Diversity etc	1
+2	project_prop	date_sampled	Date tissue sampled and approx date of field trial	2
+3	project_prop	division	Department or division where the project was made	3
+4	project_prop	study_name	The name of the research study	4
+5	platform_type	gbs	Genotyping by Sequencing	0
+6	platform_type	illumina_infinium	Illumina Infinium	0
+7	platform_type	illumina_goldengate	Illumina GoldenGate	0
+8	platform_type	kasp	KASP	0
+9	platform_type	sequencing	Sequence-based Technologies	0
+10	platform_type	affymetrix_axiom	Affymetrix Axiom	0
+11	platform_type	dartseq_snps	DArTSeq SNP	0
+12	platform_type	dart silico	Silico DArT	0
+13	platform_type	dart_clone	DArT Clone	0
+14	platform_type	fluidigm	Fluidigm	0
+15	platform_type	ssr	Simple Sequence Repeats	0
+16	germplasm_type	inbred_line	Inbred line	1
+17	germplasm_type	population	Population	2
+18	germplasm_type	f1_hybrid	F1 hybrid	3
+19	germplasm_type	3_way_hybrid	3-way hybrid	4
+20	germplasm_type	4_way_hybrid	4-way hybrid	5
+21	germplasm_type	f2	F2	6
+22	germplasm_type	f3	F3	7
+23	germplasm_type	f4	F4	8
+24	germplasm_type	f5	F5	9
+25	germplasm_type	f6	F6	10
+26	germplasm_type	bc1f1	BC1F1	11
+27	germplasm_type	bc2f1	BC2F1 	12
+28	germplasm_type	bc3f1	BC3F1	13
+29	germplasm_type	bc4f1	BC4F1 	14
+30	germplasm_type	ril	RIL:Recombinant Inbred Population	15
+31	germplasm_type	nil	NIL:Near Isogenic Lines	16
+32	germplasm_type	dh	DH:Doubled Haploid	17
+33	germplasm_type	nam	NAM:Nested Association Mapping	18
+34	germplasm_type	magic	MAGIC:Multi Parent Advanced Generation Intercrossed Population	19
+35	germplasm_prop	germplasm_id	This will be a higher level GID eg MGID describing a group of similar lines/genotypes	1
+36	germplasm_prop	seed_source_id	Seed source ID	2
+37	germplasm_prop	germplasm_subsp	Germplasm sub-species eg indica, japonica, for rice; Dent, Flint for maize	3
+38	germplasm_prop	germplasm_heterotic_group	Heterotic groups within species eg NSS, SSS, A, B for maize	4
+39	germplasm_prop	par1	Parent 1 of the germplasm name	5
+40	germplasm_prop	par2	Parent 2 of the germplasm name	6
+41	germplasm_prop	par3	Parent 3 of the germplasm	7
+42	germplasm_prop	par4	Parent 4 of the germplasm name 	8
+43	status	new	new row	1
+44	status	modified	modified row	2
+45	status	deleted	deleted row	3
+46	mapset_types	physical	Physical map	1
+47	mapset_types	genetic	Genetic map	2
+48	marker_strand	top	Marker design on the "top" strand as defined by Illumina	1
+49	marker_strand	bott	Marker design on the "bottom" strand as defined by Illumina	2
+50	marker_strand	forward	Marker designed on the Forward Strand - used by most technologies apart from Illumina and Affymetrix	3
+51	marker_strand	+	Marker designed on the positive or + strand eg used by  Affymetrix	4
+52	marker_prop	primerF1	First forward primer	1
+53	marker_prop	primerF2	Second forward primer	2
+54	marker_prop	primerR1	First reverse primer	3
+55	marker_prop	primerR2	Second reverse primer	4
+56	marker_prop	probe1	First probe	5
+57	marker_prop	probe2	Second probe	6
+58	marker_prop	polymorphism_type	This describes the type of polymorphism that the marker interrogates eg SSR;SNP;Indel.	7
+59	marker_prop	synonym	Another name for the marker	8
+60	marker_prop	source	The source of the marker eg a publication reference or sequence assembly	9
+61	marker_prop	gene_id	The gene the marker was designed to	10
+62	marker_prop	gene_annotation	Type of gene eg transcription factor	11
+63	marker_prop	polymorphism_annotation	eg Synonymous etc	12
+64	marker_prop	marker_dom	Describes if the marker behaves in a dominant fashion ie  presence/ absence with allele dosage (ie heterozygous or homozygous presence) for presence being unknown	13
+65	marker_prop	clone_id	The clone ID - used for Dart technologies = the MarkerName for Silico Dart	14
+66	marker_prop	clone_id_pos	The SNP position on the sequence for the clone ID - used for Dart technologies	15
+67	marker_prop	genome_build	The genome build that the marker was made with	16
+68	marker_prop	typeofrefallele_alleleorder	How a reference allele is called eg TOP/BOTT, F/R, +/-, first found, minor/major etc	17
+69	marker_prop	strand data_read	Strand that the allele data is read on ie the probe is designed to	18
+70	dnasample_prop	trial_name	Trial name for field experiment that the sample is coming from, or fieldbook	1
+71	dnasample_prop	sample_group	Sample Group eg MABCTHC_cycle1	2
+72	dnasample_prop	sample_group_cycle	Cycle eg backcrossing cycle for a sample group	3
+73	dnasample_prop	sample_type	Type of tissue sampled eg leaf, seed, bulk seed, bulk plant	4
+74	dnasample_prop	sample_parent_prop	Type of parent for a population eg donor, recurrent etc	5
+75	dnasample_prop	ref_sample	Standard sample against which all other germplasm is compared to for this GID/MGID. Gold standard or Reference line.	6
+76	dnarun_prop	barcode	Sample DNA barcode used to identify a sample using sequence-based technologies eg ACAATGGA	1
+77	germplasm_species	zea_mays	 Zea mays	1
+78	germplasm_species	triticum_aestivum_subsp_aestivum	Triticum aestivum subsp aestivum	1
+79	germplasm_species	triticum_turgidum_subsp_durum  	Triticum turgidum subsp durum 	2
+80	germplasm_species	triticosecale_spp 	Triticosecale spp	3
+81	germplasm_species	oryza_sativa	Oryza sativa	1
+82	germplasm_species	oryza_australiensis	Oryza australiensis	2
+83	germplasm_species	oryza_barthii	Oryza barthii	3
+84	germplasm_species	oryza_glaberrima	Oryza glaberrima	4
+85	germplasm_species	oryza_longistaminata	Oryza longistaminata	5
+86	germplasm_species	oryza_punctata	Oryza punctata	6
+87	germplasm_species	oryza_rufipogon	Oryza rufipogon	7
+88	germplasm_species	cicer_arietinum	Cicer arietinum	1
+89	germplasm_species	cicer_reticulatum	Cicer reticulatum	2
+90	germplasm_species	cicer_echinospermum	Cicer echinospermum	3
+91	germplasm_species	sorghum_bicolor	Sorghum bicolor	1
+92	analysis_type	variant_calling	Sequence alignment and variant calling pipelines	1
+93	analysis_type	cleaning	Data cleaning methods used to remove poor quality data	2
+94	analysis_type	imputation	Imputation methods	3
+95	analysis_type	allele_sorting	Method for sorting alleles eg due to phasing	4
+96	dataset_type	2_letter_nucleotide	eg AA CC CT for SNPs, + - for indels and NN for missing. Any allele phasing will be maintained	1
+97	dataset_type	iupac	IUPAC eg ACGRY + 0 - N	2
+98	dataset_type	dominant_non_nucleotide	0, 1 , N: 0 can be absence and 1 can be presence. N = missing	3
+99	dataset_type	codominant_non_nucleotide	0, 1, 2, N: 0 can be absence, 1 is the heterozygote and 2 can be presence. N = missing	4
+100	dataset_type	ssr_allele_size	Used for SSR allele sizes - converted to 8 numbers eg 123/125 becomes 01230125. Missing = 00000000	5
 \.
 
 
@@ -113,7 +127,7 @@ COPY cv (cv_id, "group", term, definition, rank) FROM stdin;
 -- Name: cv_cv_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('cv_cv_id_seq', 99, true);
+SELECT pg_catalog.setval('cv_cv_id_seq', 1000, true);
 
 
 --
