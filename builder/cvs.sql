@@ -96,20 +96,10 @@ COPY cv (cv_id, "group", term, definition, rank) FROM stdin;
 74	dnasample_prop	sample_parent_prop	Type of parent for a population eg donor, recurrent etc	5
 75	dnasample_prop	ref_sample	Standard sample against which all other germplasm is compared to for this GID/MGID. Gold standard or Reference line.	6
 76	dnarun_prop	barcode	Sample DNA barcode used to identify a sample using sequence-based technologies eg ACAATGGA	1
-77	germplasm_species	zea_mays	 Zea mays	1
-78	germplasm_species	triticum_aestivum_subsp_aestivum	Triticum aestivum subsp aestivum	1
-79	germplasm_species	triticum_turgidum_subsp_durum  	Triticum turgidum subsp durum 	2
-80	germplasm_species	triticosecale_spp 	Triticosecale spp	3
-81	germplasm_species	oryza_sativa	Oryza sativa	1
-82	germplasm_species	oryza_australiensis	Oryza australiensis	2
-83	germplasm_species	oryza_barthii	Oryza barthii	3
-84	germplasm_species	oryza_glaberrima	Oryza glaberrima	4
-85	germplasm_species	oryza_longistaminata	Oryza longistaminata	5
-86	germplasm_species	oryza_punctata	Oryza punctata	6
-87	germplasm_species	oryza_rufipogon	Oryza rufipogon	7
-88	germplasm_species	cicer_arietinum	Cicer arietinum	1
-89	germplasm_species	cicer_reticulatum	Cicer reticulatum	2
-90	germplasm_species	cicer_echinospermum	Cicer echinospermum	3
+79	germplasm_species	triticum_turgidum_subsp_durum  	Triticum turgidum subsp durum 	4
+80	germplasm_species	triticosecale_spp 	Triticosecale spp	5
+81	germplasm_species	oryza_sativa	Oryza sativa	6
+82	germplasm_species	oryza_australiensis	Oryza australiensis	7
 91	germplasm_species	sorghum_bicolor	Sorghum bicolor	1
 92	analysis_type	variant_calling	Sequence alignment and variant calling pipelines	1
 93	analysis_type	cleaning	Data cleaning methods used to remove poor quality data	2
@@ -120,6 +110,16 @@ COPY cv (cv_id, "group", term, definition, rank) FROM stdin;
 98	dataset_type	dominant_non_nucleotide	0, 1 , N: 0 can be absence and 1 can be presence. N = missing	3
 99	dataset_type	codominant_non_nucleotide	0, 1, 2, N: 0 can be absence, 1 is the heterozygote and 2 can be presence. N = missing	4
 100	dataset_type	ssr_allele_size	Used for SSR allele sizes - converted to 8 numbers eg 123/125 becomes 01230125. Missing = 00000000	5
+77	germplasm_species	zea_mays	 Zea mays	2
+78	germplasm_species	triticum_aestivum_subsp_aestivum	Triticum aestivum subsp aestivum	3
+83	germplasm_species	oryza_barthii	Oryza barthii	8
+84	germplasm_species	oryza_glaberrima	Oryza glaberrima	9
+85	germplasm_species	oryza_longistaminata	Oryza longistaminata	10
+86	germplasm_species	oryza_punctata	Oryza punctata	11
+87	germplasm_species	oryza_rufipogon	Oryza rufipogon	12
+88	germplasm_species	cicer_arietinum	Cicer arietinum	13
+89	germplasm_species	cicer_reticulatum	Cicer reticulatum	14
+90	germplasm_species	cicer_echinospermum	Cicer echinospermum	15
 \.
 
 
@@ -127,7 +127,7 @@ COPY cv (cv_id, "group", term, definition, rank) FROM stdin;
 -- Name: cv_cv_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('cv_cv_id_seq', 1000, true);
+SELECT pg_catalog.setval('cv_cv_id_seq', 100, true);
 
 
 --
