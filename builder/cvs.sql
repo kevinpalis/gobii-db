@@ -105,10 +105,8 @@ COPY cv (cv_id, "group", term, definition, rank) FROM stdin;
 93	analysis_type	cleaning	Data cleaning methods used to remove poor quality data	2
 94	analysis_type	imputation	Imputation methods	3
 95	analysis_type	allele_sorting	Method for sorting alleles eg due to phasing	4
-96	dataset_type	2_letter_nucleotide	eg AA CC CT for SNPs, + - for indels and NN for missing. Any allele phasing will be maintained	1
 97	dataset_type	iupac	IUPAC eg ACGRY + 0 - N	2
 98	dataset_type	dominant_non_nucleotide	0, 1 , N: 0 can be absence and 1 can be presence. N = missing	3
-99	dataset_type	codominant_non_nucleotide	0, 1, 2, N: 0 can be absence, 1 is the heterozygote and 2 can be presence. N = missing	4
 100	dataset_type	ssr_allele_size	Used for SSR allele sizes - converted to 8 numbers eg 123/125 becomes 01230125. Missing = 00000000	5
 77	germplasm_species	zea_mays	 Zea mays	2
 78	germplasm_species	triticum_aestivum_subsp_aestivum	Triticum aestivum subsp aestivum	3
@@ -120,6 +118,8 @@ COPY cv (cv_id, "group", term, definition, rank) FROM stdin;
 88	germplasm_species	cicer_arietinum	Cicer arietinum	13
 89	germplasm_species	cicer_reticulatum	Cicer reticulatum	14
 90	germplasm_species	cicer_echinospermum	Cicer echinospermum	15
+96	dataset_type	nucleotide_2_letter	eg AA CC CT for SNPs, + - for indels and NN for missing. Any allele phasing will be maintained	1
+99	dataset_type	co_dominant_non_nucleotide	0, 1, 2, N: 0 can be absence, 1 is the heterozygote and 2 can be presence. N = missing	4
 \.
 
 

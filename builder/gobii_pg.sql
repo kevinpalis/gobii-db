@@ -54,6 +54,19 @@ CREATE TYPE keyvaluepair_type AS (
 
 
 --
+-- Name: myrowtype; Type: TYPE; Schema: public; Owner: -
+--
+
+CREATE TYPE myrowtype AS (
+	"23" text,
+	"24" text,
+	"25" text,
+	"26" text,
+	"27" text
+);
+
+
+--
 -- Name: addanalysistodataset(integer, integer); Type: FUNCTION; Schema: public; Owner: -
 --
 
@@ -1232,12 +1245,11 @@ CREATE FUNCTION getallmarkermetadatabydataset(datasetid integer) RETURNS TABLE(m
     return query
     with dm as (select dm.marker_id, dm.marker_idx from dataset_marker dm where dm.dataset_id=datasetId)
     select m.name as marker_name, mlp.linkage_group_name, mlp.start, mlp.stop, mlp.mapset_name, p.name as platform_name, m.variant_id, m.code, m.ref, array_to_string(m.alts, ',', '?'), m.sequence, r.name as reference_name, m.primers, m.probsets, cv.term as strand_name
-      from marker m, platform p, reference r, cv, v_marker_linkage_physical mlp, dm
-      where m.marker_id = dm.marker_id 
-      and m.platform_id = p.platform_id
-      and m.reference_id = r.reference_id
-      and m.strand_id = cv.cv_id
-      and m.marker_id = mlp.marker_id
+      from marker m inner join platform p on m.platform_id = p.platform_id
+      inner join dm on m.marker_id = dm.marker_id 
+      left join reference r on m.reference_id = r.reference_id
+      left join cv on m.strand_id = cv.cv_id 
+      left join v_marker_linkage_physical mlp on m.marker_id = mlp.marker_id
       order by dm.marker_idx;
   END;
 $$;
@@ -1396,19 +1408,18 @@ $$;
 -- Name: getallsamplemetadatabydataset(integer); Type: FUNCTION; Schema: public; Owner: -
 --
 
-CREATE FUNCTION getallsamplemetadatabydataset(datasetid integer) RETURNS TABLE(dnarun_name text, dnasample_name text, platename text, num text, well_row text, well_col text, germplasm_name text, external_code text, germplasm_type text, species text)
+CREATE FUNCTION getallsamplemetadatabydataset(datasetid integer) RETURNS TABLE(dnarun_name text, sample_name text, germplasm_name text, external_code text, germplasm_type text, species text, platename text, num text, well_row text, well_col text)
     LANGUAGE plpgsql
     AS $$
   BEGIN
     return query
     with dd as (select dd.dnarun_id, dd.dnarun_idx from dataset_dnarun dd where dd.dataset_id=datasetId)
-    select dr.name as dnarun_name, ds.name as dnasample_name, ds.platename, ds.num, ds.well_row, ds.well_col, g.name as germplasm_name, g.external_code, c1.term as germplasm_type, c2.term as species
-      from dnarun dr, dnasample ds, germplasm g, cv as c1, cv as c2, dd
-      where dr.dnarun_id = dd.dnarun_id
-      and dr.dnasample_id = ds.dnasample_id
-      and ds.germplasm_id = g.germplasm_id
-      and g.type_id = c1.cv_id
-      and g.species_id = c2.cv_id
+      select dr.name as dnarun_name, ds.name as sample_name, g.name as germplasm_name, g.external_code, c1.term as germplasm_type, c2.term as species, ds.platename, ds.num, ds.well_row, ds.well_col
+      from dd inner join dnarun dr on dr.dnarun_id = dd.dnarun_id 
+      inner join dnasample ds on dr.dnasample_id = ds.dnasample_id 
+      inner join germplasm g on ds.germplasm_id = g.germplasm_id 
+      left join cv as c1 on g.type_id = c1.cv_id 
+      left join cv as c2 on g.species_id = c2.cv_id
       order by dd.dnarun_idx;
   END;
 $$;
@@ -1786,11 +1797,10 @@ CREATE FUNCTION getminimalmarkermetadatabydataset(datasetid integer) RETURNS TAB
     return query
     with dm as (select dm.marker_id, dm.marker_idx from dataset_marker dm where dm.dataset_id=datasetId)
     select m.name as marker_name, m.ref || '/' || array_to_string(m.alts, ',', '?') as alleles, mlp.linkage_group_name as chrom, mlp.stop as pos, cv.term as strand
-      from marker m, cv, v_marker_linkage_genetic mlp, dm
-      where m.marker_id = dm.marker_id 
-      and m.strand_id = cv.cv_id
-      and m.marker_id = mlp.marker_id
-      order by dm.marker_idx;
+    from dm inner join marker m on m.marker_id = dm.marker_id 
+    left join v_marker_linkage_genetic mlp on m.marker_id = mlp.marker_id
+    left join cv on m.strand_id = cv.cv_id
+    order by dm.marker_idx;
   END;
 $$;
 
@@ -1799,20 +1809,19 @@ $$;
 -- Name: getminimalsamplemetadatabydataset(integer); Type: FUNCTION; Schema: public; Owner: -
 --
 
-CREATE FUNCTION getminimalsamplemetadatabydataset(datasetid integer) RETURNS TABLE(sample_name text, platename text, num text, well_row text, well_col text, germplasm_name text, germplasm_type text, species text)
+CREATE FUNCTION getminimalsamplemetadatabydataset(datasetid integer) RETURNS TABLE(dnarun_name text, sample_name text, germplasm_name text, external_code text, germplasm_type text, species text, platename text, num text, well_row text, well_col text)
     LANGUAGE plpgsql
     AS $$
   BEGIN
     return query
     with dd as (select dd.dnarun_id, dd.dnarun_idx from dataset_dnarun dd where dd.dataset_id=datasetId)
-    select ds.name as sample_name, ds.platename, ds.num, ds.well_row, ds.well_col, g.name as germplasm_name, c1.term as germplasm_type, c2.term as species
-      from dnarun dr, dnasample ds, germplasm g, cv as c1, cv as c2, dd
-      where dr.dnarun_id = dd.dnarun_id
-      and dr.dnasample_id = ds.dnasample_id
-      and ds.germplasm_id = g.germplasm_id
-      and g.type_id = c1.cv_id
-      and g.species_id = c2.cv_id
-      order by dd.dnarun_idx;
+    select dr.name as dnarun_name, ds.name as sample_name, g.name as germplasm_name, g.external_code, c1.term as germplasm_type, c2.term as species, ds.platename, ds.num, ds.well_row, ds.well_col
+    from dd inner join dnarun dr on dr.dnarun_id = dd.dnarun_id 
+    inner join dnasample ds on dr.dnasample_id = ds.dnasample_id 
+    inner join germplasm g on ds.germplasm_id = g.germplasm_id 
+    left join cv as c1 on g.type_id = c1.cv_id 
+    left join cv as c2 on g.species_id = c2.cv_id
+    order by dd.dnarun_idx;
   END;
 $$;
 
@@ -3957,6 +3966,22 @@ CREATE VIEW v_marker_metadata_by_dataset AS
     cv,
     dataset_marker dm
   WHERE ((m.marker_id = dm.marker_id) AND (m.platform_id = p.platform_id) AND (m.reference_id = r.reference_id) AND (m.strand_id = cv.cv_id));
+
+
+--
+-- Name: v_marker_with_props; Type: VIEW; Schema: public; Owner: -
+--
+
+CREATE VIEW v_marker_with_props AS
+ SELECT m.marker_id,
+    m.name,
+    mpr."23" AS genome_build,
+    mpr."24" AS whatever,
+    mp.props
+   FROM marker m,
+    marker_prop mp,
+    LATERAL jsonb_populate_record(NULL::myrowtype, mp.props) mpr("23", "24", "25", "26", "27")
+  WHERE (m.marker_id = mp.marker_id);
 
 
 --
