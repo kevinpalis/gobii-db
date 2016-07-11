@@ -65,8 +65,6 @@ COPY cv (cv_id, "group", term, definition, rank) FROM stdin;
 43	status	new	new row	1
 44	status	modified	modified row	2
 45	status	deleted	deleted row	3
-46	mapset_types	physical	Physical map	1
-47	mapset_types	genetic	Genetic map	2
 48	marker_strand	top	Marker design on the "top" strand as defined by Illumina	1
 49	marker_strand	bott	Marker design on the "bottom" strand as defined by Illumina	2
 50	marker_strand	forward	Marker designed on the Forward Strand - used by most technologies apart from Illumina and Affymetrix	3
@@ -100,6 +98,8 @@ COPY cv (cv_id, "group", term, definition, rank) FROM stdin;
 80	germplasm_species	triticosecale_spp 	Triticosecale spp	5
 81	germplasm_species	oryza_sativa	Oryza sativa	6
 82	germplasm_species	oryza_australiensis	Oryza australiensis	7
+46	mapset_type	physical	Physical map	1
+47	mapset_type	genetic	Genetic map	2
 91	germplasm_species	sorghum_bicolor	Sorghum bicolor	1
 92	analysis_type	variant_calling	Sequence alignment and variant calling pipelines	1
 93	analysis_type	cleaning	Data cleaning methods used to remove poor quality data	2
