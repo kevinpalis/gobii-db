@@ -69,10 +69,6 @@ COPY cv (cv_id, "group", term, definition, rank) FROM stdin;
 49	marker_strand	bott	Marker design on the "bottom" strand as defined by Illumina	2
 50	marker_strand	forward	Marker designed on the Forward Strand - used by most technologies apart from Illumina and Affymetrix	3
 51	marker_strand	+	Marker designed on the positive or + strand eg used by  Affymetrix	4
-52	marker_prop	primerF1	First forward primer	1
-53	marker_prop	primerF2	Second forward primer	2
-54	marker_prop	primerR1	First reverse primer	3
-55	marker_prop	primerR2	Second reverse primer	4
 56	marker_prop	probe1	First probe	5
 57	marker_prop	probe2	Second probe	6
 58	marker_prop	polymorphism_type	This describes the type of polymorphism that the marker interrogates eg SSR;SNP;Indel.	7
@@ -86,7 +82,6 @@ COPY cv (cv_id, "group", term, definition, rank) FROM stdin;
 66	marker_prop	clone_id_pos	The SNP position on the sequence for the clone ID - used for Dart technologies	15
 67	marker_prop	genome_build	The genome build that the marker was made with	16
 68	marker_prop	typeofrefallele_alleleorder	How a reference allele is called eg TOP/BOTT, F/R, +/-, first found, minor/major etc	17
-69	marker_prop	strand data_read	Strand that the allele data is read on ie the probe is designed to	18
 70	dnasample_prop	trial_name	Trial name for field experiment that the sample is coming from, or fieldbook	1
 71	dnasample_prop	sample_group	Sample Group eg MABCTHC_cycle1	2
 72	dnasample_prop	sample_group_cycle	Cycle eg backcrossing cycle for a sample group	3
@@ -100,6 +95,11 @@ COPY cv (cv_id, "group", term, definition, rank) FROM stdin;
 82	germplasm_species	oryza_australiensis	Oryza australiensis	7
 46	mapset_type	physical	Physical map	1
 47	mapset_type	genetic	Genetic map	2
+69	marker_prop	strand_data_read	Strand that the allele data is read on ie the probe is designed to	18
+52	marker_prop	primerf1	First forward primer	1
+53	marker_prop	primerf2	Second forward primer	2
+54	marker_prop	primerr1	First reverse primer	3
+55	marker_prop	primerr2	Second reverse primer	4
 91	germplasm_species	sorghum_bicolor	Sorghum bicolor	1
 92	analysis_type	variant_calling	Sequence alignment and variant calling pipelines	1
 93	analysis_type	cleaning	Data cleaning methods used to remove poor quality data	2

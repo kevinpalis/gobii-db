@@ -75,7 +75,7 @@ def main(argv):
 					print ("Temp files deleted.")
 				except Exception as e:
 					IFLUtility.printError("Failed to remove temporary files. Check file permissions. Error: %s" % str(e))
-					exitCode = 2
+					exitCode = 0
 			else:
 				printUsageHelp()
 		else:
