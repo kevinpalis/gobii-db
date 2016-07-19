@@ -4228,6 +4228,14 @@ ALTER TABLE ONLY variant ALTER COLUMN variant_id SET DEFAULT nextval('variant_va
 
 
 --
+-- Name: email_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY contact
+    ADD CONSTRAINT email_key UNIQUE (email);
+
+
+--
 -- Name: group_term_key; Type: CONSTRAINT; Schema: public; Owner: -
 --
 

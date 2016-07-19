@@ -52,6 +52,10 @@ ALTER TABLE cv ADD CONSTRAINT group_term_key UNIQUE ("group", term);
 
 -- compound unique: in the experiment table: name, projectid,platformid
 ALTER TABLE experiment ADD CONSTRAINT name_project_id_platform_id_key UNIQUE (name, project_id, platform_id);
+
+--unique
+ALTER TABLE contact ADD CONSTRAINT email_key UNIQUE (email);
+
 ALTER TABLE experiment ALTER COLUMN platform_id SET NOT NULL;
 ALTER TABLE dataset ADD CONSTRAINT dataset_fk3 FOREIGN KEY (type_id) REFERENCES cv(cv_id)
 
@@ -155,3 +159,4 @@ UPDATE CV SET term = 'dominant_non_nucleotide' WHERE CV_ID = 95;
 UPDATE CV SET term = 'codominant_non_nucleotide' WHERE CV_ID = 96;
 
 select * from createRole('User', 'User', NULL, NULL);
+

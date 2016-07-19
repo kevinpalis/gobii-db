@@ -1734,12 +1734,13 @@ RETURNS table (marker_name text, alleles text, chrom varchar, pos integer, stran
     with dm as (select dm.marker_id, dm.marker_idx from dataset_marker dm where dm.dataset_id=datasetId)
     select m.name as marker_name, m.ref || '/' || array_to_string(m.alts, ',', '?') as alleles, mlp.linkage_group_name as chrom, mlp.stop as pos, cv.term as strand
     from dm inner join marker m on m.marker_id = dm.marker_id 
-    left join v_marker_linkage_genetic mlp on m.marker_id = mlp.marker_id
+    left join v_marker_linkage_physical mlp on m.marker_id = mlp.marker_id
     left join cv on m.strand_id = cv.cv_id
     order by dm.marker_idx;
   END;
 $$ LANGUAGE plpgsql;
 
+--drop function getAllMarkerMetadataByDataset(datasetId integer);
 CREATE OR REPLACE FUNCTION getAllMarkerMetadataByDataset(datasetId integer)
 RETURNS table (marker_name text, linkage_group_name varchar, start numeric, stop numeric, mapset_name text, platform_name text, variant_id integer, code text, ref text, alts text, sequence text, reference_name text, primers jsonb, probsets jsonb, strand_name text) AS $$
   BEGIN
@@ -1755,6 +1756,7 @@ RETURNS table (marker_name text, linkage_group_name varchar, start numeric, stop
   END;
 $$ LANGUAGE plpgsql;
 
+--drop function getMinimalSampleMetadataByDataset(datasetId integer)
 CREATE OR REPLACE FUNCTION getMinimalSampleMetadataByDataset(datasetId integer)
 RETURNS table (dnarun_name text, sample_name text, germplasm_name text, external_code text, germplasm_type text, species text, platename text, num text, well_row text, well_col text) AS $$
   BEGIN
@@ -1770,6 +1772,7 @@ RETURNS table (dnarun_name text, sample_name text, germplasm_name text, external
   END;
 $$ LANGUAGE plpgsql;
  
+--drop function getAllSampleMetadataByDataset(datasetId integer);
 CREATE OR REPLACE FUNCTION getAllSampleMetadataByDataset(datasetId integer)
 RETURNS table (dnarun_name text, sample_name text, germplasm_name text, external_code text, germplasm_type text, species text, platename text, num text, well_row text, well_col text) AS $$
   BEGIN
