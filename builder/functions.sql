@@ -1728,7 +1728,7 @@ $$ LANGUAGE plpgsql;
 --######################################################################
 --drop function getAllMarkerMetadataByDataset(datasetId integer);
 CREATE OR REPLACE FUNCTION getMinimalMarkerMetadataByDataset(datasetId integer)
-RETURNS table (marker_name text, alleles text, chrom varchar, pos integer, strand text) AS $$
+RETURNS table (marker_name text, alleles text, chrom varchar, pos numeric, strand text) AS $$
   BEGIN
     return query
     with dm as (select dm.marker_id, dm.marker_idx from dataset_marker dm where dm.dataset_id=datasetId)

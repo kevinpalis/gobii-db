@@ -1790,7 +1790,7 @@ $$;
 -- Name: getminimalmarkermetadatabydataset(integer); Type: FUNCTION; Schema: public; Owner: -
 --
 
-CREATE FUNCTION getminimalmarkermetadatabydataset(datasetid integer) RETURNS TABLE(marker_name text, alleles text, chrom character varying, pos integer, strand text)
+CREATE FUNCTION getminimalmarkermetadatabydataset(datasetid integer) RETURNS TABLE(marker_name text, alleles text, chrom character varying, pos numeric, strand text)
     LANGUAGE plpgsql
     AS $$
   BEGIN
@@ -1798,7 +1798,7 @@ CREATE FUNCTION getminimalmarkermetadatabydataset(datasetid integer) RETURNS TAB
     with dm as (select dm.marker_id, dm.marker_idx from dataset_marker dm where dm.dataset_id=datasetId)
     select m.name as marker_name, m.ref || '/' || array_to_string(m.alts, ',', '?') as alleles, mlp.linkage_group_name as chrom, mlp.stop as pos, cv.term as strand
     from dm inner join marker m on m.marker_id = dm.marker_id 
-    left join v_marker_linkage_genetic mlp on m.marker_id = mlp.marker_id
+    left join v_marker_linkage_physical mlp on m.marker_id = mlp.marker_id
     left join cv on m.strand_id = cv.cv_id
     order by dm.marker_idx;
   END;
