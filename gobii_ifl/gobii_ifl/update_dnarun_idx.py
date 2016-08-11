@@ -22,7 +22,7 @@ def main(isVerbose, connectionStr, iFile, datasetId):
 		with open(iFile, 'r') as f1:
 			reader = csv.reader(f1, delimiter='\t')
 			reader.next()
-			for sample_id, sample_name in reader:
+			for sample_id, sample_name, experiment_id in reader:
 				#if IS_VERBOSE:
 				#	print("Updating: %s" % marker_name)
 				updateH5iMgr.updateDatasetDnarunH5Index(datasetId, sample_id, idx)
