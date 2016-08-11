@@ -23,7 +23,7 @@ def main(isVerbose, connectionStr, iFile, datasetId):
 		with open(iFile, 'r') as f1:
 			reader = csv.reader(f1, delimiter='\t')
 			reader.next()
-			for marker_id, marker_name in reader:
+			for marker_id, marker_name, platform_id in reader:
 				#if IS_VERBOSE:
 				#	print("Updating: %s" % marker_name)
 				updateH5iMgr.updateDatasetMarkerH5Index(datasetId, marker_id, idx)

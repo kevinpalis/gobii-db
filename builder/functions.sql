@@ -1726,7 +1726,7 @@ $$ LANGUAGE plpgsql;
 --######################################################################
 -- Extraction functions 
 --######################################################################
---drop function getAllMarkerMetadataByDataset(datasetId integer);
+--drop function getMinimalMarkerMetadataByDataset(datasetId integer);
 CREATE OR REPLACE FUNCTION getMinimalMarkerMetadataByDataset(datasetId integer)
 RETURNS table (marker_name text, alleles text, chrom varchar, pos numeric, strand text) AS $$
   BEGIN

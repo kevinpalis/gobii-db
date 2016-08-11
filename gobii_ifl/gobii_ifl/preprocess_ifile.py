@@ -82,11 +82,11 @@ def main(isVerbose, connectionStr, iFile, outputPath):
 		if IS_VERBOSE:
 			print("mappedColList: %s" % mappedColList)
 		for fColumn in header:
-			if fColumn in targetTableColumnList or fColumn in mappedColList:
-				if selectStr == "":
-					selectStr += fTableName+"."+fColumn
-				else:
-					selectStr += ", "+fTableName+"."+fColumn
+			#if fColumn in targetTableColumnList or fColumn in mappedColList:
+			if selectStr == "":
+				selectStr += fTableName+"."+fColumn
+			else:
+				selectStr += ", "+fTableName+"."+fColumn
 			#print("Current selectStr=%s" % selectStr)
 		for file_column_names, column_alias, table_name, table_columns, id_column, table_alias in reader:
 			#if IS_VERBOSE:
