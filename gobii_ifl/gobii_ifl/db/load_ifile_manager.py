@@ -5,12 +5,14 @@ from connection_manager import ConnectionManager
 from foreign_data_manager import ForeignDataManager
 
 class LoadIfileManager:
+	WORK_MEM = 10240
 
 	def __init__(self, connectionStr):
 		self.connMgr = ConnectionManager()
 		self.conn = self.connMgr.connectToDatabase(connectionStr)
 		self.cur = self.conn.cursor()
 		self.fdm = ForeignDataManager()
+		self.cur.execute("set work_mem to %s", (self.WORK_MEM,))
 		#print("Load IFile Manager Initialized.")
 
 	def dropForeignTable(self, fdwTableName):
