@@ -50,6 +50,7 @@ class PreprocessIfileManager:
 
 	def createForeignTable(self, iFile, fTableName):
 		header, fdwScript = self.fdm.generateFDWScript(iFile, fTableName)
+		#print("fdwScript: %s" % fdwScript)
 		self.cur.execute(fdwScript)
 		return header
 
