@@ -11,7 +11,6 @@ class ExtractMetadataManager:
 		self.conn = self.connMgr.connectToDatabase(connectionStr)
 		self.cur = self.conn.cursor()
 		self.fdm = ForeignDataManager()
-		#print("Preprocess IFile Manager Initialized.")
 
 	def dropForeignTable(self, fdwTableName):
 		self.cur.execute("drop foreign table if exists "+fdwTableName)
@@ -21,39 +20,53 @@ class ExtractMetadataManager:
 		self.cur.execute(fdwScript)
 		return header
 
+	def createFileWithoutDuplicates(self, outputFilePath, noDupsSql):
+		copyStmt = "copy ("+noDupsSql+") to STDOUT with delimiter E'\\t'"+" csv header;"
+		with open(outputFilePath, 'w') as outputFile:
+			self.cur.copy_expert(copyStmt, outputFile, 20480)
+		outputFile.close()
+
 	def createAllMarkerMetadataFile(self, outputFilePath, datasetId):
-		sql = "copy (select * from getAllMarkerMetadataByDataset("+datasetId+")) to '"+outputFilePath+"' with delimiter E'\\t'"+" csv header;"
-		#print("copyStmt = "+copyStmt)
-		self.cur.execute(sql)
+		sql = "copy (select * from getAllMarkerMetadataByDataset("+datasetId+")) to STDOUT with delimiter E'\\t'"+" csv header;"
+		with open(outputFilePath, 'w') as outputFile:
+			self.cur.copy_expert(sql, outputFile, 20480)
+		outputFile.close()
 
 	def createMarkerNamesFile(self, outputFilePath, datasetId):
-		sql = "copy (select * from getMarkerNamesByDataset("+datasetId+")) to '"+outputFilePath+"' with delimiter E'\\t'"+" csv header;"
-		self.cur.execute(sql)
+		sql = "copy (select * from getMarkerNamesByDataset("+datasetId+")) to STDOUT with delimiter E'\\t'"+" csv header;"
+		with open(outputFilePath, 'w') as outputFile:
+			self.cur.copy_expert(sql, outputFile, 20480)
+		outputFile.close()
 
 	def createMinimalMarkerMetadataFile(self, outputFilePath, datasetId):
-		sql = "copy (select * from getMinimalMarkerMetadataByDataset("+datasetId+")) to '"+outputFilePath+"' with delimiter E'\\t'"+" csv header;"
-		#print("copyStmt = "+copyStmt)
-		self.cur.execute(sql)
+		sql = "copy (select * from getMinimalMarkerMetadataByDataset("+datasetId+")) to STDOUT with delimiter E'\\t'"+" csv header;"
+		with open(outputFilePath, 'w') as outputFile:
+			self.cur.copy_expert(sql, outputFile, 20480)
+		outputFile.close()
 
 	def createAllSampleMetadataFile(self, outputFilePath, datasetId):
-		sql = "copy (select * from getAllSampleMetadataByDataset("+datasetId+")) to '"+outputFilePath+"' with delimiter E'\\t'"+" csv header;"
-		#print("copyStmt = "+copyStmt)
-		self.cur.execute(sql)
+		sql = "copy (select * from getAllSampleMetadataByDataset("+datasetId+")) to STDOUT with delimiter E'\\t'"+" csv header;"
+		with open(outputFilePath, 'w') as outputFile:
+			self.cur.copy_expert(sql, outputFile, 20480)
+		outputFile.close()
 
 	def createDnarunNamesFile(self, outputFilePath, datasetId):
-		sql = "copy (select * from getDnarunNamesByDataset("+datasetId+")) to '"+outputFilePath+"' with delimiter E'\\t'"+" csv header;"
-		#print("copyStmt = "+copyStmt)
-		self.cur.execute(sql)
+		sql = "copy (select * from getDnarunNamesByDataset("+datasetId+")) to STDOUT with delimiter E'\\t'"+" csv header;"
+		with open(outputFilePath, 'w') as outputFile:
+			self.cur.copy_expert(sql, outputFile, 20480)
+		outputFile.close()
 
 	def createMinimalSampleMetadataFile(self, outputFilePath, datasetId):
-		sql = "copy (select * from getMinimalSampleMetadataByDataset("+datasetId+")) to '"+outputFilePath+"' with delimiter E'\\t'"+" csv header;"
-		#print("copyStmt = "+copyStmt)
-		self.cur.execute(sql)
+		sql = "copy (select * from getMinimalSampleMetadataByDataset("+datasetId+")) to STDOUT with delimiter E'\\t'"+" csv header;"
+		with open(outputFilePath, 'w') as outputFile:
+			self.cur.copy_expert(sql, outputFile, 20480)
+		outputFile.close()
 
 	def createAllProjectMetadataFile(self, outputFilePath, datasetId):
-		sql = "copy (select * from getAllProjectMetadataByDataset("+datasetId+")) to '"+outputFilePath+"' with delimiter E'\\t'"+" csv header;"
-		#print("copyStmt = "+copyStmt)
-		self.cur.execute(sql)
+		sql = "copy (select * from getAllProjectMetadataByDataset("+datasetId+")) to STDOUT with delimiter E'\\t'"+" csv header;"
+		with open(outputFilePath, 'w') as outputFile:
+			self.cur.copy_expert(sql, outputFile, 20480)
+		outputFile.close()
 
 	def commitTransaction(self):
 		self.conn.commit()
