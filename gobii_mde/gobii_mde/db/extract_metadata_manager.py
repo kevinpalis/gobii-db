@@ -11,7 +11,6 @@ class ExtractMetadataManager:
 		self.conn = self.connMgr.connectToDatabase(connectionStr)
 		self.cur = self.conn.cursor()
 		self.fdm = ForeignDataManager()
-		#print("Preprocess IFile Manager Initialized.")
 
 	def dropForeignTable(self, fdwTableName):
 		self.cur.execute("drop foreign table if exists "+fdwTableName)

@@ -81,18 +81,6 @@ def main(argv):
 			MDEUtility.printError("The supplied dataset ID is not valid.")
 		#cleanup
 
-def checkDataIntegrity(iFile, pFile, verbose):
-	iCount = MDEUtility.getFileLineCount(iFile)
-	pCount = MDEUtility.getFileLineCount(pFile)
-	#print ("Input file line count: %i" % iCount)
-	#print ("Ppd file line count: %i" % pCount)
-	if iCount == pCount:
-		return True
-	else:
-		if verbose:
-			print ("Mismatch: input_file=%s preprocessed_file=%s" % (iCount, pCount))
-		return False
-
 def printUsageHelp():
 	print ("gobii_mde.py -c <connectionString> -m <markerOutputFile> -s <sampleOutputFile> -p <projectOutputFile> -d <dataset_id> -a -v -n")
 	print ("\t-h = Usage help")
