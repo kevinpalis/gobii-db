@@ -5,12 +5,14 @@ from connection_manager import ConnectionManager
 from foreign_data_manager import ForeignDataManager
 
 class LoadIfileManager:
+	WORK_MEM = 10240
 
 	def __init__(self, connectionStr):
 		self.connMgr = ConnectionManager()
 		self.conn = self.connMgr.connectToDatabase(connectionStr)
 		self.cur = self.conn.cursor()
 		self.fdm = ForeignDataManager()
+		self.cur.execute("set work_mem to %s", (self.WORK_MEM,))
 		#print("Load IFile Manager Initialized.")
 
 	def dropForeignTable(self, fdwTableName):
@@ -22,21 +24,30 @@ class LoadIfileManager:
 		self.cur.execute(fdwScript)
 		return header
 
-	def createFileWithDerivedIds(self, outputFilePath, derivedIdSql):
-		copyStmt = "copy ("+derivedIdSql+") to '"+outputFilePath+"' with delimiter E'\\t'"+" csv header;"
-		#print("copyStmt = "+copyStmt)
-		self.cur.execute(copyStmt)
-
-	def createFileWithoutDuplicates(self, outputFilePath, noDupsSql):
+	def createFileWithoutDuplicatesV1(self, outputFilePath, noDupsSql):
 		copyStmt = "copy ("+noDupsSql+") to '"+outputFilePath+"' with delimiter E'\\t'"+" csv header;"
 		#print("copyStmt = "+copyStmt)
 		self.cur.execute(copyStmt)
 
-	def loadData(self, tableName, header, fileToLoad, primaryKeyColumnName):
+	def createFileWithoutDuplicates(self, outputFilePath, noDupsSql):
+		copyStmt = "copy ("+noDupsSql+") to STDOUT with delimiter E'\\t'"+" csv header;"
+		with open(outputFilePath, 'w') as outputFile:
+			#let's try 20MB buffer size for a start, default was 8MB
+			self.cur.copy_expert(copyStmt, outputFile, 20480)
+		outputFile.close()
+
+	def loadDataV1(self, tableName, header, fileToLoad, primaryKeyColumnName):
 		loadSql = "copy "+tableName+" ("+(",".join(header))+")"+" from '"+fileToLoad+"' with delimiter E'\\t' csv header;"
 		#print("loadSql = "+loadSql)
-		self.updateSerialSequence(tableName, primaryKeyColumnName)
 		self.cur.execute(loadSql)
+		self.updateSerialSequence(tableName, primaryKeyColumnName)
+
+	def loadData(self, tableName, header, fileToLoad, primaryKeyColumnName):
+		loadSql = "copy "+tableName+" ("+(",".join(header))+")"+" from STDIN with delimiter E'\\t' csv header;"
+		with open(fileToLoad, 'r') as f:
+			self.cur.copy_expert(loadSql, f, 20480)
+		f.close()
+		self.updateSerialSequence(tableName, primaryKeyColumnName)
 
 	def updateSerialSequence(self, tableName, primaryKeyColumnName):
 		updateSeqSql = "SELECT pg_catalog.setval(pg_get_serial_sequence('"+tableName+"', '"+primaryKeyColumnName+"'), MAX("+primaryKeyColumnName+")) FROM "+tableName+";"
