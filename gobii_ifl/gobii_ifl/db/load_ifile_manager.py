@@ -44,10 +44,14 @@ class LoadIfileManager:
 
 	def loadData(self, tableName, header, fileToLoad, primaryKeyColumnName):
 		loadSql = "copy "+tableName+" ("+(",".join(header))+")"+" from STDIN with delimiter E'\\t' csv header;"
+		rowsLoaded = 0
 		with open(fileToLoad, 'r') as f:
 			self.cur.copy_expert(loadSql, f, 20480)
+			rowsLoaded = self.cur.rowcount
+			#print("Rows loaded = %s" % self.cur.rowcount)
 		f.close()
 		self.updateSerialSequence(tableName, primaryKeyColumnName)
+		return rowsLoaded
 
 	def updateSerialSequence(self, tableName, primaryKeyColumnName):
 		updateSeqSql = "SELECT pg_catalog.setval(pg_get_serial_sequence('"+tableName+"', '"+primaryKeyColumnName+"'), MAX("+primaryKeyColumnName+")) FROM "+tableName+";"
