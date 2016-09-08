@@ -93,8 +93,8 @@ def main(isVerbose, connectionStr, iFile, outputPath):
 		loadMgr.dropForeignTable(fTableName)
 		loadMgr.commitTransaction()
 		loadMgr.closeConnection()
-		print("Loaded %s successfully. Rows loaded = %s." % (iFile, rowsLoaded))
-		return outputFile
+		print("Loaded %s successfully.\nRows loaded = %s" % (iFile, rowsLoaded))
+		return outputFile, rowsLoaded
 	except Exception as e:
 		IFLUtility.printError('Failed to load %s. Error: %s' % (iFile, str(e)))
 		loadMgr.rollbackTransaction()
