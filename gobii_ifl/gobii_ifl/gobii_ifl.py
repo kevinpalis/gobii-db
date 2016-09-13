@@ -16,6 +16,7 @@ def main(argv):
 		inputDir = ""
 		outputPath = ""
 		exitCode = 0
+		rowsLoaded = 0
 		#print("Args count: ", len(argv))
 		try:
 			opts, args = getopt.getopt(argv, "hc:i:d:o:vl", ["connectionString=", "inputFile=", "inputDir=", "outputDir=", "verbose", "fileLengthCheck"])
@@ -43,6 +44,7 @@ def main(argv):
 		#print("Opts: ", opts)
 		if connectionStr != "" and outputPath != "":
 			if inputDir != "":
+				#Directory iterative run
 				for f in os.listdir(inputDir):
 					try:
 						if verbose:
@@ -51,24 +53,30 @@ def main(argv):
 						if flCheck and not checkDataIntegrity(f, preprocessedFile, verbose):
 							IFLUtility.printError("File length mismatch detected on %s. You have duplicate entries in the table where the NMAP file maps to, please fix it. Skipping file." % f)
 						else:
-							loadFile = load_ifile.main(verbose, connectionStr, preprocessedFile, outputPath)
+							loadFile, rowsLoaded = load_ifile.main(verbose, connectionStr, preprocessedFile, outputPath)
+						'''
+						In light of enhanced error logging, we decided that there is value to these files and so IFLs will not delete them.
 						try:
 							os.remove(preprocessedFile)
 							os.remove(loadFile)
 						except Exception as e:
 							IFLUtility.printError("Failed to remove temporary files. Check file permissions. Error: %s" % str(e))
 							exitCode = 2
+						'''
 					except Exception as e1:
 						IFLUtility.printError("Failed to load file %s. Error: %s" % (f, str(e1)))
 						exitCode = 3
+						sys.exit(exitCode)
 			elif iFile != "":
+				#Per file run
 				preprocessedFile = preprocess_ifile.main(verbose, connectionStr, iFile, outputPath)
 				loadFile = None
 				if flCheck and not checkDataIntegrity(iFile, preprocessedFile, verbose):
 					IFLUtility.printError("File length mismatch detected on %s. You have duplicate entries in the table where the NMAP file maps to, please fix it first. Loading will abort." % iFile)
 				else:
-					loadFile = load_ifile.main(verbose, connectionStr, preprocessedFile, outputPath)
-				return
+					loadFile, rowsLoaded = load_ifile.main(verbose, connectionStr, preprocessedFile, outputPath)
+				'''
+				In light of enhanced error logging, we decided that there is value to these files and so IFLs will not delete them.
 				try:
 					os.remove(preprocessedFile)
 					os.remove(loadFile)
@@ -76,11 +84,13 @@ def main(argv):
 				except Exception as e:
 					IFLUtility.printError("Failed to remove temporary files. Check file permissions. Error: %s" % str(e))
 					exitCode = 0
+				'''
 			else:
 				printUsageHelp()
 		else:
 			printUsageHelp()
-		sys.exit(exitCode)
+		return rowsLoaded
+		#sys.exit(exitCode)
 		#cleanup
 
 def checkDataIntegrity(iFile, pFile, verbose):

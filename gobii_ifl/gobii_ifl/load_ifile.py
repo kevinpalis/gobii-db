@@ -40,6 +40,7 @@ def main(isVerbose, connectionStr, iFile, outputPath):
 	#print("splitext: ", splitext(basename(iFile)))
 	tableName = splitext(basename(iFile))[1][1:]
 	randomStr = IFLUtility.generateRandomString(SUFFIX_LEN)
+	rowsLoaded = 0
 	fTableName = "ft_" + tableName + "_" + randomStr
 	if IS_VERBOSE:
 		print("Table Name:", tableName)
@@ -88,12 +89,12 @@ def main(isVerbose, connectionStr, iFile, outputPath):
 		if IS_VERBOSE:
 			print("Removed duplicates successfully.")
 		#primary key column assumed to be tablename_id --> needs to be configurable(?) (would've been better if everything's just 'id' as usual!)
-		loadMgr.loadData(tableName, header, outputFile, tableName+"_id")
+		rowsLoaded = loadMgr.loadData(tableName, header, outputFile, tableName+"_id")
 		loadMgr.dropForeignTable(fTableName)
 		loadMgr.commitTransaction()
 		loadMgr.closeConnection()
-		print("Loaded %s successfully." % iFile)
-		return outputFile
+		print("Loaded %s successfully.\nRows loaded = %s" % (iFile, rowsLoaded))
+		return outputFile, rowsLoaded
 	except Exception as e:
 		IFLUtility.printError('Failed to load %s. Error: %s' % (iFile, str(e)))
 		loadMgr.rollbackTransaction()
