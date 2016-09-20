@@ -45,6 +45,7 @@ $$;
 --will see if rollback is needed here
 
 --changeset kpalis:create_datasetmarkeridx_gin context:general
+drop view if exists v_marker_metadata_by_dataset;
 create index idx_marker_datasetmarkeridx on marker using gin (dataset_marker_idx); 
 --changeset kpalis:create_datasetdnarunidx_gin context:general
 create index idx_dnarun_datasetdnarunidx on dnarun using gin (dataset_dnarun_idx);
