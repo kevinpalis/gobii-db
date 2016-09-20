@@ -61,11 +61,11 @@ def main(argv):
 							os.remove(loadFile)
 						except Exception as e:
 							IFLUtility.printError("Failed to remove temporary files. Check file permissions. Error: %s" % str(e))
-							exitCode = 2
+							exitCode = -2
 						'''
 					except Exception as e1:
 						IFLUtility.printError("Failed to load file %s. Error: %s" % (f, str(e1)))
-						exitCode = 3
+						exitCode = -3
 						sys.exit(exitCode)
 			elif iFile != "":
 				#Per file run
@@ -89,8 +89,8 @@ def main(argv):
 				printUsageHelp()
 		else:
 			printUsageHelp()
-		return rowsLoaded
-		#sys.exit(exitCode)
+		#return rowsLoaded
+		sys.exit(rowsLoaded)
 		#cleanup
 
 def checkDataIntegrity(iFile, pFile, verbose):
@@ -114,7 +114,7 @@ def printUsageHelp():
 	print ("\t-o or --outputDir = The output directory where preprocessed file and file for bulk loading (no duplicates) will be placed.\n\t\tEnsure that this path is writeable.")
 	print ("\t-v or --verbose = Print the status of the IFL in more detail")
 	print ("\t-l or --fileLengthCheck = This will check if the preprocessed file is of the same length as the input file. \n\t\tA mismatch indicates duplicate entries in the table where the NMAP file maps to.\n\t\tInput file should not be loaded in that case.")
-	sys.exit(1)
+	sys.exit(-1)
 
 if __name__ == "__main__":
 	main(sys.argv[1:])

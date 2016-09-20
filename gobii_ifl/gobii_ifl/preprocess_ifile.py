@@ -147,7 +147,7 @@ def main(isVerbose, connectionStr, iFile, outputPath):
 if __name__ == "__main__":
 	if len(sys.argv) < 4:
 		print("Please supply the parameters. \nUsage: preprocess_ifile <db_connection_string> <intermediate_file> <output_directory_path>")
-		sys.exit(1)
+		sys.exit(-1)
 	connectionStr = str(sys.argv[1])
 	iFile = str(sys.argv[2])
 	outputPath = str(sys.argv[3])
