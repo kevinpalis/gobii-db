@@ -41,6 +41,7 @@ def main(isVerbose, connectionStr, iFile, outputPath):
 	tableName = splitext(basename(iFile))[1][1:]
 	randomStr = IFLUtility.generateRandomString(SUFFIX_LEN)
 	rowsLoaded = 0
+	exitCode = 0
 	fTableName = "ft_" + tableName + "_" + randomStr
 	if IS_VERBOSE:
 		print("Table Name:", tableName)
@@ -93,17 +94,21 @@ def main(isVerbose, connectionStr, iFile, outputPath):
 		loadMgr.dropForeignTable(fTableName)
 		loadMgr.commitTransaction()
 		loadMgr.closeConnection()
-		print("Loaded %s successfully.\nRows loaded = %s" % (iFile, rowsLoaded))
-		return outputFile, rowsLoaded
+		if IS_VERBOSE:
+			print("Loaded %s successfully.\nRows loaded = %s" % (iFile, rowsLoaded))
+		print(rowsLoaded)
+		return outputFile, exitCode
 	except Exception as e:
 		IFLUtility.printError('Failed to load %s. Error: %s' % (iFile, str(e)))
 		loadMgr.rollbackTransaction()
+		exitCode = 6
 		traceback.print_exc(file=sys.stderr)
+		return outputFile, exitCode
 
 if __name__ == "__main__":
 	if len(sys.argv) < 4:
 		print("Please supply the parameters. \nUsage: load_ifile <db_connection_str> <intermediate_file> <output_directory_path>")
-		sys.exit(-1)
+		sys.exit(1)
 	connectionStr = str(sys.argv[1])
 	iFile = str(sys.argv[2])
 	#dupMappingFile = str(sys.argv[2])
