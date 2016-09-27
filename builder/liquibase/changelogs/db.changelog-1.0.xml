@@ -2,4 +2,5 @@
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
 	<include file="changelogs/changesets/create_indices.sql"/>
 	<include file="changelogs/changesets/dataset_join_tables_fix.sql"/>
+	<include file="changelogs/changesets/mde_filter_by_map.sql"/>
 </databaseChangeLog>
