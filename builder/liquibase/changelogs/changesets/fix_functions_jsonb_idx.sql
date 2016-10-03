@@ -1,5 +1,8 @@
 --liquibase formatted sql
-
+/*
+	As a result of removing the dataset_marker and dataset_dnarun tables and replacing them with jsonb columns in the 
+	main entities instead, these are the necessary adjustments/replacements/deletions in functions.
+*/
 --changeset kpalis:getMinimalMarkerMetadataByDataset_fix context:general splitStatements:false
 DROP FUNCTION getMinimalMarkerMetadataByDataset(integer);
 CREATE OR REPLACE FUNCTION getMinimalMarkerMetadataByDataset(datasetId integer)
@@ -64,43 +67,39 @@ RETURNS table (dnarun_name text, sample_name text, germplasm_name text, external
 	order by dr.dataset_dnarun_idx->datasetId::text;
   END;
 $$ LANGUAGE plpgsql;
-/*
+
+--changeset kpalis:getMarkerNamesByDataset_fix context:general splitStatements:false
+DROP FUNCTION getMarkerNamesByDataset(integer);
 CREATE OR REPLACE FUNCTION getMarkerNamesByDataset(datasetId integer)
 RETURNS table (marker_id integer, marker_name text) AS $$
   BEGIN
     return query
-    with dm as (select dm.marker_id, dm.marker_idx from dataset_marker dm where dm.dataset_id=datasetId)
     select m.marker_id, m.name as marker_name
-      from marker m, dm
-      where m.marker_id = dm.marker_id 
-      order by dm.marker_idx;
+	from marker m
+	where m.dataset_marker_idx ? datasetId::text
+	order by m.dataset_marker_idx->datasetId::text;
   END;
 $$ LANGUAGE plpgsql;
 
+--changeset kpalis:getDnarunNamesByDataset_fix context:general splitStatements:false
+DROP FUNCTION getDnarunNamesByDataset(integer);
 CREATE OR REPLACE FUNCTION getDnarunNamesByDataset(datasetId integer)
 RETURNS table (dnarun_id integer, dnarun_name text) AS $$
   BEGIN
     return query
-    with dd as (select dd.dnarun_id, dd.dnarun_idx from dataset_dnarun dd where dd.dataset_id=datasetId)
     select  dr.dnarun_id, dr.name as dnarun_name 
-      from dnarun dr, dd
-      where dr.dnarun_id = dd.dnarun_id
-      order by dd.dnarun_idx;
+	from dnarun dr
+	where dr.dataset_dnarun_idx ? datasetId::text
+	order by dr.dataset_dnarun_idx->datasetId::text;
   END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION getAllProjectMetadataByDataset(datasetId integer)
-RETURNS table (project_name text, description text, PI text, experiment_name text, platform_name text, dataset_name text, analysis_name text) AS $$
-  BEGIN
-    return query
-    select p.name as project_name, p.description, c.firstname || ' ' || c.lastname as PI, e.name as experiment_name, pf.name as platform_name, d.name as dataset_name, a.name as analysis_name
-      from dataset d, experiment e, project p, contact c, platform pf, analysis a
-      where d.dataset_id = datasetId
-      and d.callinganalysis_id = a.analysis_id
-      and d.experiment_id = e.experiment_id
-      and e.project_id = p.project_id
-      and p.pi_contact = c.contact_id
-      and e.platform_id = pf.platform_id;
-  END;
-$$ LANGUAGE plpgsql;
-*/
+--changeset kpalis:dropDatasetDnarunFxns context:general splitStatements:false
+DROP FUNCTION createDatasetDnaRun(integer, integer, integer, OUT integer);
+DROP FUNCTION updateDatasetDnaRun(integer, integer, integer, integer);
+DROP FUNCTION deleteDatasetDnaRun(integer);
+
+--changeset kpalis:dropDatasetMarkerFxns context:general splitStatements:false tag:version_1.1
+DROP FUNCTION createDatasetMarker(integer, integer, real, real, real, integer, OUT integer);
+DROP FUNCTION updateDatasetMarker(integer, integer, integer, real, real, real, integer);
+DROP FUNCTION deleteDatasetMarker(integer);
