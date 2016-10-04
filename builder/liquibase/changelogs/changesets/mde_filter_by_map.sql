@@ -36,3 +36,15 @@ RETURNS table (marker_name text, linkage_group_name varchar, start numeric, stop
   END;
 $$ LANGUAGE plpgsql;
 
+--changeset kpalis:add_getMarkerNamesByDatasetAndMap_fxn context:general splitStatements:false
+CREATE OR REPLACE FUNCTION getMarkerNamesByDatasetAndMap(datasetId integer, mapId integer)
+RETURNS table (marker_id integer, marker_name text) AS $$
+  BEGIN
+    return query
+    select m.marker_id, m.name as marker_name
+	from marker m
+	left join v_marker_linkage_physical mlp on (m.marker_id = mlp.marker_id and mlp.map_id=mapId)
+	where m.dataset_marker_idx ? datasetId::text
+	order by m.dataset_marker_idx->datasetId::text;
+  END;
+$$ LANGUAGE plpgsql;
