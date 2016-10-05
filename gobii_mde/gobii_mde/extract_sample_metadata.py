@@ -41,9 +41,10 @@ def main(isVerbose, connectionStr, datasetId, outputFile, allMeta, namesOnly):
 		MDEUtility.printError('Failed to create sample metadata file. Error: %s' % (str(e)))
 		exMgr.rollbackTransaction()
 		traceback.print_exc(file=sys.stderr)
+		sys.exit(7)
 
 if __name__ == "__main__":
 	if len(sys.argv) < 5:
 		print("Please supply the parameters. \nUsage: extract_sample_metadata <db_connection_string> <dataset_id> <output_file_abs_path> <all_meta> <names_only>")
-		sys.exit()
+		sys.exit(1)
 	main(True, str(sys.argv[1]), str(sys.argv[2]), str(sys.argv[3]), str(sys.argv[4]), str(sys.argv[5]))

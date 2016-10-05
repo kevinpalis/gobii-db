@@ -17,9 +17,11 @@ def main(argv):
 		projectOutputFile = ""
 		allMeta = False
 		namesOnly = False
+		mapId = -1
+		exitCode = 0
 		#print("Args count: ", len(argv))
 		try:
-			opts, args = getopt.getopt(argv, "hc:m:s:d:p:avn", ["connectionString=", "markerOutputFile=", "sampleOutputFile=", "datasetId=", "projectOutputFile=", "all", "verbose", "namesonly"])
+			opts, args = getopt.getopt(argv, "hc:m:s:d:p:avnM:", ["connectionString=", "markerOutputFile=", "sampleOutputFile=", "datasetId=", "projectOutputFile=", "all", "verbose", "namesonly", "map="])
 			#print (opts, args)
 			if len(args) < 2 and len(opts) < 2:
 				printUsageHelp()
@@ -45,6 +47,8 @@ def main(argv):
 				verbose = True
 			elif opt in ("-n", "--namesonly"):
 				namesOnly = True
+			elif opt in ("-M", "--map"):
+				mapId = arg
 
 		#if verbose:
 		#print("Opts: ", opts)
@@ -54,9 +58,10 @@ def main(argv):
 				try:
 					if verbose:
 						print("Generating marker metadata file...")
-					extract_marker_metadata.main(verbose, connectionStr, datasetId, markerOutputFile, allMeta, namesOnly)
+					extract_marker_metadata.main(verbose, connectionStr, datasetId, markerOutputFile, allMeta, namesOnly, mapId)
 				except Exception as e1:
 					MDEUtility.printError("Error: %s" % (str(e1)))
+					exitCode = 2
 				rn = True
 			if connectionStr != "" and sampleOutputFile != "":
 				try:
@@ -65,6 +70,7 @@ def main(argv):
 					extract_sample_metadata.main(verbose, connectionStr, datasetId, sampleOutputFile, allMeta, namesOnly)
 				except Exception as e:
 					MDEUtility.printError("Error: %s" % str(e))
+					exitCode = 3
 				rn = True
 			if connectionStr != "" and projectOutputFile != "":
 				try:
@@ -73,16 +79,19 @@ def main(argv):
 					extract_project_metadata.main(verbose, connectionStr, datasetId, projectOutputFile, allMeta)
 				except Exception as e:
 					MDEUtility.printError("Error: %s" % str(e))
+					exitCode = 4
 				rn = True
 			if not rn:
 				print("At least one of -m, -s, or -p is required for the extractor to run.")
 				printUsageHelp()
 		else:
 			MDEUtility.printError("The supplied dataset ID is not valid.")
+			exitCode = 5
+		sys.exit(exitCode)
 		#cleanup
 
 def printUsageHelp():
-	print ("gobii_mde.py -c <connectionString> -m <markerOutputFile> -s <sampleOutputFile> -p <projectOutputFile> -d <dataset_id> -a -v -n")
+	print ("gobii_mde.py -c <connectionString> -m <markerOutputFile> -s <sampleOutputFile> -p <projectOutputFile> -d <dataset_id> -M <map_id> -a -v -n")
 	print ("\t-h = Usage help")
 	print ("\t-c or --connectionString = Database connection string (RFC 3986 URI).\n\t\tFormat: postgresql://[user[:password]@][netloc][:port][/dbname][?param1=value1&...]")
 	print ("\t-m or --markerOutputFile = The marker metadata output file. This should be an absolute path.")
@@ -92,7 +101,8 @@ def printUsageHelp():
 	print ("\t-a or --all = Get all metadata information available, regardless if they are relevant to HMP, Flapjack, etc. formats.")
 	print ("\t-v or --verbose = Print the status of the MDE in more detail.")
 	print ("\t-n or --namesonly = Generate only names metadata. This flag is ignored if -a / --all is set.")
-	sys.exit()
+	print ("\t-M or --map = Get only the markers in the specified map. This is useful if a dataset contains markers that belongs to multiple maps.")
+	sys.exit(1)
 
 if __name__ == "__main__":
 	main(sys.argv[1:])
