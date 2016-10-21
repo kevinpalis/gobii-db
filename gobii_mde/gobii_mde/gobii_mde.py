@@ -18,10 +18,11 @@ def main(argv):
 		allMeta = False
 		namesOnly = False
 		mapId = -1
+		includeChrLen = False
 		exitCode = 0
 		#print("Args count: ", len(argv))
 		try:
-			opts, args = getopt.getopt(argv, "hc:m:s:d:p:avnM:", ["connectionString=", "markerOutputFile=", "sampleOutputFile=", "datasetId=", "projectOutputFile=", "all", "verbose", "namesonly", "map="])
+			opts, args = getopt.getopt(argv, "hc:m:s:d:p:avnM:l", ["connectionString=", "markerOutputFile=", "sampleOutputFile=", "datasetId=", "projectOutputFile=", "all", "verbose", "namesOnly", "map=", "includeChrLen"])
 			#print (opts, args)
 			if len(args) < 2 and len(opts) < 2:
 				printUsageHelp()
@@ -45,10 +46,12 @@ def main(argv):
 				allMeta = True
 			elif opt in ("-v", "--verbose"):
 				verbose = True
-			elif opt in ("-n", "--namesonly"):
+			elif opt in ("-n", "--namesOnly"):
 				namesOnly = True
 			elif opt in ("-M", "--map"):
 				mapId = arg
+			elif opt in ("-l", "--includeChrLen"):
+				includeChrLen = True
 
 		#if verbose:
 		#print("Opts: ", opts)
@@ -58,7 +61,7 @@ def main(argv):
 				try:
 					if verbose:
 						print("Generating marker metadata file...")
-					extract_marker_metadata.main(verbose, connectionStr, datasetId, markerOutputFile, allMeta, namesOnly, mapId)
+					extract_marker_metadata.main(verbose, connectionStr, datasetId, markerOutputFile, allMeta, namesOnly, mapId, includeChrLen)
 				except Exception as e1:
 					MDEUtility.printError("Error: %s" % (str(e1)))
 					exitCode = 2
@@ -100,7 +103,7 @@ def printUsageHelp():
 	print ("\t-d or --datasetId = The dataset ID of which marker metadata will be extracted from. This should be a valid integer ID.")
 	print ("\t-a or --all = Get all metadata information available, regardless if they are relevant to HMP, Flapjack, etc. formats.")
 	print ("\t-v or --verbose = Print the status of the MDE in more detail.")
-	print ("\t-n or --namesonly = Generate only names metadata. This flag is ignored if -a / --all is set.")
+	print ("\t-n or --namesOnly = Generate only names metadata. This flag is ignored if -a / --all is set.")
 	print ("\t-M or --map = Get only the markers in the specified map. This is useful if a dataset contains markers that belongs to multiple maps.")
 	sys.exit(1)
 
