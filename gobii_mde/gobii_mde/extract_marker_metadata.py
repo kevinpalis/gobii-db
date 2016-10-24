@@ -11,7 +11,7 @@ import traceback
 from util.mde_utility import MDEUtility
 from db.extract_metadata_manager import ExtractMetadataManager
 
-def main(isVerbose, connectionStr, datasetId, outputFile, allMeta, namesOnly, mapId, chrLength):
+def main(isVerbose, connectionStr, datasetId, outputFile, allMeta, namesOnly, mapId, includeChrLen):
 	if isVerbose:
 		print("Getting marker metadata for dataset with ID: %s" % datasetId)
 		print("Output File: ", outputFile)
@@ -23,6 +23,9 @@ def main(isVerbose, connectionStr, datasetId, outputFile, allMeta, namesOnly, ma
 			exMgr.createMarkerNamesFile(outputFile, datasetId, mapId)
 		else:
 			exMgr.createMinimalMarkerMetadataFile(outputFile, datasetId, mapId)
+		if includeChrLen:
+			exMgr.createChrLenFile(outputFile, datasetId, mapId)
+
 		exMgr.commitTransaction()
 		exMgr.closeConnection()
 		if allMeta:
