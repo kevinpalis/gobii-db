@@ -75,5 +75,15 @@ ALTER TABLE  marker RENAME CONSTRAINT  marker_fk1 TO  marker_platform_id_fkey;
 --changeset venice.juanillas:alterFK_germplasm_prop_fk1 context:general splitStatements:false
 ALTER TABLE  germplasm_prop RENAME CONSTRAINT  germplasm_prop_fk1 TO  germplasm_prop_germplasm_id_fkey;
 
+--changeset venice.juanillas:alterUnique_pi_project_name_key context:general splitStatements:false
+ALTER TABLE project RENAME CONSTRAINT pi_project_name_key TO idx_project;
 
+--changeset venice.juanillas:alterUnique_name_project_id_platform_id_key context:general splitStatements:false
+ALTER TABLE experiment RENAME CONSTRAINT name_project_id_platform_id_key TO idx_experiment;
+
+--changeset venice.juanillas:alterUnique_group_term_key context:general splitStatements:false
+ALTER TABLE cv RENAME CONSTRAINT group_term_key TO idx_cv;
+
+--changeset venice.juanillas:alterUnique_email_key context:general splitStatements:false
+ALTER TABLE contact RENAME CONSTRAINT email_key TO idx_contact;
 
