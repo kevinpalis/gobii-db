@@ -4,4 +4,5 @@
 	<include file="changelogs/changesets/dataset_join_tables_fix.sql"/>
 	<include file="changelogs/changesets/fix_functions_jsonb_idx.sql"/>
 	<include file="changelogs/changesets/mde_filter_by_map.sql"/>
+	<include file="changelogs/changesets/mde_chr_end.sql"/>
 </databaseChangeLog>

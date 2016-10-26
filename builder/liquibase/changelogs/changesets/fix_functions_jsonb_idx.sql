@@ -4,7 +4,7 @@
 	main entities instead, these are the necessary adjustments/replacements/deletions in functions.
 */
 --changeset kpalis:getMinimalMarkerMetadataByDataset_fix context:general splitStatements:false
-DROP FUNCTION getMinimalMarkerMetadataByDataset(integer);
+DROP FUNCTION IF EXISTS getMinimalMarkerMetadataByDataset(integer);
 CREATE OR REPLACE FUNCTION getMinimalMarkerMetadataByDataset(datasetId integer)
 RETURNS table (marker_name text, alleles text, chrom varchar, pos numeric, strand text) AS $$
   BEGIN
@@ -19,7 +19,7 @@ RETURNS table (marker_name text, alleles text, chrom varchar, pos numeric, stran
 $$ LANGUAGE plpgsql;
 
 --changeset kpalis:getAllMarkerMetadataByDataset_fix context:general splitStatements:false
-DROP FUNCTION getAllMarkerMetadataByDataset(integer);
+DROP FUNCTION IF EXISTS getAllMarkerMetadataByDataset(integer);
 CREATE OR REPLACE FUNCTION getAllMarkerMetadataByDataset(datasetId integer)
 RETURNS table (marker_name text, linkage_group_name varchar, start numeric, stop numeric, mapset_name text, platform_name text, variant_id integer, code text, ref text, alts text, sequence text, reference_name text, primers jsonb, probsets jsonb, strand_name text) AS $$
   BEGIN
@@ -35,7 +35,7 @@ RETURNS table (marker_name text, linkage_group_name varchar, start numeric, stop
 $$ LANGUAGE plpgsql;
 
 --changeset kpalis:getMinimalSampleMetadataByDataset_fix context:general splitStatements:false
-DROP FUNCTION getMinimalSampleMetadataByDataset(integer);
+DROP FUNCTION IF EXISTS getMinimalSampleMetadataByDataset(integer);
 CREATE OR REPLACE FUNCTION getMinimalSampleMetadataByDataset(datasetId integer)
 RETURNS table (dnarun_name text, sample_name text, germplasm_name text, external_code text, germplasm_type text, species text, platename text, num text, well_row text, well_col text) AS $$
   BEGIN
@@ -52,7 +52,7 @@ RETURNS table (dnarun_name text, sample_name text, germplasm_name text, external
 $$ LANGUAGE plpgsql;
 
 --changeset kpalis:getAllSampleMetadataByDataset_fix context:general splitStatements:false
-DROP FUNCTION getAllSampleMetadataByDataset(integer);
+DROP FUNCTION IF EXISTS getAllSampleMetadataByDataset(integer);
 CREATE OR REPLACE FUNCTION getAllSampleMetadataByDataset(datasetId integer)
 RETURNS table (dnarun_name text, sample_name text, germplasm_name text, external_code text, germplasm_type text, species text, platename text, num text, well_row text, well_col text) AS $$
   BEGIN
@@ -69,7 +69,7 @@ RETURNS table (dnarun_name text, sample_name text, germplasm_name text, external
 $$ LANGUAGE plpgsql;
 
 --changeset kpalis:getMarkerNamesByDataset_fix context:general splitStatements:false
-DROP FUNCTION getMarkerNamesByDataset(integer);
+DROP FUNCTION IF EXISTS getMarkerNamesByDataset(integer);
 CREATE OR REPLACE FUNCTION getMarkerNamesByDataset(datasetId integer)
 RETURNS table (marker_id integer, marker_name text) AS $$
   BEGIN
@@ -82,7 +82,7 @@ RETURNS table (marker_id integer, marker_name text) AS $$
 $$ LANGUAGE plpgsql;
 
 --changeset kpalis:getDnarunNamesByDataset_fix context:general splitStatements:false
-DROP FUNCTION getDnarunNamesByDataset(integer);
+DROP FUNCTION IF EXISTS getDnarunNamesByDataset(integer);
 CREATE OR REPLACE FUNCTION getDnarunNamesByDataset(datasetId integer)
 RETURNS table (dnarun_id integer, dnarun_name text) AS $$
   BEGIN
@@ -95,11 +95,11 @@ RETURNS table (dnarun_id integer, dnarun_name text) AS $$
 $$ LANGUAGE plpgsql;
 
 --changeset kpalis:dropDatasetDnarunFxns context:general splitStatements:false
-DROP FUNCTION createDatasetDnaRun(integer, integer, integer, OUT integer);
-DROP FUNCTION updateDatasetDnaRun(integer, integer, integer, integer);
-DROP FUNCTION deleteDatasetDnaRun(integer);
+DROP FUNCTION IF EXISTS createDatasetDnaRun(integer, integer, integer, OUT integer);
+DROP FUNCTION IF EXISTS updateDatasetDnaRun(integer, integer, integer, integer);
+DROP FUNCTION IF EXISTS deleteDatasetDnaRun(integer);
 
 --changeset kpalis:dropDatasetMarkerFxns context:general splitStatements:false tag:version_1.1
-DROP FUNCTION createDatasetMarker(integer, integer, real, real, real, integer, OUT integer);
-DROP FUNCTION updateDatasetMarker(integer, integer, integer, real, real, real, integer);
-DROP FUNCTION deleteDatasetMarker(integer);
+DROP FUNCTION IF EXISTS createDatasetMarker(integer, integer, real, real, real, integer, OUT integer);
+DROP FUNCTION IF EXISTS updateDatasetMarker(integer, integer, integer, real, real, real, integer);
+DROP FUNCTION IF EXISTS deleteDatasetMarker(integer);
