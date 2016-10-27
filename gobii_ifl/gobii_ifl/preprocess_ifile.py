@@ -47,7 +47,7 @@ def main(isVerbose, connectionStr, iFile, outputPath):
 	#print("arguments: %s" % str(sys.argv))
 
 	outputFile = outputPath+"ppd_"+basename(iFile)
-
+	exitCode = 0
 	#print("splitext: ", splitext(basename(iFile)))
 	tableName = splitext(basename(iFile))[1][1:]
 	randomStr = IFLUtility.generateRandomString(SUFFIX_LEN)
@@ -137,12 +137,15 @@ def main(isVerbose, connectionStr, iFile, outputPath):
 		ppMgr.dropForeignTable(fTableName)
 		ppMgr.commitTransaction()
 		ppMgr.closeConnection()
-		print("Preprocessed %s successfully." % iFile)
-		return outputFile
+		if IS_VERBOSE:
+			print("Preprocessed %s successfully." % iFile)
+		return outputFile, exitCode
 	except Exception as e:
 		IFLUtility.printError('Failed to preprocess %s. Error: %s' % (iFile, str(e)))
 		ppMgr.rollbackTransaction()
+		exitCode = 5
 		traceback.print_exc(file=sys.stderr)
+		return outputFile, exitCode
 
 if __name__ == "__main__":
 	if len(sys.argv) < 4:

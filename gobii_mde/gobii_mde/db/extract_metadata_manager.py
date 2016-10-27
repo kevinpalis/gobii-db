@@ -26,20 +26,44 @@ class ExtractMetadataManager:
 			self.cur.copy_expert(copyStmt, outputFile, 20480)
 		outputFile.close()
 
-	def createAllMarkerMetadataFile(self, outputFilePath, datasetId):
-		sql = "copy (select * from getAllMarkerMetadataByDataset("+datasetId+")) to STDOUT with delimiter E'\\t'"+" csv header;"
+	def createAllMarkerMetadataFile(self, outputFilePath, datasetId, mapId):
+		sql = ""
+		if mapId == -1:
+			sql = "copy (select * from getAllMarkerMetadataByDataset("+datasetId+")) to STDOUT with delimiter E'\\t'"+" csv header;"
+		else:
+			sql = "copy (select * from getAllMarkerMetadataByDatasetAndMap("+datasetId+","+mapId+")) to STDOUT with delimiter E'\\t'"+" csv header;"
+		print (sql)
 		with open(outputFilePath, 'w') as outputFile:
 			self.cur.copy_expert(sql, outputFile, 20480)
 		outputFile.close()
 
-	def createMarkerNamesFile(self, outputFilePath, datasetId):
-		sql = "copy (select * from getMarkerNamesByDataset("+datasetId+")) to STDOUT with delimiter E'\\t'"+" csv header;"
+	def createMarkerNamesFile(self, outputFilePath, datasetId, mapId):
+		sql = ""
+		if mapId == -1:
+			sql = "copy (select * from getMarkerNamesByDataset("+datasetId+")) to STDOUT with delimiter E'\\t'"+" csv header;"
+		else:
+			sql = "copy (select * from getMarkerNamesByDatasetAndMap("+datasetId+","+mapId+")) to STDOUT with delimiter E'\\t'"+" csv header;"
 		with open(outputFilePath, 'w') as outputFile:
 			self.cur.copy_expert(sql, outputFile, 20480)
 		outputFile.close()
 
-	def createMinimalMarkerMetadataFile(self, outputFilePath, datasetId):
-		sql = "copy (select * from getMinimalMarkerMetadataByDataset("+datasetId+")) to STDOUT with delimiter E'\\t'"+" csv header;"
+	def createMinimalMarkerMetadataFile(self, outputFilePath, datasetId, mapId):
+		sql = ""
+		if mapId == -1:
+			sql = "copy (select * from getMinimalMarkerMetadataByDataset("+datasetId+")) to STDOUT with delimiter E'\\t'"+" csv header;"
+		else:
+			sql = "copy (select * from getMinimalMarkerMetadataByDatasetAndMap("+datasetId+","+mapId+")) to STDOUT with delimiter E'\\t'"+" csv header;"
+		with open(outputFilePath, 'w') as outputFile:
+			self.cur.copy_expert(sql, outputFile, 20480)
+		outputFile.close()
+
+	def createChrLenFile(self, outputFilePath, datasetId, mapId):
+		sql = ""
+		outputFilePath = outputFilePath+".chr"
+		if mapId == -1:
+			sql = "copy (select * from getAllChrLenByDataset("+datasetId+")) to STDOUT with delimiter E'\\t'"+" csv header;"
+		else:
+			sql = "copy (select * from getAllChrLenByDatasetAndMap("+datasetId+","+mapId+")) to STDOUT with delimiter E'\\t'"+" csv header;"
 		with open(outputFilePath, 'w') as outputFile:
 			self.cur.copy_expert(sql, outputFile, 20480)
 		outputFile.close()
