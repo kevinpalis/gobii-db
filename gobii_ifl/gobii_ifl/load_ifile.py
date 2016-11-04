@@ -42,6 +42,7 @@ def main(isVerbose, connectionStr, iFile, outputPath):
 	randomStr = IFLUtility.generateRandomString(SUFFIX_LEN)
 	rowsLoaded = 0
 	exitCode = 0
+	kvpList = []
 	fTableName = "ft_" + tableName + "_" + randomStr
 	if IS_VERBOSE:
 		print("Table Name:", tableName)
@@ -51,6 +52,9 @@ def main(isVerbose, connectionStr, iFile, outputPath):
 		#print(resource_string('res.map', tableName+'.dupmap'))
 
 	dupMappingFile = resource_stream('res.map', tableName+'.dupmap')
+	kvpListFile = resource_stream('res', 'kvp.list')
+	kvpList = kvpListFile.readlines()
+	#print ("kvpList: %s" % kvpList)
 	#instantiating this initializes a database connection
 	loadMgr = LoadIfileManager(connectionStr)
 
