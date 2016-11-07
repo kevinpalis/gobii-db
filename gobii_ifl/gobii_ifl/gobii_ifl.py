@@ -76,6 +76,7 @@ def main(argv):
 			elif iFile != "":
 				#Per file run
 				preprocessedFile, exitCode = preprocess_ifile.main(verbose, connectionStr, iFile, outputPath)
+				exitCode = 1  # temp
 				if exitCode != 0:
 							sys.exit(exitCode)
 				loadFile = None

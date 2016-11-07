@@ -48,6 +48,7 @@ def main(isVerbose, connectionStr, iFile, outputPath):
 
 	outputFile = outputPath+"ppd_"+basename(iFile)
 	exitCode = 0
+	isKVP = False
 	#print("splitext: ", splitext(basename(iFile)))
 	tableName = splitext(basename(iFile))[1][1:]
 	randomStr = IFLUtility.generateRandomString(SUFFIX_LEN)
@@ -60,7 +61,11 @@ def main(isVerbose, connectionStr, iFile, outputPath):
 		#print(resource_string('res.map', tableName+'.nmap'))
 
 	nameMappingFile = resource_stream('res.map', tableName+'.nmap')
-	#sys.exit()
+	kvpList = resource_stream('res', 'kvp.list').read().splitlines()
+	print ("kvpList: %s" % kvpList)
+	if tableName in kvpList:
+		isKVP = True
+	print ("isKVP: %s" % isKVP)
 	#instantiating this initializes a database connection
 	ppMgr = PreprocessIfileManager(connectionStr)
 
@@ -72,6 +77,7 @@ def main(isVerbose, connectionStr, iFile, outputPath):
 	selectStr = ""
 	conditionStr = ""
 	fromStr = fTableName
+	#gets a list of column names for the table we're loading data to
 	targetTableColumnList = [i[0] for i in ppMgr.getColumnListOfTable(tableName)]
 	if IS_VERBOSE:
 		print("Got targetTableColumnList = %s" % targetTableColumnList)
@@ -88,12 +94,13 @@ def main(isVerbose, connectionStr, iFile, outputPath):
 				else:
 					selectStr += ", "+fTableName+"."+fColumn
 			else:
+				#only include the column in the select statement IF it is a column of the target table OR it is a column that will be converted (ex. marker_name -> marker_id)
 				if fColumn in targetTableColumnList or fColumn in mappedColList:
 					if selectStr == "":
 						selectStr += fTableName+"."+fColumn
 					else:
 						selectStr += ", "+fTableName+"."+fColumn
-			#print("Current selectStr=%s" % selectStr)
+		print("Current selectStr=%s" % selectStr)
 		for file_column_names, column_alias, table_name, table_columns, id_column, table_alias in reader:
 			#if IS_VERBOSE:
 			#	print("Processing column(s): FILECOLS: %s | TABLECOLS: %s" % (file_column_names, table_columns))
@@ -146,6 +153,7 @@ def main(isVerbose, connectionStr, iFile, outputPath):
 		exitCode = 5
 		traceback.print_exc(file=sys.stderr)
 		return outputFile, exitCode
+
 
 if __name__ == "__main__":
 	if len(sys.argv) < 4:
