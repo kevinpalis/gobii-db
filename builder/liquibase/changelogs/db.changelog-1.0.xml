@@ -10,4 +10,5 @@
 	<include file="changelogs/changesets/fix_functions_inconsistent_tables.sql"/>
 	<!--include file="changelogs/changesets/fix_remove_proptables.sql"/-->
 	<!--include file="changelogs/changesets/fix_fxns_propstable.sql"/--> 
+	<include file="changelogs/changesets/fix_failing_functions.sql"/>
 </databaseChangeLog>
