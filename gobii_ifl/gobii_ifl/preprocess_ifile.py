@@ -61,9 +61,13 @@ def main(isVerbose, connectionStr, iFile, outputPath):
 		#print(resource_string('res.map', tableName+'.nmap'))
 
 	nameMappingFile = resource_stream('res.map', tableName+'.nmap')
-	kvpList = resource_stream('res', 'kvp.list').read().splitlines()
-	print ("kvpList: %s" % kvpList)
-	if tableName in kvpList:
+	kvpMapFile = resource_stream('res.map', 'kvp.map')
+	kvpReader = csv.reader(kvpMapFile, delimiter='\t')
+	kvpTablesList = [i[0] for i in kvpReader]
+	kvpMapFile.seek(0)
+	#kvpMap = kvpMapFile.read().splitlines()
+	print ("kvpTablesList: %s" % kvpTablesList)
+	if tableName in kvpTablesList:
 		isKVP = True
 	print ("isKVP: %s" % isKVP)
 	#instantiating this initializes a database connection
@@ -79,7 +83,7 @@ def main(isVerbose, connectionStr, iFile, outputPath):
 	fromStr = fTableName
 	#gets a list of column names for the table we're loading data to
 	targetTableColumnList = [i[0] for i in ppMgr.getColumnListOfTable(tableName)]
-	if IS_VERBOSE:
+	if IS_VERBOSE and not isKVP:
 		print("Got targetTableColumnList = %s" % targetTableColumnList)
 	try:
 		reader = csv.reader(nameMappingFile, delimiter='\t')
@@ -87,20 +91,24 @@ def main(isVerbose, connectionStr, iFile, outputPath):
 		nameMappingFile.seek(0)
 		if IS_VERBOSE:
 			print("mappedColList: %s" % mappedColList)
-		for fColumn in header:
-			if tableName == "mh5i" or tableName == "sh5i":
-				if selectStr == "":
-					selectStr += fTableName+"."+fColumn
-				else:
-					selectStr += ", "+fTableName+"."+fColumn
-			else:
-				#only include the column in the select statement IF it is a column of the target table OR it is a column that will be converted (ex. marker_name -> marker_id)
-				if fColumn in targetTableColumnList or fColumn in mappedColList:
+		if not isKVP:
+			for fColumn in header:
+				if tableName == "mh5i" or tableName == "sh5i":
 					if selectStr == "":
 						selectStr += fTableName+"."+fColumn
 					else:
 						selectStr += ", "+fTableName+"."+fColumn
+				else:
+					#only include the column in the select statement IF it is a column of the target table OR it is a column that will be converted (ex. marker_name -> marker_id)
+					if fColumn in targetTableColumnList or fColumn in mappedColList:
+						if selectStr == "":
+							selectStr += fTableName+"."+fColumn
+						else:
+							selectStr += ", "+fTableName+"."+fColumn
+		else:
+			selectStr = fTableName+".*"
 		print("Current selectStr=%s" % selectStr)
+		# --> You are here @kpalis :)
 		for file_column_names, column_alias, table_name, table_columns, id_column, table_alias in reader:
 			#if IS_VERBOSE:
 			#	print("Processing column(s): FILECOLS: %s | TABLECOLS: %s" % (file_column_names, table_columns))
