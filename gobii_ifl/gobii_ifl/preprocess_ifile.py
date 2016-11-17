@@ -69,7 +69,8 @@ def main(isVerbose, connectionStr, iFile, outputPath):
 	print ("kvpTablesList: %s" % kvpTablesList)
 	if tableName in kvpTablesList:
 		isKVP = True
-	print ("isKVP: %s" % isKVP)
+	if IS_VERBOSE and isKVP:
+		print ("Detected a KVP file...")
 	#instantiating this initializes a database connection
 	ppMgr = PreprocessIfileManager(connectionStr)
 
@@ -106,19 +107,28 @@ def main(isVerbose, connectionStr, iFile, outputPath):
 						else:
 							selectStr += ", "+fTableName+"."+fColumn
 		else:
-			selectStr = fTableName+".*"
+			#selectStr = fTableName+".*" -- was initially thinking of just this, but changed my mind for a more consistent pattern. Keeping this here til I'm done.
+			for fColumn in header:
+				#For KVP files, include all columns
+				if selectStr == "":
+					selectStr += fTableName+"."+fColumn
+				else:
+					selectStr += ", "+fTableName+"."+fColumn
 		print("Current selectStr=%s" % selectStr)
-		# --> You are here @kpalis :)
-		for file_column_names, column_alias, table_name, table_columns, id_column, table_alias in reader:
+		for row in reader:
 			#if IS_VERBOSE:
 			#	print("Processing column(s): FILECOLS: %s | TABLECOLS: %s" % (file_column_names, table_columns))
+			#provide a commenting mechanism so mapping files can be more readable
+			if row[0].startswith("#"):
+				continue
+			file_column_names, column_alias, table_name, table_columns, id_column, table_alias = row
 			fileColumns = file_column_names.split(",")
 			tableColumns = table_columns.split(",")
 			mainFileCol = ""
 			#print("File Columns: %s \nTable Columns: %s" % (fileColumns, tableColumns))
 			for fileCol, tableCol in itertools.izip(fileColumns, tableColumns):
 				if IS_VERBOSE:
-					print("Processing column mapping %s = %s" % (fileCol, tableCol))
+					print("Processing column mapping file.%s = %s.%s" % (fileCol, table_name, tableCol))
 				if fileCol not in header:
 					if IS_VERBOSE:
 						print("Column is not present in input file. Skipping...")
@@ -133,8 +143,10 @@ def main(isVerbose, connectionStr, iFile, outputPath):
 					conditionStr += cond
 				else:
 					conditionStr += " and "+cond
+			print ("\nmainFileCol=%s" % mainFileCol)
 			if mainFileCol != "":
-				#print("Current selectStr=%s will be replaced: %s BY %s" % (selectStr, fTableName+"."+mainFileCol, table_name+"."+id_column+" as "+column_alias))
+				if IS_VERBOSE:
+					print("Current selectStr=%s \n %s will be replaced by %s" % (selectStr, fTableName+"."+mainFileCol, table_name+"."+id_column+" as "+column_alias))
 				selectStr = selectStr.replace(fTableName+"."+mainFileCol, table_name+"."+id_column+" as "+column_alias)
 				if table_alias is not None and table_alias.strip() != '':
 					selectStr = selectStr.replace(table_name+".", table_alias+".")
