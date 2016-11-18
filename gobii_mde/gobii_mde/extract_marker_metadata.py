@@ -11,7 +11,7 @@ import traceback
 from util.mde_utility import MDEUtility
 from db.extract_metadata_manager import ExtractMetadataManager
 
-def main(isVerbose, connectionStr, datasetId, outputFile, allMeta, namesOnly, mapId, includeChrLen):
+def main(isVerbose, connectionStr, datasetId, outputFile, allMeta, namesOnly, mapId, includeChrLen,displayMapId):
 	if isVerbose:
 		print("Getting marker metadata for dataset with ID: %s" % datasetId)
 		print("Output File: ", outputFile)
@@ -25,6 +25,11 @@ def main(isVerbose, connectionStr, datasetId, outputFile, allMeta, namesOnly, ma
 			exMgr.createMinimalMarkerMetadataFile(outputFile, datasetId, mapId)
 		if includeChrLen:
 			exMgr.createChrLenFile(outputFile, datasetId, mapId)
+
+		#current versino would pass only one mapId. In future this could be mapId[].
+		if displayMapId:
+			exMgr.getMarkerMapsetInfoByDataset(outputFile, datasetId, displayMapId)
+
 
 		exMgr.commitTransaction()
 		exMgr.closeConnection()
@@ -43,6 +48,6 @@ def main(isVerbose, connectionStr, datasetId, outputFile, allMeta, namesOnly, ma
 
 if __name__ == "__main__":
 	if len(sys.argv) < 5:
-		print("Please supply the parameters. \nUsage: extract_marker_metadata <db_connection_string> <dataset_id> <output_file_abs_path> <all_meta> <names_only:boolean> <map_id> <includeChrLen:boolean>")
+		print("Please supply the parameters. \nUsage: extract_marker_metadata <db_connection_string> <dataset_id> <output_file_abs_path> <all_meta> <names_only:boolean> <map_id> <includeChrLen:boolean> <displayMapId>")
 		sys.exit(1)
-	main(True, str(sys.argv[1]), str(sys.argv[2]), str(sys.argv[3]), str(sys.argv[4]), str(sys.argv[5]), str(sys.argv[6]), str(sys.argv[7]))
+	main(True, str(sys.argv[1]), str(sys.argv[2]), str(sys.argv[3]), str(sys.argv[4]), str(sys.argv[5]), str(sys.argv[6]), str(sys.argv[7]), str(sys.argv[8]))

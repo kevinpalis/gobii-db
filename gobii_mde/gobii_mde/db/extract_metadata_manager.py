@@ -91,6 +91,18 @@ class ExtractMetadataManager:
 		with open(outputFilePath, 'w') as outputFile:
 			self.cur.copy_expert(sql, outputFile, 20480)
 		outputFile.close()
+	
+	def getMarkerMapsetInfoByDataset(self, outputFilePath, datasetId, mapId):
+		'''
+			For the given datasetId & mapId this funtion would output all markers in dataset and  only the given mapset info.
+		'''
+		sql = "copy (select * from getMarkerMapsetInfoByDataset("+datasetId+","+mapId+")) to STDOUT with delimiter E'\\t'"+" csv header;"
+			
+		with open(outputFilePath, 'w') as outputFile:
+			self.cur.copy_expert(sql, outputFile, 20480)
+		outputFile.close()
+
+
 
 	def commitTransaction(self):
 		self.conn.commit()
