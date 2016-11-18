@@ -7,4 +7,5 @@
 	<include file="changelogs/changesets/mde_chr_end.sql"/>
 <!--	<include file="changelogs/changesets/fix_column_names.sql"/>-->
 	<include file="changelogs/changesets/fix_constraints.sql"/>
+	<include file="changelogs/changesets/upsert_kvp.sql"/>
 </databaseChangeLog>
