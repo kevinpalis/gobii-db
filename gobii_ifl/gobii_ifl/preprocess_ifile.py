@@ -20,10 +20,11 @@
 	reference_name			reference_id	reference			name								reference_id
 	strand_name					strand_id			cv						term								cv_id
 
-	Row 2 basically says, for the 'strand_name' column in the file, find its ID in the database table 'cv'
+	Which means, for the 'strand_name' column in the file, find its ID in the database table 'cv'
 	using the criteria: strand_name = cv.term column. Then in the result file, change the column name to the col_alias
 	which is 'strand_id' for it to map directly to the strand_id column of the marker table.
 
+	More information: http://cbsugobii05.tc.cornell.edu:6084/display/TD/PostgreSQL+IFL
 	Prerequisites:
 
 	@author kdp44 Kevin Palis
@@ -65,8 +66,7 @@ def main(isVerbose, connectionStr, iFile, outputPath):
 	kvpReader = csv.reader(kvpMapFile, delimiter='\t')
 	kvpTablesList = [i[0] for i in kvpReader]
 	kvpMapFile.seek(0)
-	#kvpMap = kvpMapFile.read().splitlines()
-	print ("kvpTablesList: %s" % kvpTablesList)
+	#print ("kvpTablesList: %s" % kvpTablesList)
 	if tableName in kvpTablesList:
 		isKVP = True
 	if IS_VERBOSE and isKVP:
@@ -90,8 +90,8 @@ def main(isVerbose, connectionStr, iFile, outputPath):
 		reader = csv.reader(nameMappingFile, delimiter='\t')
 		mappedColList = [i[0].split(",")[0] for i in reader]
 		nameMappingFile.seek(0)
-		if IS_VERBOSE:
-			print("mappedColList: %s" % mappedColList)
+		#if IS_VERBOSE:
+		#	print("mappedColList: %s" % mappedColList)
 		if not isKVP:
 			for fColumn in header:
 				if tableName == "mh5i" or tableName == "sh5i":
@@ -114,7 +114,7 @@ def main(isVerbose, connectionStr, iFile, outputPath):
 					selectStr += fTableName+"."+fColumn
 				else:
 					selectStr += ", "+fTableName+"."+fColumn
-		print("Current selectStr=%s" % selectStr)
+		#print("Current selectStr=%s" % selectStr)
 		for row in reader:
 			#if IS_VERBOSE:
 			#	print("Processing column(s): FILECOLS: %s | TABLECOLS: %s" % (file_column_names, table_columns))
@@ -128,7 +128,7 @@ def main(isVerbose, connectionStr, iFile, outputPath):
 			#print("File Columns: %s \nTable Columns: %s" % (fileColumns, tableColumns))
 			for fileCol, tableCol in itertools.izip(fileColumns, tableColumns):
 				if IS_VERBOSE:
-					print("Processing column mapping file.%s = %s.%s" % (fileCol, table_name, tableCol))
+					print("\nProcessing column mapping file.%s = %s.%s" % (fileCol, table_name, tableCol))
 				if fileCol not in header:
 					if IS_VERBOSE:
 						print("Column is not present in input file. Skipping...")
@@ -143,10 +143,10 @@ def main(isVerbose, connectionStr, iFile, outputPath):
 					conditionStr += cond
 				else:
 					conditionStr += " and "+cond
-			print ("\nmainFileCol=%s" % mainFileCol)
+			#print ("\nmainFileCol=%s" % mainFileCol)
 			if mainFileCol != "":
-				if IS_VERBOSE:
-					print("Current selectStr=%s \n %s will be replaced by %s" % (selectStr, fTableName+"."+mainFileCol, table_name+"."+id_column+" as "+column_alias))
+				#if IS_VERBOSE:
+				#	print("Current selectStr=%s \n %s will be replaced by %s" % (selectStr, fTableName+"."+mainFileCol, table_name+"."+id_column+" as "+column_alias))
 				selectStr = selectStr.replace(fTableName+"."+mainFileCol, table_name+"."+id_column+" as "+column_alias)
 				if table_alias is not None and table_alias.strip() != '':
 					selectStr = selectStr.replace(table_name+".", table_alias+".")
@@ -159,16 +159,16 @@ def main(isVerbose, connectionStr, iFile, outputPath):
 		if conditionStr.strip() != "":
 			deriveIdSql += " where "+conditionStr
 		if IS_VERBOSE:
-			print ("deriveIdSql: "+deriveIdSql)
+			print ("\nderiveIdSql: %s \n" % deriveIdSql)
 		ppMgr.createFileWithDerivedIds(outputFile, deriveIdSql)
 		ppMgr.dropForeignTable(fTableName)
 		ppMgr.commitTransaction()
 		ppMgr.closeConnection()
 		if IS_VERBOSE:
-			print("Preprocessed %s successfully." % iFile)
+			print("\nPreprocessed %s successfully.\n" % iFile)
 		return outputFile, exitCode
 	except Exception as e:
-		IFLUtility.printError('Failed to preprocess %s. Error: %s' % (iFile, str(e)))
+		IFLUtility.printError('\nFailed to preprocess %s. Error: %s' % (iFile, str(e)))
 		ppMgr.rollbackTransaction()
 		exitCode = 5
 		traceback.print_exc(file=sys.stderr)

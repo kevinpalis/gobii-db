@@ -53,6 +53,16 @@ class LoadIfileManager:
 		self.updateSerialSequence(tableName, primaryKeyColumnName)
 		return rowsLoaded
 
+	def upsertKVPFromForeignTable(self, fTableName, sourceKey, sourceValue, targetTable, targetId, targetJsonb):
+		kvpSql = "select * from upsertKVPFromForeignTable('"+fTableName.lower()+"', '"+sourceKey+"', '"+sourceValue+"', '"+targetTable+"', '"+targetId+"', '"+targetJsonb+"');"
+		print ("kvpSQL: %s" % kvpSql)
+		self.cur.execute(kvpSql)
+		rowsLoaded = self.cur.fetchone()
+		if rowsLoaded is not None:
+			return rowsLoaded[0]
+		else:
+			return rowsLoaded
+
 	def updateSerialSequence(self, tableName, primaryKeyColumnName):
 		updateSeqSql = "SELECT pg_catalog.setval(pg_get_serial_sequence('"+tableName+"', '"+primaryKeyColumnName+"'), MAX("+primaryKeyColumnName+")) FROM "+tableName+";"
 		#print("updateSeqSql = "+updateSeqSql)
