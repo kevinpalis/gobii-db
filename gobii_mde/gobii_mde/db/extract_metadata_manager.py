@@ -96,8 +96,9 @@ class ExtractMetadataManager:
 		'''
 			For the given datasetId & mapId this funtion would output all markers in dataset and  only the given mapset info.
 		'''
+		outputFilePath = outputFilePath+".mapset"
 		sql = "copy (select * from getMarkerMapsetInfoByDataset("+datasetId+","+mapId+")) to STDOUT with delimiter E'\\t'"+" csv header;"
-			
+		print(sql)
 		with open(outputFilePath, 'w') as outputFile:
 			self.cur.copy_expert(sql, outputFile, 20480)
 		outputFile.close()

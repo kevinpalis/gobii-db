@@ -19,10 +19,11 @@ def main(argv):
 		namesOnly = False
 		mapId = -1
 		includeChrLen = False
+		displayMap = -1
 		exitCode = 0
 		#print("Args count: ", len(argv))
 		try:
-			opts, args = getopt.getopt(argv, "hc:m:s:d:p:avnM:l", ["connectionString=", "markerOutputFile=", "sampleOutputFile=", "datasetId=", "projectOutputFile=", "all", "verbose", "namesOnly", "map=", "includeChrLen"])
+			opts, args = getopt.getopt(argv, "hc:m:s:d:p:avnM:lD:", ["connectionString=", "markerOutputFile=", "sampleOutputFile=", "datasetId=", "projectOutputFile=", "all", "verbose", "namesOnly", "map=", "includeChrLen","displayMap="])
 			#print (opts, args)
 			if len(args) < 2 and len(opts) < 2:
 				printUsageHelp()
@@ -52,6 +53,8 @@ def main(argv):
 				mapId = arg
 			elif opt in ("-l", "--includeChrLen"):
 				includeChrLen = True
+			elif opt  in ("-D", "--displayMap"):
+				displayMap = arg
 
 		#if verbose:
 		#print("Opts: ", opts)
@@ -61,7 +64,7 @@ def main(argv):
 				try:
 					if verbose:
 						print("Generating marker metadata file...")
-					extract_marker_metadata.main(verbose, connectionStr, datasetId, markerOutputFile, allMeta, namesOnly, mapId, includeChrLen)
+					extract_marker_metadata.main(verbose, connectionStr, datasetId, markerOutputFile, allMeta, namesOnly, mapId, includeChrLen,displayMap)
 				except Exception as e1:
 					MDEUtility.printError("Error: %s" % (str(e1)))
 					exitCode = 2
@@ -94,7 +97,7 @@ def main(argv):
 		#cleanup
 
 def printUsageHelp():
-	print ("gobii_mde.py -c <connectionString> -m <markerOutputFile> -s <sampleOutputFile> -p <projectOutputFile> -d <dataset_id> -M <map_id> -a -v -n")
+	print ("gobii_mde.py -c <connectionString> -m <markerOutputFile> -s <sampleOutputFile> -p <projectOutputFile> -d <dataset_id> -M <map_id> -D <MapsetId for Display> -a -v -n")
 	print ("\t-h = Usage help")
 	print ("\t-c or --connectionString = Database connection string (RFC 3986 URI).\n\t\tFormat: postgresql://[user[:password]@][netloc][:port][/dbname][?param1=value1&...]")
 	print ("\t-m or --markerOutputFile = The marker metadata output file. This should be an absolute path.")
@@ -105,6 +108,7 @@ def printUsageHelp():
 	print ("\t-v or --verbose = Print the status of the MDE in more detail.")
 	print ("\t-n or --namesOnly = Generate only names metadata. This flag is ignored if -a / --all is set.")
 	print ("\t-M or --map = Get only the markers in the specified map. This is useful if a dataset contains markers that belongs to multiple maps.")
+	print ("\t-D or --displayMap = MapsetId for the mapset info to display,if marker exists in more than one mapset. Mapset file is the same as marker file appended  with .mapset. ")
 	sys.exit(1)
 
 if __name__ == "__main__":
