@@ -15,3 +15,19 @@ $$ LANGUAGE plpgsql;
 --changeset kpalis:remove_obsolete_marker_fxn context:general splitStatements:false
 DROP FUNCTION createMarker(platformid integer, variantid integer, markername text, markercode text, markerref text, markeralts text[], markersequence text, referenceid integer, markerprimers jsonb, markerprobsets text[], strandid integer, markerstatus integer);
 DROP FUNCTION updateMarker(id integer, platformid integer, variantid integer, markername text, markercode text, markerref text, markeralts text[], markersequence text, referenceid integer, markerprimers jsonb, markerprobsets text[], strandid integer, markerstatus integer);
+
+--changeset kpalis:fix_upsertmapsetpropertybyname context:general splitStatements:false
+DROP FUNCTION upsertmapsetpropertybyname(id integer, propertyname text, propertyvalue text);
+CREATE OR REPLACE FUNCTION upsertmapsetpropertybyname(id integer, propertyname text, propertyvalue text)
+ RETURNS integer
+ LANGUAGE plpgsql
+AS $function$
+  DECLARE
+    propertyId integer;
+  BEGIN
+    select cv_id into propertyId from cv where term=propertyName;
+    update mapset set props = props || ('{"'||propertyId::text||'": "'||propertyValue||'"}')::jsonb
+      where mapset_id=id;
+    return propertyId;
+  END;
+$function$
