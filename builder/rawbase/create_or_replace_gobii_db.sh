@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #params: $1 = database_name; $2 = user_name
-#trigger
+#Just to demonstrate GOBII CI/CD to the team
 echo "Params: " $1 $2 $3 $4 $5
 export PGPASSWORD=$5
 echo "Dropping database $1..."

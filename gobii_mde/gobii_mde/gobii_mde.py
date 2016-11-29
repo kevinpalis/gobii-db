@@ -105,6 +105,7 @@ def printUsageHelp():
 	print ("\t-v or --verbose = Print the status of the MDE in more detail.")
 	print ("\t-n or --namesOnly = Generate only names metadata. This flag is ignored if -a / --all is set.")
 	print ("\t-M or --map = Get only the markers in the specified map. This is useful if a dataset contains markers that belongs to multiple maps.")
+	print ("\t-l or --includeChrLen = Generates a file that lists all the chromosomes (or any linkage groups) that appear on the markers list, along with their lengths. Filename is the same as the marker file but appended with .chr.")
 	sys.exit(1)
 
 if __name__ == "__main__":

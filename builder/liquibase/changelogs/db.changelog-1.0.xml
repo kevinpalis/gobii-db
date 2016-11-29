@@ -8,6 +8,8 @@
 	<include file="changelogs/changesets/fix_column_names.sql"/>
 	<include file="changelogs/changesets/fix_constraints.sql"/>
 	<include file="changelogs/changesets/fix_functions_inconsistent_tables.sql"/>
-	<include file="changelogs/changesets/fix_remove_proptables.sql"/>
-	<include file="changelogs/changesets/fix_fxns_propstable.sql"/> 
+	<!--include file="changelogs/changesets/fix_remove_proptables.sql"/-->
+	<!--include file="changelogs/changesets/fix_fxns_propstable.sql"/--> 
+	<include file="changelogs/changesets/fix_failing_functions.sql"/>
+	<include file="changelogs/changesets/upsert_kvp.sql"/>
 </databaseChangeLog>

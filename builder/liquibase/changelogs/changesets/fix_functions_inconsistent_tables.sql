@@ -21,10 +21,22 @@ RETURNS void AS $$
     END;
 $$ LANGUAGE plpgsql;
 
---changeset venice.juanillas:createanalysis_fxn context:general splitStatements:false
+--changeset venice.juanillas:createanalysis_fxn1 context:general splitStatements:false
 DROP FUNCTION IF EXISTS createAnalysis(analysisname text, analysisdescription text, typeid integer, analysisprogram text, analysisprogramversion text, aanalysisalgorithm text, analysissourcename text, analysissourceversion text, analysissourceuri text, referenceid integer, analysisparameters jsonb, analysistimeexecuted timestamp without time zone, analysisstatus integer, OUT id integer);
 
 CREATE OR REPLACE FUNCTION createAnalysis(analysisname text, analysisdescription text, typeid integer, analysisprogram text, analysisprogramversion text, aanalysisalgorithm text, analysissourcename text, analysissourceversion text, analysissourceuri text, referenceid integer, analysisparameters jsonb, analysistimeexecuted timestamp without time zone, analysisstatus integer,createdBy integer, createdDate date, modifiedBy integer, modifiedDate date,OUT id integer)
+RETURNS integer AS $$
+    BEGIN   
+        insert into analysis (name, description, type_id, program, programversion, algorithm, sourcename, sourceversion, sourceuri, reference_id, parameters, timeexecuted, status,created_by, created_date, modified_by, modified_date)
+        values (analysisName, analysisDescription, typeId, analysisProgram, analysisProgramversion, aanalysisAlgorithm, analysisSourcename, analysisSourceversion, analysisSourceuri, referenceId, analysisparameters, analysisTimeexecuted, analysisStatus, createdBy, createdDate, modifiedBy, modifiedDate);
+            select lastval() into id;
+    END;
+$$ LANGUAGE plpgsql;
+
+--changeset venice.juanillas:createanalysis_fxn2 context:general splitStatements:false
+DROP FUNCTION IF EXISTS createAnalysis(analysisname text, analysisdescription text, typeid integer, analysisprogram text, analysisprogramversion text, aanalysisalgorithm text, analysissourcename text, analysissourceversion text, analysissourceuri text, referenceid integer, analysistimeexecuted timestamp without time zone, analysisstatus integer, OUT id integer);
+
+CREATE OR REPLACE FUNCTION createAnalysis(analysisname text, analysisdescription text, typeid integer, analysisprogram text, analysisprogramversion text, aanalysisalgorithm text, analysissourcename text, analysissourceversion text, analysissourceuri text, referenceid integer, analysistimeexecuted timestamp without time zone, analysisstatus integer,createdBy integer, createdDate date, modifiedBy integer, modifiedDate date,OUT id integer)
 RETURNS integer AS $$
 	BEGIN	
 		insert into analysis (name, description, type_id, program, programversion, algorithm, sourcename, sourceversion, sourceuri, reference_id, parameters, timeexecuted, status,created_by, created_date, modified_by, modified_date)
@@ -33,13 +45,24 @@ RETURNS integer AS $$
 	END;
 $$ LANGUAGE plpgsql;
 
---changeset venice.juanillas:updateanalysis_fxn context:general splitStatements:false
+--changeset venice.juanillas:updateanalysis_fxn1 context:general splitStatements:false
+DROP FUNCTION IF EXISTS updateAnalysis(id integer, analysisName text, analysisDescription text, typeId integer, analysisProgram text, analysisProgramversion text, aanalysisAlgorithm text, analysisSourcename text, analysisSourceversion text, analysisSourceuri text, referenceId integer, analysisTimeexecuted timestamp, analysisStatus integer);
+
+CREATE OR REPLACE FUNCTION updateAnalysis(id integer, analysisName text, analysisDescription text, typeId integer, analysisProgram text, analysisProgramversion text, aanalysisAlgorithm text, analysisSourcename text, analysisSourceversion text, analysisSourceuri text, referenceId integer, analysisParameters jsonb, analysisTimeexecuted timestamp, analysisStatus integer, createdBy integer,createdDate date, modifiedBy integer, modifiedDate date)
+RETURNS void AS $$
+    BEGIN
+    update analysis set name=analysisName, description=analysisDescription, type_id=typeId, program=analysisProgram, programversion=analysisProgramversion, algorithm=aanalysisAlgorithm, sourcename=analysisSourcename, sourceversion=analysisSourceversion, sourceuri=analysisSourceuri, reference_id=referenceId, parameters=analysisParameters, timeexecuted=analysisTimeexecuted, status=analysisStatus, created_by = createdBy, created_date = createdDate, modified_by = modifiedBy, modified_date = modifiedDate
+     where analysis_id = id;
+    END;
+$$ LANGUAGE plpgsql;
+
+--changeset venice.juanillas:updateanalysis_fxn2 context:general splitStatements:false
 DROP FUNCTION IF EXISTS updateAnalysis(id integer, analysisName text, analysisDescription text, typeId integer, analysisProgram text, analysisProgramversion text, aanalysisAlgorithm text, analysisSourcename text, analysisSourceversion text, analysisSourceuri text, referenceId integer, analysisTimeexecuted timestamp, analysisStatus integer);
 
 CREATE OR REPLACE FUNCTION updateAnalysis(id integer, analysisName text, analysisDescription text, typeId integer, analysisProgram text, analysisProgramversion text, aanalysisAlgorithm text, analysisSourcename text, analysisSourceversion text, analysisSourceuri text, referenceId integer, analysisTimeexecuted timestamp, analysisStatus integer, createdBy integer,createdDate date, modifiedBy integer, modifiedDate date)
 RETURNS void AS $$
     BEGIN
-    update analysis set name=analysisName, description=analysisDescription, type_id=typeId, program=analysisProgram, programversion=analysisProgramversion, algorithm=aanalysisAlgorithm, sourcename=analysisSourcename, sourceversion=analysisSourceversion, sourceuri=analysisSourceuri, reference_id=referenceId, parameters='{}'::jsonb, timeexecuted=analysisTimeexecuted, status=analysisStatus, created_by = createdBy, created_date = createdDate, modified_by = modifiedBy, modified_date = modifiedDate
+    update analysis set name=analysisName, description=analysisDescription, type_id=typeId, program=analysisProgram, programversion=analysisProgramversion, algorithm=aanalysisAlgorithm, sourcename=analysisSourcename, sourceversion=analysisSourceversion, sourceuri=analysisSourceuri, reference_id=referenceId, timeexecuted=analysisTimeexecuted, status=analysisStatus, created_by = createdBy, created_date = createdDate, modified_by = modifiedBy, modified_date = modifiedDate
      where analysis_id = id;
     END;
 $$ LANGUAGE plpgsql;
