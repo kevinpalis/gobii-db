@@ -125,3 +125,97 @@ created_by, created_date, modified_by, modified_date, status)
   END;
 $$ LANGUAGE plpgsql;
 
+--changeset kpalis:fix_functions_wmapid context:general splitStatements:false
+CREATE OR REPLACE FUNCTION getAllPropertiesOfMapset(id integer)
+RETURNS table (property_id integer, property_name text, property_value text) AS $$
+  BEGIN
+    return query
+    select p1.key::int as property_id, cv.term as property_name, p1.value as property_value
+    from cv, (select (jsonb_each_text(props)).* from mapset where mapset_id=id) as p1
+    where cv.cv_id = p1.key::int;
+    END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION upsertMapsetPropertyById(id integer, propertyId integer, propertyValue text)
+RETURNS void AS $$
+  BEGIN
+    update map_prop set props = props || ('{"'||propertyId::text||'": "'||propertyValue||'"}')::jsonb
+      where mapset_id=id;
+  END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION getAllPropertiesOfMapset(id integer)
+RETURNS table (property_id integer, property_name text, property_value text) AS $$
+  BEGIN
+    return query
+    select p1.key::int as property_id, cv.term as property_name, p1.value as property_value
+    from cv, (select (jsonb_each_text(props)).* from map_prop where mapset_id=id) as p1
+    where cv.cv_id = p1.key::int;
+    END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION getMapsetPropertyById(id integer, propertyId integer)
+RETURNS text AS $$
+  DECLARE
+    value text;
+  BEGIN
+    select props->propertyId::text into value from mapset where mapset_id=id;
+    return value;
+  END;
+$$ LANGUAGE plpgsql;
+
+--read/select a property of a single entity given its id and property name --> should match with the property name in the CV table
+CREATE OR REPLACE FUNCTION getMapsetPropertyByName(id integer, propertyName text)
+RETURNS table (property_id integer, property_value text) AS $$
+  BEGIN
+    return query
+    (with property as (select cv_id from cv where term=propertyName)
+    select property.cv_id, (props->property.cv_id::text)::text as value
+      from mapset, property
+      where mapset_id=id);
+  END;
+$$ LANGUAGE plpgsql;
+
+--update property by key id
+CREATE OR REPLACE FUNCTION updateMapsetPropertyById(id integer, propertyId integer, propertyValue text)
+RETURNS void AS $$
+  BEGIN
+    update mapset set props = jsonb_set(props, ('{'||propertyId::text||'}')::text[], ('"'||propertyValue||'"')::jsonb)
+      where mapset_id=id;
+  END;
+$$ LANGUAGE plpgsql;
+
+--update property by property name --> should match with the property name in the CV table
+CREATE OR REPLACE FUNCTION updateMapsetPropertyByName(id integer, propertyName text, propertyValue text)
+RETURNS void AS $$
+  BEGIN
+    with property as (select cv_id from cv where term=propertyName)
+    update mapset
+      set props = jsonb_set(props, ('{'||property.cv_id::text||'}')::text[], ('"'||propertyValue||'"')::jsonb)
+      from property
+      where mapset_id=id;
+  END;
+$$ LANGUAGE plpgsql;
+
+--delete property by ID
+CREATE OR REPLACE FUNCTION deleteMapsetPropertyById(id integer, propertyId integer)
+RETURNS integer AS $$
+  BEGIN
+    update mapset
+    set props = props - propertyId::text
+    where mapset_id=id;
+    return propertyId;
+  END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION deleteMapsetPropertyByName(id integer, propertyName text)
+RETURNS text AS $$
+  BEGIN
+    with property as (select cv_id from cv where term=propertyName)
+    update mapset
+      set props = props - property.cv_id::text
+      from property
+      where mapset_id=id;
+    return propertyName;
+  END;
+$$ LANGUAGE plpgsql;
