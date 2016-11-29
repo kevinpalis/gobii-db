@@ -139,20 +139,11 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION upsertMapsetPropertyById(id integer, propertyId integer, propertyValue text)
 RETURNS void AS $$
   BEGIN
-    update map_prop set props = props || ('{"'||propertyId::text||'": "'||propertyValue||'"}')::jsonb
+    update mapset set props = props || ('{"'||propertyId::text||'": "'||propertyValue||'"}')::jsonb
       where mapset_id=id;
   END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION getAllPropertiesOfMapset(id integer)
-RETURNS table (property_id integer, property_name text, property_value text) AS $$
-  BEGIN
-    return query
-    select p1.key::int as property_id, cv.term as property_name, p1.value as property_value
-    from cv, (select (jsonb_each_text(props)).* from map_prop where mapset_id=id) as p1
-    where cv.cv_id = p1.key::int;
-    END;
-$$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION getMapsetPropertyById(id integer, propertyId integer)
 RETURNS text AS $$
