@@ -49,7 +49,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 --changeset kpalis:fixing_fix_functions_platform context:general splitStatements:false
-DROP FUNCTION IF EXISTS createPlatform(platformName text, platformCode text, vendorId integer, platformDescription text, createdBy integer, createdDate date, modifiedBy integer, modifiedDate date, platformStatus integer, typeId integer, OUT id integer)
+DROP FUNCTION IF EXISTS createPlatform(platformName text, platformCode text, vendorId integer, platformDescription text, createdBy integer, createdDate date, modifiedBy integer, modifiedDate date, platformStatus integer, typeId integer, OUT id integer);
 
 CREATE OR REPLACE FUNCTION createPlatform(platformName text, platformCode text, vendorId integer, platformDescription text, createdBy integer, createdDate date, modifiedBy integer, modifiedDate date, platformStatus integer, typeId integer, OUT id integer)
 RETURNS integer AS $$
