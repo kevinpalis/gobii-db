@@ -1,7 +1,0 @@
-driver: org.postgresql.Driver
-classpath: drivers/postgresql-9.4.1209.jar
-url: jdbc:postgresql://localhost:5432/gobii_dev
-username: appuser
-password: g0b11isw3s0m3
-changeLogFile: changelogs/db.changelog-master.xml
-contexts: general
