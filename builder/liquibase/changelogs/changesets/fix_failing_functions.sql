@@ -83,7 +83,7 @@ RETURNS integer AS $$
     BEGIN
 	    insert into project (name, code, description, pi_contact, created_by, created_date, modified_by, modified_date, status)
 	      values (projectName, projectCode, projectDescription, piContact, createdBy, createdDate, modifiedBy, modifiedDate, projectStatus);
-	    select lastval() into id;
+	    select lastval() into projectId;
     END;
 $$ LANGUAGE plpgsql;
 
