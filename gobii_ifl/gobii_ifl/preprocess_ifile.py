@@ -46,6 +46,7 @@ def main(isVerbose, connectionStr, iFile, outputPath):
 	PROPS_COL_NAME = 'props'
 	PROPERTY_ID = 'property_id'
 	PROPERTY_VALUE = 'property_value'
+	DEBUG_LEVEL = 0
 	#if IS_VERBOSE:
 	#print("arguments: %s" % str(sys.argv))
 
@@ -87,12 +88,12 @@ def main(isVerbose, connectionStr, iFile, outputPath):
 				atHeader = True
 				propColPos = 0
 				for row in propReader:
-					#print (row)
 					longRow = []
 					if atHeader:
 						try:
 							propColPos = row.index(PROPS_COL_NAME)
-							print ("Got column position of property at %s" % propColPos)
+							if IS_VERBOSE and DEBUG_LEVEL > 0:
+								print ("Got column position of property at %s" % propColPos)
 							#write header of long-format file as: <all other columns> property_id property_value
 							for col in row:
 									if col != PROPS_COL_NAME:
@@ -107,8 +108,7 @@ def main(isVerbose, connectionStr, iFile, outputPath):
 							traceback.print_exc(file=sys.stderr)
 							return outputFile, exitCode
 					else:
-						print ("Parsing...%s" % row[propColPos])
-						parsedRow = []
+						#print ("Parsing...%s" % row[propColPos])
 						try:
 							for idx, col in enumerate(row):
 								if idx != propColPos:
@@ -116,9 +116,6 @@ def main(isVerbose, connectionStr, iFile, outputPath):
 							propKVPs = row[propColPos].split(",")
 							for propKVP in propKVPs:
 								parsedRow = []
-								#parsedRow = longRow
-								print ("longRow: %s" % longRow)
-								print("parsedRow: %s \n propKVP: %s" % (parsedRow, propKVP))
 								prop = propKVP.split(":")
 								if len(prop) < 2:
 									if IS_VERBOSE:
