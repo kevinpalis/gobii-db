@@ -1,3 +1,4 @@
 #source_table	source_key_column	source_value_column	target_table	target_id_col	target_jsonb_col
 dataset_marker	dataset_id	marker_idx	marker	marker_id	dataset_marker_idx
 dataset_dnarun	dataset_id	dnarun_idx	dnarun	dnarun_id	dataset_dnarun_idx
+germplasm_prop	property_id	property_value	germplasm	germplasm_id	props

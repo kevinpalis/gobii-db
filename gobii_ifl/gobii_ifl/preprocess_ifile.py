@@ -26,7 +26,7 @@
 
 	More information: http://cbsugobii05.tc.cornell.edu:6084/display/TD/PostgreSQL+IFL
 	Prerequisites:
-
+	ERROR Codes: 20 series
 	@author kdp44 Kevin Palis
 '''
 from __future__ import print_function
@@ -43,13 +43,17 @@ from util.ifl_utility import IFLUtility
 def main(isVerbose, connectionStr, iFile, outputPath):
 	IS_VERBOSE = isVerbose
 	SUFFIX_LEN = 8
-
+	PROPS_COL_NAME = 'props'
+	PROPERTY_ID = 'property_id'
+	PROPERTY_VALUE = 'property_value'
 	#if IS_VERBOSE:
 	#print("arguments: %s" % str(sys.argv))
 
 	outputFile = outputPath+"ppd_"+basename(iFile)
+	longPropFilename = outputPath+"long_"+basename(iFile)
 	exitCode = 0
 	isKVP = False
+	isProp = False
 	#print("splitext: ", splitext(basename(iFile)))
 	tableName = splitext(basename(iFile))[1][1:]
 	randomStr = IFLUtility.generateRandomString(SUFFIX_LEN)
@@ -60,7 +64,7 @@ def main(isVerbose, connectionStr, iFile, outputPath):
 		print("Getting information from mapping file: ", tableName+'.nmap')
 		#print(resource_listdir('res.map', ''))
 		#print(resource_string('res.map', tableName+'.nmap'))
-
+	isProp = tableName.endswith('_prop')
 	nameMappingFile = resource_stream('res.map', tableName+'.nmap')
 	kvpMapFile = resource_stream('res.map', 'kvp.map')
 	kvpReader = csv.reader(kvpMapFile, delimiter='\t')
@@ -71,6 +75,64 @@ def main(isVerbose, connectionStr, iFile, outputPath):
 		isKVP = True
 	if IS_VERBOSE and isKVP:
 		print ("Detected a KVP file...")
+
+	if isProp:
+		#format the file to LONG
+		if IS_VERBOSE:
+			print ("Detected a property file. Converting file to long-format...")
+		with open(iFile, 'r') as propFile:
+			with open(longPropFilename, 'w') as longPropFile:
+				propReader = csv.reader(propFile, delimiter='\t')
+				propWriter = csv.writer(longPropFile, delimiter='\t')
+				atHeader = True
+				propColPos = 0
+				for row in propReader:
+					#print (row)
+					longRow = []
+					if atHeader:
+						try:
+							propColPos = row.index(PROPS_COL_NAME)
+							print ("Got column position of property at %s" % propColPos)
+							#write header of long-format file as: <all other columns> property_id property_value
+							for col in row:
+									if col != PROPS_COL_NAME:
+										longRow.append(col)
+							longRow.append(PROPERTY_ID)
+							longRow.append(PROPERTY_VALUE)
+							propWriter.writerow(longRow)
+							atHeader = False
+						except Exception as e:
+							IFLUtility.printError('\nFailed to preprocess %s. No property column in file. Error: %s' % (iFile, str(e)))
+							exitCode = 20
+							traceback.print_exc(file=sys.stderr)
+							return outputFile, exitCode
+					else:
+						print ("Parsing...%s" % row[propColPos])
+						parsedRow = []
+						try:
+							for idx, col in enumerate(row):
+								if idx != propColPos:
+									longRow.append(col)
+							propKVPs = row[propColPos].split(",")
+							for propKVP in propKVPs:
+								parsedRow = []
+								#parsedRow = longRow
+								print ("longRow: %s" % longRow)
+								print("parsedRow: %s \n propKVP: %s" % (parsedRow, propKVP))
+								prop = propKVP.split(":")
+								if len(prop) < 2:
+									if IS_VERBOSE:
+										print ("Property %s is not a KVP. Skipping..." % prop)
+										continue
+								parsedRow.append(prop[0])
+								parsedRow.append(prop[1])
+								propWriter.writerow(longRow+parsedRow)
+						except Exception as e:
+							IFLUtility.printError('\nFailed to preprocess %s. Cannot parse properties. Error: %s' % (iFile, str(e)))
+							exitCode = 21
+							traceback.print_exc(file=sys.stderr)
+							return outputFile, exitCode
+		sys.exit(1)
 	#instantiating this initializes a database connection
 	ppMgr = PreprocessIfileManager(connectionStr)
 
@@ -170,7 +232,7 @@ def main(isVerbose, connectionStr, iFile, outputPath):
 	except Exception as e:
 		IFLUtility.printError('\nFailed to preprocess %s. Error: %s' % (iFile, str(e)))
 		ppMgr.rollbackTransaction()
-		exitCode = 5
+		exitCode = 22
 		traceback.print_exc(file=sys.stderr)
 		return outputFile, exitCode
 
