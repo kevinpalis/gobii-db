@@ -129,12 +129,15 @@ def main(isVerbose, connectionStr, iFile, outputPath):
 							exitCode = 21
 							traceback.print_exc(file=sys.stderr)
 							return outputFile, exitCode
-		sys.exit(1)
 	#instantiating this initializes a database connection
 	ppMgr = PreprocessIfileManager(connectionStr)
 
 	ppMgr.dropForeignTable(fTableName)
-	header = ppMgr.createForeignTable(iFile, fTableName)
+	header = ""
+	if isProp:
+		header = ppMgr.createForeignTable(longPropFilename, fTableName)
+	else:
+		header = ppMgr.createForeignTable(iFile, fTableName)
 	ppMgr.commitTransaction()
 	if IS_VERBOSE:
 		print("Foreign table %s created and populated." % fTableName)

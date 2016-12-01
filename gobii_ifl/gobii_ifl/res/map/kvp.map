@@ -2,3 +2,5 @@
 dataset_marker	dataset_id	marker_idx	marker	marker_id	dataset_marker_idx
 dataset_dnarun	dataset_id	dnarun_idx	dnarun	dnarun_id	dataset_dnarun_idx
 germplasm_prop	property_id	property_value	germplasm	germplasm_id	props
+dnasample_prop	property_id	property_value	dnasample	dnasample_id	props
+marker_prop	property_id	property_value	marker	marker_id	props
