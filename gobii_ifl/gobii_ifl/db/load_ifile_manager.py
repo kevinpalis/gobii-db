@@ -55,7 +55,7 @@ class LoadIfileManager:
 
 	def upsertKVPFromForeignTable(self, fTableName, sourceKey, sourceValue, targetTable, targetId, targetJsonb):
 		kvpSql = "select * from upsertKVPFromForeignTable('"+fTableName.lower()+"', '"+sourceKey+"', '"+sourceValue+"', '"+targetTable+"', '"+targetId+"', '"+targetJsonb+"');"
-		#print ("kvpSQL: %s" % kvpSql)
+		print ("kvpSQL: %s" % kvpSql)
 		self.cur.execute(kvpSql)
 		rowsLoaded = self.cur.fetchone()
 		if rowsLoaded is not None:
