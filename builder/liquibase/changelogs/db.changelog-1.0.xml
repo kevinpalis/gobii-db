@@ -12,4 +12,5 @@
 	<include file="changelogs/changesets/fix_fxns_propstable.sql"/> 
 	<include file="changelogs/changesets/fix_failing_functions.sql"/>
 	<include file="changelogs/changesets/upsert_kvp.sql"/>
+	<include file="changelogs/changesets/fix_upsert_kvp.sql"/>
 </databaseChangeLog>

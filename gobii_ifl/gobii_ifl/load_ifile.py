@@ -117,11 +117,11 @@ def main(isVerbose, connectionStr, iFile, outputPath):
 				source_table, source_key_column, source_value_column, target_table, target_id_col, target_jsonb_col = kvpRow
 				rowsLoaded = loadMgr.upsertKVPFromForeignTable(fTableName, source_key_column, source_value_column, target_table, target_id_col, target_jsonb_col)
 
-		#loadMgr.dropForeignTable(fTableName)
+		loadMgr.dropForeignTable(fTableName)
 		loadMgr.commitTransaction()
 		loadMgr.closeConnection()
 		if IS_VERBOSE:
-			print("Loaded %s successfully.\nRows loaded = %s" % (iFile, rowsLoaded))
+			print("Loaded %s successfully.\nRows loaded/upserted = %s" % (iFile, rowsLoaded))
 		print(rowsLoaded)
 		return outputFile, exitCode
 	except Exception as e:
