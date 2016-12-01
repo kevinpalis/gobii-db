@@ -4,3 +4,7 @@ dataset_dnarun	dataset_id	dnarun_idx	dnarun	dnarun_id	dataset_dnarun_idx
 germplasm_prop	property_id	property_value	germplasm	germplasm_id	props
 dnasample_prop	property_id	property_value	dnasample	dnasample_id	props
 marker_prop	property_id	property_value	marker	marker_id	props
+project_prop	property_id	property_value	project	project_id	props
+mapset_prop	property_id	property_value	mapset	mapset_id	props
+dnarun_prop	property_id	property_value	dnarun	dnarun_id	props
+platform_prop	property_id	property_value	platform	platform_id	props
