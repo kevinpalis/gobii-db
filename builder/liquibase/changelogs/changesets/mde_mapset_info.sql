@@ -2,7 +2,7 @@
 
 --changeset raza:getMarkerMapsetInfoByDataset context:general splitStatements:false
 DROP FUNCTION IF EXISTS getMarkerMapsetInfoByDataset( integer, integer);
--- This
+
 CREATE OR REPLACE FUNCTION getMarkerMapsetInfoByDataset(dsId integer,mapId integer)
 RETURNS table (marker_name text,platform text,reference_name text, reference_version text,linkage_group_name text,linkage_group_start text,linkage_group_stop text,marker_linkage_group_start text,marker_linkage_group_stop text,mapset_name text) AS $$
 BEGIN
