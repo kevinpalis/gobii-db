@@ -98,7 +98,6 @@ class ExtractMetadataManager:
 		'''
 		outputFilePath = outputFilePath+".mapset"
 		sql = "copy (select * from getMarkerMapsetInfoByDataset("+datasetId+","+mapId+")) to STDOUT with delimiter E'\\t'"+" csv header;"
-		print(sql)
 		with open(outputFilePath, 'w') as outputFile:
 			self.cur.copy_expert(sql, outputFile, 20480)
 		outputFile.close()
