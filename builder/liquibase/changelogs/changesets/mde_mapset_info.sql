@@ -4,7 +4,7 @@
 DROP FUNCTION IF EXISTS getMarkerMapsetInfoByDataset( integer, integer);
 -- This
 CREATE OR REPLACE FUNCTION getMarkerMapsetInfoByDataset(dsId integer,mapId integer)
-RETURNS table (marker_name text,platform text,linkage_group_name text,linkage_group_start text,linkage_group_stop text,marker_linkage_group_start text,marker_linkage_group_stop text,mapset_name text) AS $$
+RETURNS table (marker_name text,platform text,reference_name text, reference_version text,linkage_group_name text,linkage_group_start text,linkage_group_stop text,marker_linkage_group_start text,marker_linkage_group_stop text,mapset_name text) AS $$
 BEGIN
 	RETURN QUERY 
 	with mlgt as (
@@ -14,7 +14,7 @@ BEGIN
 			left join mapset ms on ms.mapset_id = lg.map_id
 			join marker mr on mr.marker_id = mlg.marker_id and mr.dataset_marker_idx ? dsId::text		
 		)
-		select m.name,p.name
+		select m.name,p.name,r.name,r.version
 			,COALESCE(t.lgn,mlgt.linkage_group_name::text) as lg_name 
 			,COALESCE(t.lgst,mlgt.lg_start::text) as lg_start
 			,COALESCE(t.lgsp,mlgt.lg_stop::text) as lg_stop
@@ -23,6 +23,7 @@ BEGIN
 			, COALESCE(t.mpsn,mlgt.mapset_name) as mapset_name
 		from marker m
 		join platform p on p.platform_id = m.platform_id
+		left join reference r on r.reference_id = m.reference_id
 		left join mlgt on mlgt.marker_id = m.marker_id 
 		left join (	
 			select  ''::text as lgn
@@ -36,7 +37,6 @@ BEGIN
 		order by m.dataset_marker_idx -> dsId::text;
 END;
 $$ LANGUAGE plpgsql;
-
 
 
 
