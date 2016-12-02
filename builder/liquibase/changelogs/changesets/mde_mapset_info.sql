@@ -26,12 +26,12 @@ BEGIN
 		left join reference r on r.reference_id = m.reference_id
 		left join mlgt on mlgt.marker_id = m.marker_id 
 		left join (	
-			select  ''::text as lgn
-				,''::text as mpsn	
-				,''::text as lgst
-				,''::text as lgsp
-				,''::text as mlgst
-				,''::text as mlgsp			
+			select  ' '::text as lgn
+				,' '::text as mpsn	
+				,' '::text as lgst
+				,' '::text as lgsp
+				,' '::text as mlgst
+				,' '::text as mlgsp			
 		) t on mlgt.mapset_id != mapId
 		where m.dataset_marker_idx ? dsId::text
 		order by m.dataset_marker_idx -> dsId::text;
