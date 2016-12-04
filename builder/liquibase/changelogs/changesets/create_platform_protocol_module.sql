@@ -61,15 +61,6 @@ RETURNS integer AS $$
     END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION getTotalProtocols()
-RETURNS integer AS $$
-  DECLARE
-    total integer; 
-  BEGIN
-    select count(*) into total from protocol;
-    return total;
-  END;
-$$ LANGUAGE plpgsql;
 
 --###upsert by id
 CREATE OR REPLACE FUNCTION upsertprotocolPropertyById(id integer, propertyId integer, propertyValue text)
@@ -156,8 +147,10 @@ $$ LANGUAGE plpgsql;
 --changeset kpalis:drop_platform_vendor_id context:general splitStatements:false
 ALTER TABLE platform DROP COLUMN vendor_id;
 
+DROP FUNCTION IF EXISTS updateplatform(id integer, platformname text, platformcode text, vendorid integer, platformdescription text, createdby integer, createddate date, modifiedby integer, modifieddate date, platformstatus integer, typeid integer);
+
 CREATE OR REPLACE FUNCTION updateplatform(id integer, platformname text, platformcode text, platformdescription text, createdby integer, createddate date, modifiedby integer, modifieddate date, platformstatus integer, typeid integer)
-  RETURNS void
+  RETURNS integer
   LANGUAGE plpgsql
  AS $function$
  	 DECLARE
@@ -170,6 +163,8 @@ CREATE OR REPLACE FUNCTION updateplatform(id integer, platformname text, platfor
      END;
  $function$;
 
+DROP FUNCTION IF EXISTS createplatform(platformname text, platformcode text, vendorid integer, platformdescription text, createdby integer, createddate date, modifiedby integer, modifieddate date, platformstatus integer, typeid integer, OUT id integer);
+
 CREATE OR REPLACE FUNCTION createplatform(platformname text, platformcode text, platformdescription text, createdby integer, createddate date, modifiedby integer, modifieddate date, platformstatus integer, typeid integer, OUT id integer)
   RETURNS integer
   LANGUAGE plpgsql
@@ -181,6 +176,20 @@ CREATE OR REPLACE FUNCTION createplatform(platformname text, platformcode text, 
    END;
  $function$;
 
+DROP FUNCTION IF EXISTS deleteplatform(id integer);
+
+CREATE OR REPLACE FUNCTION deleteplatform(id integer)
+  RETURNS integer
+  LANGUAGE plpgsql
+ AS $function$
+ 	 DECLARE
+ 	 	i integer;
+     BEGIN
+     delete from platform where platform_id = id;
+     GET DIAGNOSTICS i = ROW_COUNT;
+     return i;
+     END;
+ $function$;
 
 --=============
 --### VENDOR_PROTOCOL TABLE ###---
@@ -206,6 +215,42 @@ ALTER TABLE vendor_protocol ADD CONSTRAINT vendor_protocol_vendor_id_fkey FOREIG
 
 ALTER TABLE vendor_protocol ADD CONSTRAINT vendor_protocol_protocol_id_fkey FOREIGN KEY ( protocol_id ) REFERENCES protocol( protocol_id );
 
+--changeset kpalis:vendor_protocol_CRUD_functions context:general splitStatements:false
+CREATE OR REPLACE FUNCTION createVendorProtocol(pname text, pvendorid integer, pprotocolid integer, pstatus integer, OUT id integer)
+RETURNS integer AS $$
+    BEGIN
+    insert into vendor_protocol (name, vendor_id, protocol_id, status)
+      values (pname, pvendorid, pprotocolid, pstatus); 
+    select lastval() into id;
+    END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION updateVendorProtocol(pid integer, pname text, pvendorid integer, pprotocolid integer, pstatus integer)
+RETURNS integer AS $$
+	DECLARE
+        i integer;
+    BEGIN
+    update vendor_protocol set name=pname, vendor_id=pvendorid, protocol_id=pprotocolid, status=pstatus
+     where vendor_protocol = pid;
+      GET DIAGNOSTICS i = ROW_COUNT;
+      return i;
+    END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION deleteProtocol(pId integer)
+RETURNS integer AS $$
+    DECLARE
+        i integer;
+    BEGIN
+    delete from vendor_protocol where vendor_protocol_id = pId;
+    GET DIAGNOSTICS i = ROW_COUNT;
+    return i;
+    END;
+$$ LANGUAGE plpgsql;
+
+
+
 --### EXPERIMENT AND MARKER MODS ###---
 --changeset kpalis:redirect_experiment_fk context:general splitStatements:false
 ALTER TABLE experiment DROP COLUMN platform_id;
@@ -216,6 +261,7 @@ ALTER TABLE experiment ADD CONSTRAINT experiment_vendor_protocol_id_fkey FOREIGN
 
 --changeset kpalis:add_marker_to_vendor_protocol_link context:general splitStatements:false
 ALTER TABLE marker ADD COLUMN dataset_vendor_protocol jsonb DEFAULT '{}'::jsonb;
+COMMENT ON COLUMN marker.dataset_vendor_protocol IS 'Key-value-pair JSONB that stores the vendor_protocol ID for each marker-dataset combination.';
 CREATE INDEX idx_marker_datasetvendorprotocol ON marker ( dataset_vendor_protocol );
 
 
