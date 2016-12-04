@@ -288,5 +288,17 @@ ALTER TABLE marker ADD COLUMN dataset_vendor_protocol jsonb DEFAULT '{}'::jsonb;
 COMMENT ON COLUMN marker.dataset_vendor_protocol IS 'Key-value-pair JSONB that stores the vendor_protocol ID for each marker-dataset combination.';
 CREATE INDEX idx_marker_datasetvendorprotocol ON marker ( dataset_vendor_protocol );
 
+--NOTE: The column dataset_vendor_protocol is set (upserted) during bulk loading via the IFLs so the current CRUD functions of marker doesn't need to be changed. But for convenience of testing, I'm adding the function below that upserts to this column one at a time.
 
+CREATE OR REPLACE FUNCTION upsertDatasetVendorProtocol(pid integer, pdatasetid integer, pvendorprotocolid integer)
+RETURNS integer AS $$
+    DECLARE
+        i integer;
+    BEGIN
+	    update marker m set vendor_protocol_id = vendor_protocol_id || ('{"'||pdatasetid||'": '||pvendorprotocolid||'}')::jsonb
+		where m.marker_id = pid
+	    GET DIAGNOSTICS i = ROW_COUNT;
+	    return i;
+    END;
+$$ LANGUAGE plpgsql;
 
