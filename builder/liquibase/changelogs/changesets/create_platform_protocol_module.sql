@@ -27,9 +27,6 @@ ALTER TABLE protocol ADD CONSTRAINT protocol_type_id_fkey FOREIGN KEY ( type_id 
 
 ALTER TABLE protocol ADD CONSTRAINT protocol_platform_id_fkey FOREIGN KEY ( platform_id ) REFERENCES platform( platform_id );
 
---changeset kpalis:drop_platform_vendor_id_fk context:general splitStatements:false
-ALTER TABLE platform DROP COLUMN vendor_id;
-
 --changeset kpalis:protocol_CRUD_functions context:general splitStatements:false
 CREATE OR REPLACE FUNCTION createProtocol(pname text, pdescription text, ptypeid integer, pplatformid integer, pcreatedby integer, pcreateddate date, pmodifiedby integer, pmodifieddate date, pstatus integer, OUT id integer)
 RETURNS integer AS $$
@@ -55,9 +52,12 @@ $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION deleteProtocol(pId integer)
 RETURNS integer AS $$
+    DECLARE
+        i integer;
     BEGIN
     delete from protocol where protocol_id = pId;
-    return pId;
+    GET DIAGNOSTICS i = ROW_COUNT;
+    return i;
     END;
 $$ LANGUAGE plpgsql;
 
@@ -151,6 +151,36 @@ RETURNS text AS $$
     return propertyName;
   END;
 $$ LANGUAGE plpgsql;
+
+--### MODIFY PLATFORM TABLE ###--
+--changeset kpalis:drop_platform_vendor_id context:general splitStatements:false
+ALTER TABLE platform DROP COLUMN vendor_id;
+
+CREATE OR REPLACE FUNCTION updateplatform(id integer, platformname text, platformcode text, platformdescription text, createdby integer, createddate date, modifiedby integer, modifieddate date, platformstatus integer, typeid integer)
+  RETURNS void
+  LANGUAGE plpgsql
+ AS $function$
+ 	 DECLARE
+ 	 	i integer;
+     BEGIN
+     update platform set name=platformName, code=platformCode, description=platformDescription, created_by=createdBy, created_date=createdDate, modified_by=modifiedBy, modified_date=modifiedDate, status=platformStatus, type_id=typeId
+      where platform_id = id;
+      GET DIAGNOSTICS i = ROW_COUNT;
+      return i;
+     END;
+ $function$;
+
+CREATE OR REPLACE FUNCTION createplatform(platformname text, platformcode text, platformdescription text, createdby integer, createddate date, modifiedby integer, modifieddate date, platformstatus integer, typeid integer, OUT id integer)
+  RETURNS integer
+  LANGUAGE plpgsql
+ AS $function$
+   BEGIN
+     insert into platform (name, code, description, created_by, created_date, modified_by, modified_date, status, type_id)
+       values (platformName, platformCode, platformDescription, createdBy, createdDate, modifiedBy, modifiedDate, platformStatus, typeId);
+     select lastval() into id;
+   END;
+ $function$;
+
 
 --=============
 --### VENDOR_PROTOCOL TABLE ###---
