@@ -238,7 +238,7 @@ RETURNS integer AS $$
 $$ LANGUAGE plpgsql;
 
 
-CREATE OR REPLACE FUNCTION deleteProtocol(pId integer)
+CREATE OR REPLACE FUNCTION deleteVendorProtocol(pId integer)
 RETURNS integer AS $$
     DECLARE
         i integer;
@@ -256,8 +256,32 @@ $$ LANGUAGE plpgsql;
 ALTER TABLE experiment DROP COLUMN platform_id;
 
 ALTER TABLE experiment ADD COLUMN vendor_protocol_id integer;
+
 CREATE INDEX idx_experiment_vendor_protocol_id ON experiment ( vendor_protocol_id );
+
 ALTER TABLE experiment ADD CONSTRAINT experiment_vendor_protocol_id_fkey FOREIGN KEY ( vendor_protocol_id ) REFERENCES vendor_protocol( vendor_protocol_id );
+
+--function changes
+CREATE OR REPLACE FUNCTION createexperiment(pname text, pcode text, pprojectid integer, pvendorprotocolid integer, pmanifestid integer, pdatafile text, pcreatedby integer, pcreateddate date, pmodifiedby integer, pmodifieddate date, pstatus integer, OUT expid integer)
+  RETURNS integer
+  LANGUAGE plpgsql
+ AS $function$
+     BEGIN
+     insert into experiment (name, code, project_id, manifest_id, data_file, created_by, created_date, modified_by, modified_date, status, vendor_protocol_id)
+       values (pname, pcode, pprojectid, pmanifestid, pdatafile, pcreatedby, pcreateddate, pmodifiedby, pmodifieddate, pstatus, pvendorprotocolid);
+     select lastval() into expId;
+     END;
+ $function$;
+
+CREATE OR REPLACE FUNCTION updateexperiment(pid integer, pname text, pcode text, pprojectid integer, pvendorprotocolid integer, pmanifestid integer, pdatafile text, pcreatedby integer, pcreateddate date, pmodifiedby integer, pmodifieddate date, pstatus integer)
+  RETURNS void
+  LANGUAGE plpgsql
+ AS $function$
+     BEGIN
+     update experiment set name=pname, code=pcode, project_id=pprojectid, manifest_id=pmanifestid, data_file=pdatafile,
+       created_by=pcreatedby, created_date=pcreateddate, modified_by=pmodifiedby, modified_date=pmodifieddate, status=pstatus, vendor_protocol_id=pvendorprotocolid where experiment_id = eId;
+     END;
+ $function$;
 
 --changeset kpalis:add_marker_to_vendor_protocol_link context:general splitStatements:false
 ALTER TABLE marker ADD COLUMN dataset_vendor_protocol jsonb DEFAULT '{}'::jsonb;
