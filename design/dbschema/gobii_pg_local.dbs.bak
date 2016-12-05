@@ -3978,33 +3978,34 @@ $function$
 			<entity schema="public" name="v_marker_linkage_genetic" />
 		</group>
 	</layout>
-	<layout id="Layout_78ffbd4" name="GOBII_ERD_v1.0.0" joined_routing="y" show_relation_columns="y" >
-		<entity schema="public" name="contact" color="dafada" x="75" y="1125" />
-		<entity schema="public" name="cvgroup" color="dfdff5" x="675" y="630" />
-		<entity schema="public" name="dataset" color="cddcee" x="1170" y="540" />
-		<entity schema="public" name="dbxref" color="dfdff5" x="675" y="870" />
-		<entity schema="public" name="linkage_group" color="cdf5d8" x="525" y="60" />
-		<entity schema="public" name="mapset" color="cdf5d8" x="720" y="60" />
-		<entity schema="public" name="marker" color="f8f3ed" x="45" y="45" />
-		<entity schema="public" name="marker_group" color="f8f3ed" x="270" y="45" />
-		<entity schema="public" name="marker_linkage_group" color="f8f3ed" x="270" y="390" />
-		<entity schema="public" name="variant" color="f8f3ed" x="45" y="390" />
-		<entity schema="public" name="platform" color="c8fcfc" x="915" y="60" />
-		<entity schema="public" name="dnasample" color="ffdcdc" x="300" y="615" />
-		<entity schema="public" name="germplasm" color="ffdcdc" x="90" y="825" />
-		<entity schema="public" name="cv" color="dfdff5" x="510" y="630" />
-		<entity schema="public" name="organization" color="dafada" x="255" y="1125" />
+	<layout id="Layout_78ffbd4" name="GOBII_ERD_v1.0.0" joined_routing="y" show_column_type="y" show_relation_columns="y" >
+		<comment><![CDATA[GOBII_ERD_v1.0.0]]></comment>
+		<entity schema="public" name="cvgroup" color="dfdff5" x="690" y="630" />
+		<entity schema="public" name="platform" color="c8fcfc" x="1020" y="60" />
+		<entity schema="public" name="dnasample" color="ffdcdc" x="285" y="615" />
+		<entity schema="public" name="germplasm" color="ffdcdc" x="75" y="825" />
+		<entity schema="public" name="cv" color="dfdff5" x="525" y="630" />
 		<entity schema="public" name="display" color="d2d7d7" x="495" y="1215" />
-		<entity schema="public" name="gobiiprop" color="d2d7d7" x="660" y="1215" />
-		<entity schema="public" name="reference" color="ffa5a5" x="510" y="345" />
-		<entity schema="public" name="analysis" color="cddcee" x="1005" y="540" />
-		<entity schema="public" name="project" color="cddcee" x="870" y="540" />
-		<entity schema="public" name="experiment" color="cddcee" x="1170" y="855" />
-		<entity schema="public" name="manifest" color="cddcee" x="885" y="870" />
-		<entity schema="public" name="role" color="dafada" x="255" y="1320" />
-		<entity schema="public" name="protocol" color="c8fcfc" x="1125" y="60" />
-		<entity schema="public" name="vendor_protocol" color="c8fcfc" x="1125" y="315" />
-		<entity schema="public" name="dnarun" color="ffdcdc" x="75" y="615" />
+		<entity schema="public" name="project" color="cddcee" x="915" y="540" />
+		<entity schema="public" name="protocol" color="c8fcfc" x="1230" y="60" />
+		<entity schema="public" name="vendor_protocol" color="c8fcfc" x="1230" y="315" />
+		<entity schema="public" name="dnarun" color="ffdcdc" x="60" y="615" />
+		<entity schema="public" name="mapset" color="cdf5d8" x="795" y="75" />
+		<entity schema="public" name="linkage_group" color="cdf5d8" x="555" y="105" />
+		<entity schema="public" name="marker_linkage_group" color="f8f3ed" x="270" y="345" />
+		<entity schema="public" name="dataset" color="cddcee" x="1290" y="540" />
+		<entity schema="public" name="analysis" color="cddcee" x="1095" y="540" />
+		<entity schema="public" name="experiment" color="cddcee" x="1275" y="855" />
+		<entity schema="public" name="manifest" color="cddcee" x="930" y="840" />
+		<entity schema="public" name="dbxref" color="dfdff5" x="690" y="855" />
+		<entity schema="public" name="gobiiprop" color="d2d7d7" x="675" y="1215" />
+		<entity schema="public" name="organization" color="dafada" x="270" y="1125" />
+		<entity schema="public" name="role" color="dafada" x="270" y="1320" />
+		<entity schema="public" name="contact" color="dafada" x="75" y="1155" />
+		<entity schema="public" name="marker_group" color="f8f3ed" x="300" y="45" />
+		<entity schema="public" name="reference" color="ffa5a5" x="570" y="345" />
+		<entity schema="public" name="marker" color="f8f3ed" x="45" y="45" />
+		<entity schema="public" name="variant" color="f8f3ed" x="75" y="360" />
 		<group name="CV" color="dfdff5" >
 			<entity schema="public" name="cv" />
 			<entity schema="public" name="cvgroup" />
