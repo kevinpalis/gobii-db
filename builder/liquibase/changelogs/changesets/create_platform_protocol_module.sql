@@ -285,7 +285,8 @@ CREATE OR REPLACE FUNCTION updateexperiment(pid integer, pname text, pcode text,
         i integer;
      BEGIN
      update experiment set name=pname, code=pcode, project_id=pprojectid, manifest_id=pmanifestid, data_file=pdatafile,
-       created_by=pcreatedby, created_date=pcreateddate, modified_by=pmodifiedby, modified_date=pmodifieddate, status=pstatus, vendor_protocol_id=pvendorprotocolid where experiment_id = eId;
+       created_by=pcreatedby, created_date=pcreateddate, modified_by=pmodifiedby, modified_date=pmodifieddate, status=pstatus, vendor_protocol_id=pvendorprotocolid 
+       where experiment_id = pId;
      GET DIAGNOSTICS i = ROW_COUNT;
      return i;
      END;

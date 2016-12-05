@@ -233,34 +233,34 @@ CREATE OR REPLACE FUNCTION createdbxref(paccession text, pver text, pdescription
   LANGUAGE plpgsql
  AS $function$
    BEGIN
-     insert into cvgroup (accession, ver, description, db_name, url)
+     insert into dbxref (accession, ver, description, db_name, url)
        values (paccession, pver, pdescription, pdbname, purl);
      select lastval() into id;
    END;
  $function$;
 
-CREATE OR REPLACE FUNCTION updatecvgroup(pid integer, pname text, pdefinition text, ptype integer)
+CREATE OR REPLACE FUNCTION updatedbxref(pid integer, paccession text, pver text, pdescription text, pdbname text, purl text)
   RETURNS void
   LANGUAGE plpgsql
  AS $function$
      DECLARE
         i integer;
      BEGIN
-     update cvgroup set name=pname, definition=pdefinition, type=ptype
-      where cvgroup_id = pid;
+     update dbxref set accession=paccession, ver=pver, description=pdescription, db_name=pdbname, url=purl
+      where dbxref_id = pid;
      GET DIAGNOSTICS i = ROW_COUNT;
      return i;
      END;
  $function$;
 
-CREATE OR REPLACE FUNCTION deletecvgroup(id integer)
+CREATE OR REPLACE FUNCTION deletedbxref(id integer)
   RETURNS integer
   LANGUAGE plpgsql
  AS $function$
      DECLARE
       i integer;
      BEGIN
-     delete from cvgroup where cvgroup_id = id;
+     delete from dbxref where dbxref_id = id;
      GET DIAGNOSTICS i = ROW_COUNT;
      return i;
      END;
