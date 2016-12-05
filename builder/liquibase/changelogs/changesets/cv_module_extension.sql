@@ -10,7 +10,7 @@ CREATE TABLE cvgroup (
   type              integer  NOT NULL DEFAULT 1,
   props                jsonb DEFAULT '{}'::jsonb,
   CONSTRAINT cv_pkey PRIMARY KEY ( cvgroup_id ),
-  CONSTRAINT unique_cvgroup_name UNIQUE ( name ) 
+  CONSTRAINT unique_cvgroup_name_type UNIQUE ( name, type ) 
  );
 
 CREATE INDEX idx_cvgroup ON cvgroup ( type );
@@ -27,6 +27,7 @@ COMMENT ON COLUMN cvgroup.definition IS 'A text description of the criteria for 
 COMMENT ON COLUMN cvgroup.type IS 'Determines if CV group is of type "System CV" (1) or "Custom CV" (2). More types can be added as needed';
 
 --populate cvgroup with current distinct groups from seed data + a user created group
+--for system cvs
 INSERT INTO cvgroup (name, definition, type) values ('dataset_type', '', 1);
 INSERT INTO cvgroup (name, definition, type) values ('germplasm_prop', '', 1);
 INSERT INTO cvgroup (name, definition, type) values ('dnarun_prop', '', 1);
@@ -40,7 +41,21 @@ INSERT INTO cvgroup (name, definition, type) values ('analysis_type', '', 1);
 INSERT INTO cvgroup (name, definition, type) values ('project_prop', '', 1);
 INSERT INTO cvgroup (name, definition, type) values ('germplasm_type', '', 1);
 INSERT INTO cvgroup (name, definition, type) values ('mapset_type', '', 1);
-INSERT INTO cvgroup (name, definition, type) values ('user_created', '', 2); --14
+--for user-created cvs
+INSERT INTO cvgroup (name, definition, type) values ('dataset_type', '', 2);
+INSERT INTO cvgroup (name, definition, type) values ('germplasm_prop', '', 2);
+INSERT INTO cvgroup (name, definition, type) values ('dnarun_prop', '', 2);
+INSERT INTO cvgroup (name, definition, type) values ('status', '', 2);
+INSERT INTO cvgroup (name, definition, type) values ('marker_strand', '', 2);
+INSERT INTO cvgroup (name, definition, type) values ('germplasm_species', '', 2);
+INSERT INTO cvgroup (name, definition, type) values ('marker_prop', '', 2);
+INSERT INTO cvgroup (name, definition, type) values ('dnasample_prop', '', 2);
+INSERT INTO cvgroup (name, definition, type) values ('platform_type', '', 2);
+INSERT INTO cvgroup (name, definition, type) values ('analysis_type', '', 2);
+INSERT INTO cvgroup (name, definition, type) values ('project_prop', '', 2);
+INSERT INTO cvgroup (name, definition, type) values ('germplasm_type', '', 2);
+INSERT INTO cvgroup (name, definition, type) values ('mapset_type', '', 2);
+
 -----
 
 --## CV ##--
@@ -51,7 +66,7 @@ ALTER TABLE cv ADD CONSTRAINT unique_cvterm_term_cvgroupid UNIQUE ( term, cvgrou
 ALTER TABLE cv ADD CONSTRAINT cv_cvgroupid_fkey FOREIGN KEY ( cvgroup_id ) REFERENCES cvgroup( cvgroup_id );
 
 --migrate data: group name -> group id
-UPDATE cv SET cvgroup_id=(select cvgroup_id from cvgroup where name=cv."group");
+UPDATE cv SET cvgroup_id=(select cvgroup_id from cvgroup where name=cv."group" and type=1);
 
 --set column to required
 ALTER TABLE cv ALTER COLUMN cvgroup_id SET NOT NULL;
@@ -118,7 +133,137 @@ unique global OBO identifier for this cvterm.  ';
 
 
 
---################################# FUNCTIONS AFFECTED ####################################---
+--################################# FUNCTIONS ##########################################---
+/* A summary of what changed:
+*  - CV.group freetext column dropped and replaced by a normalized cvgroup table, then migrated data accordingly
+*  - Added several columns to CV, mostly due to CIMMYT's request
+*  - DBXREF table added and relationship to CV established via cv.dbxref_id
+*/
 
+--changeset kpalis:update_fxns_affected_by_cv_mods context:general splitStatements:false
+
+DROP FUNCTION IF EXISTS createcv(cvgroup text, cvterm text, cvdefinition text, cvrank integer, OUT id integer);
+CREATE OR REPLACE FUNCTION createcv(pcvgroupid integer, pcvterm text, pcvdefinition text, pcvrank integer, pabbreviation text, pdbxrefid integer, pstatus integer, OUT id integer)
+  RETURNS integer
+  LANGUAGE plpgsql
+ AS $function$
+   BEGIN
+     insert into cv (cvgroup_id, term, definition, rank, abbreviation, dbxref_id, status)
+       values (pcvgroup, pcvterm, pcvdefinition, pcvrank, pabbreviation, pdbxrefid, pstatus);
+     select lastval() into id;
+   END;
+ $function$;
+
+DROP FUNCTION IF EXISTS updatecv(id integer, cvgroup text, cvterm text, cvdefinition text, cvrank integer);
+CREATE OR REPLACE FUNCTION updatecv(pid integer, pcvgroupid integer, pcvterm text, pcvdefinition text, pcvrank integer, pabbreviation text, pdbxrefid integer, pstatus integer)
+  RETURNS void
+  LANGUAGE plpgsql
+ AS $function$
+     DECLARE
+        i integer;
+     BEGIN
+     update cv set cvgroup_id=pcvgroupid, term=pcvterm, definition=pcvdefinition, rank=pcvrank, abbreviation=pabbreviation, dbxref_id=pdbxrefid, status=pstatus
+      where cv_id = pid;
+     GET DIAGNOSTICS i = ROW_COUNT;
+     return i;
+     END;
+ $function$;
+
+ --new function to create CVs - Can be used to create both system CVs and userCVs via pgrouptype parameter.
+ --Parameters to note: Pgroupname = same as before, simply the group name, ie. 'mapset_type'. Pgrouptype = 1 - system, 2 - custom/user
+CREATE OR REPLACE FUNCTION createCVinGroup(pgroupname text, pgrouptype integer, pcvterm text, pcvdefinition text, pcvrank integer, pabbreviation text, pdbxrefid integer, pstatus integer, OUT id integer)
+  RETURNS integer
+  LANGUAGE plpgsql
+ AS $function$
+   DECLARE
+    groupId integer;
+   BEGIN
+     select cvgroup_id into groupId from cvgroup where name=pgroupname and type=pgrouptype;
+     insert into cv (cvgroup_id, term, definition, rank, abbreviation, dbxref_id, status)
+       values (groupId, pcvterm, pcvdefinition, pcvrank, pabbreviation, pdbxrefid, pstatus);
+     select lastval() into id;
+   END;
+ $function$;
+
+--changeset kpalis:crud_fxns_for_cvgroup context:general splitStatements:false
+
+CREATE OR REPLACE FUNCTION createcvgroup(pname text, pdefinition text, ptype integer, OUT id integer)
+  RETURNS integer
+  LANGUAGE plpgsql
+ AS $function$
+   BEGIN
+     insert into cvgroup (name, definition, type)
+       values (pname, pdefinition, ptype);
+     select lastval() into id;
+   END;
+ $function$;
+
+CREATE OR REPLACE FUNCTION updatecvgroup(pid integer, pname text, pdefinition text, ptype integer)
+  RETURNS void
+  LANGUAGE plpgsql
+ AS $function$
+     DECLARE
+        i integer;
+     BEGIN
+     update cvgroup set name=pname, definition=pdefinition, type=ptype
+      where cvgroup_id = pid;
+     GET DIAGNOSTICS i = ROW_COUNT;
+     return i;
+     END;
+ $function$;
+
+CREATE OR REPLACE FUNCTION deletecvgroup(id integer)
+  RETURNS integer
+  LANGUAGE plpgsql
+ AS $function$
+     DECLARE
+      i integer;
+     BEGIN
+     delete from cvgroup where cvgroup_id = id;
+     GET DIAGNOSTICS i = ROW_COUNT;
+     return i;
+     END;
+ $function$
+
+
+--changeset kpalis:crud_fxns_for_dbxref context:general splitStatements:false
+
+CREATE OR REPLACE FUNCTION createdbxref(paccession text, pver text, pdescription text, pdbname text, purl text, OUT id integer)
+  RETURNS integer
+  LANGUAGE plpgsql
+ AS $function$
+   BEGIN
+     insert into cvgroup (accession, ver, description, db_name, url)
+       values (paccession, pver, pdescription, pdbname, purl);
+     select lastval() into id;
+   END;
+ $function$;
+
+CREATE OR REPLACE FUNCTION updatecvgroup(pid integer, pname text, pdefinition text, ptype integer)
+  RETURNS void
+  LANGUAGE plpgsql
+ AS $function$
+     DECLARE
+        i integer;
+     BEGIN
+     update cvgroup set name=pname, definition=pdefinition, type=ptype
+      where cvgroup_id = pid;
+     GET DIAGNOSTICS i = ROW_COUNT;
+     return i;
+     END;
+ $function$;
+
+CREATE OR REPLACE FUNCTION deletecvgroup(id integer)
+  RETURNS integer
+  LANGUAGE plpgsql
+ AS $function$
+     DECLARE
+      i integer;
+     BEGIN
+     delete from cvgroup where cvgroup_id = id;
+     GET DIAGNOSTICS i = ROW_COUNT;
+     return i;
+     END;
+ $function$
 
 
