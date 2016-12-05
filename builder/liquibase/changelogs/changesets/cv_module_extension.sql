@@ -149,14 +149,14 @@ CREATE OR REPLACE FUNCTION createcv(pcvgroupid integer, pcvterm text, pcvdefinit
  AS $function$
    BEGIN
      insert into cv (cvgroup_id, term, definition, rank, abbreviation, dbxref_id, status)
-       values (pcvgroup, pcvterm, pcvdefinition, pcvrank, pabbreviation, pdbxrefid, pstatus);
+       values (pcvgroupid, pcvterm, pcvdefinition, pcvrank, pabbreviation, pdbxrefid, pstatus);
      select lastval() into id;
    END;
  $function$;
 
 DROP FUNCTION IF EXISTS updatecv(id integer, cvgroup text, cvterm text, cvdefinition text, cvrank integer);
 CREATE OR REPLACE FUNCTION updatecv(pid integer, pcvgroupid integer, pcvterm text, pcvdefinition text, pcvrank integer, pabbreviation text, pdbxrefid integer, pstatus integer)
-  RETURNS void
+  RETURNS integer
   LANGUAGE plpgsql
  AS $function$
      DECLARE
@@ -199,7 +199,7 @@ CREATE OR REPLACE FUNCTION createcvgroup(pname text, pdefinition text, ptype int
  $function$;
 
 CREATE OR REPLACE FUNCTION updatecvgroup(pid integer, pname text, pdefinition text, ptype integer)
-  RETURNS void
+  RETURNS integer
   LANGUAGE plpgsql
  AS $function$
      DECLARE
@@ -240,7 +240,7 @@ CREATE OR REPLACE FUNCTION createdbxref(paccession text, pver text, pdescription
  $function$;
 
 CREATE OR REPLACE FUNCTION updatedbxref(pid integer, paccession text, pver text, pdescription text, pdbname text, purl text)
-  RETURNS void
+  RETURNS integer
   LANGUAGE plpgsql
  AS $function$
      DECLARE
