@@ -1,7 +1,6 @@
 --liquibase formatted sql
 
---### CV Table Change and Migration ###---
---## CVGroup ##--
+--## GOBIIProp ##--
 --changeset kpalis:create_gobiiprop_table context:general splitStatements:false
 CREATE TABLE gobiiprop ( 
   gobiiprop_id         serial  NOT NULL,
@@ -26,10 +25,10 @@ default 0 value should be used.';
 
 --changeset kpalis:start_tracking_dbversion context:general splitStatements:false
 select createcvgroup('gobii_datawarehouse', 'CV terms that are for the internal usage of the data warehosue', 1);
-select createCVinGroup('gobii_datawarehouse', 1, 'version', 'The version of a software, ex. the data warehouse.', 1, '', null, 1)
+select createCVinGroup('gobii_datawarehouse', 1, 'version', 'The version of a software, ex. the data warehouse.', 1, '', null, 1);
 --first version
 insert into gobiiprop (type_id, value, rank)
-select cv_id, '1.0.0', 1 from cv where term='version' and type=1 and cvgroup_id=(select cvgroup_id from cvgroup where name='gobii_datawarehouse');
+select cv_id, '1.0.0', 1 from cv where term='version' and cvgroup_id=(select cvgroup_id from cvgroup where name='gobii_datawarehouse' and type=1 );
 
 --No need for other functions here but this one, as this table is for the internal use of the datawarehouse
 --changeset kpalis:add_fxn_to_set_dbversion context:general splitStatements:false
@@ -41,10 +40,10 @@ CREATE OR REPLACE FUNCTION setDatawarehouseVersion(ver text)
         i integer;
         propId integer;
      BEGIN
-     select cv_id into propId from cv where term='version' and type=1 and cvgroup_id=(select cvgroup_id from cvgroup where name='gobii_datawarehouse');
+     select cv_id into propId from cv where term='version' and cvgroup_id=(select cvgroup_id from cvgroup where name='gobii_datawarehouse' and type=1 );
      update gobiiprop set value=ver
-      where cv_id = pid
-      and type_id=propId;
+      where type_id=propId
+      and rank=1;
      GET DIAGNOSTICS i = ROW_COUNT;
      return i;
      END;

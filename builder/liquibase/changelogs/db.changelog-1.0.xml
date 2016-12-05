@@ -16,4 +16,5 @@
 	<include file="changelogs/changesets/create_platform_protocol_module.sql"/>
 	<include file="changelogs/changesets/fix_dangerous_cascade_links.sql"/>
 	<include file="changelogs/changesets/cv_module_extension.sql"/>
+	<include file="changelogs/changesets/gobiiprop_versioning.sql"/>
 </databaseChangeLog>
