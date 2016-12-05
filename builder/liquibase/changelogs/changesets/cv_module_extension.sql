@@ -26,14 +26,7 @@ COMMENT ON COLUMN cvgroup.definition IS 'A text description of the criteria for 
 
 COMMENT ON COLUMN cvgroup.type IS 'Determines if CV group is of type "System CV" (1) or "Custom CV" (2). More types can be added as needed';
 
---## CV ##--
---changeset kpalis:normalize_and_populate_cv_group context:general splitStatements:false
-
-ALTER TABLE cv ADD COLUMN cvgroup_id integer NOT NULL;
-
-ALTER TABLE cv ADD CONSTRAINT unique_cvterm_term_cvgroupid UNIQUE ( term, cvgroup_id );
-ALTER TABLE cv ADD CONSTRAINT cv_cvgroupid_fkey FOREIGN KEY ( cvgroup_id ) REFERENCES cvgroup( cvgroup_id );
---migrate data: group name -> group id
+--populate cvgroup with current distinct groups from seed data + a user created group
 INSERT INTO cvgroup (name, definition, type) values ('dataset_type', '', 1);
 INSERT INTO cvgroup (name, definition, type) values ('germplasm_prop', '', 1);
 INSERT INTO cvgroup (name, definition, type) values ('dnarun_prop', '', 1);
@@ -47,8 +40,21 @@ INSERT INTO cvgroup (name, definition, type) values ('analysis_type', '', 1);
 INSERT INTO cvgroup (name, definition, type) values ('project_prop', '', 1);
 INSERT INTO cvgroup (name, definition, type) values ('germplasm_type', '', 1);
 INSERT INTO cvgroup (name, definition, type) values ('mapset_type', '', 1);
-
+INSERT INTO cvgroup (name, definition, type) values ('user_created', '', 2); --14
 -----
+
+--## CV ##--
+--changeset kpalis:normalize_and_migrate_cv context:general splitStatements:false
+
+ALTER TABLE cv ADD COLUMN cvgroup_id integer;
+ALTER TABLE cv ADD CONSTRAINT unique_cvterm_term_cvgroupid UNIQUE ( term, cvgroup_id );
+ALTER TABLE cv ADD CONSTRAINT cv_cvgroupid_fkey FOREIGN KEY ( cvgroup_id ) REFERENCES cvgroup( cvgroup_id );
+
+--migrate data: group name -> group id
+UPDATE cv SET cvgroup_id=(select cvgroup_id from cvgroup where name=cv."group");
+
+--set column to required
+ALTER TABLE cv ALTER COLUMN cvgroup_id SET NOT NULL;
 
 CREATE INDEX idx_cv_cvgroupid ON cv ( cvgroup_id );
 --drop freetext group column
@@ -71,14 +77,11 @@ CREATE INDEX idx_dbxref_accession ON dbxref ( accession );
 
 CREATE INDEX idx_dbxref_ver ON dbxref ( ver );
 
-COMMENT ON TABLE dbxref IS 'A unique, global, public, stable identifier. Not necessarily an external reference - can reference data items inside the particular chado instance being used. Typically a row in a table can be uniquely identified with a primary identifier (called dbxref_id); a table may also have secondary identifiers (in a linking table <T>_dbxref). A dbxref is generally written as <DB>:<ACCESSION> or as <DB>:<ACCESSION>:<VERSION>.';
+COMMENT ON TABLE dbxref IS 'A unique, global, public, stable identifier. Not necessarily an external reference - can reference data items inside the particular instance being used. Typically a row in a table can be uniquely identified with a primary identifier (called dbxref_id); a table may also have secondary identifiers (in a linking table <T>_dbxref). A dbxref is generally written as <DB>:<ACCESSION> or as <DB>:<ACCESSION>:<VERSION>.';
 
-COMMENT ON COLUMN dbxref.accession IS 'The local part of the identifier. Guaranteed by the db authority to be unique for that db.
-
-In CIMMYT`s request will be: source_id';
+COMMENT ON COLUMN dbxref.accession IS 'The local part of the identifier. Guaranteed by the db authority to be unique for that db.';
 
 COMMENT ON COLUMN dbxref.db_name IS 'source name, ex. EDAM Ontology
-
 A database authority. Typical databases in
 bioinformatics are FlyBase, GO, UniProt, NCBI, MGI, etc. The authority
 is generally known by this shortened form, which is unique within the
@@ -112,5 +115,10 @@ definition.';
 
 COMMENT ON COLUMN cv.dbxref_id IS 'Primary identifier dbxref - The
 unique global OBO identifier for this cvterm.  ';
+
+
+
+--################################# FUNCTIONS AFFECTED ####################################---
+
 
 
