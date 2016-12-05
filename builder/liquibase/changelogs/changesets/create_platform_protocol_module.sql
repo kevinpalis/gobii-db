@@ -262,6 +262,8 @@ CREATE INDEX idx_experiment_vendor_protocol_id ON experiment ( vendor_protocol_i
 ALTER TABLE experiment ADD CONSTRAINT experiment_vendor_protocol_id_fkey FOREIGN KEY ( vendor_protocol_id ) REFERENCES vendor_protocol( vendor_protocol_id );
 
 --function changes
+DROP FUNCTION IF EXISTS createexperiment(expname text, expcode text, projectid integer, platformid integer, manifestid integer, datafile text, createdby integer, createddate date, modifiedby integer, modifieddate date, expstatus integer, OUT expid integer);
+
 CREATE OR REPLACE FUNCTION createexperiment(pname text, pcode text, pprojectid integer, pvendorprotocolid integer, pmanifestid integer, pdatafile text, pcreatedby integer, pcreateddate date, pmodifiedby integer, pmodifieddate date, pstatus integer, OUT expid integer)
   RETURNS integer
   LANGUAGE plpgsql
@@ -273,13 +275,19 @@ CREATE OR REPLACE FUNCTION createexperiment(pname text, pcode text, pprojectid i
      END;
  $function$;
 
+DROP FUNCTION IF EXISTS updateexperiment(eid integer, expname text, expcode text, projectid integer, platformid integer, manifestid integer, datafile text, createdby integer, createddate date, modifiedby integer, modifieddate date, expstatus integer);
+
 CREATE OR REPLACE FUNCTION updateexperiment(pid integer, pname text, pcode text, pprojectid integer, pvendorprotocolid integer, pmanifestid integer, pdatafile text, pcreatedby integer, pcreateddate date, pmodifiedby integer, pmodifieddate date, pstatus integer)
-  RETURNS void
+  RETURNS integer
   LANGUAGE plpgsql
  AS $function$
+ 	DECLARE
+        i integer;
      BEGIN
      update experiment set name=pname, code=pcode, project_id=pprojectid, manifest_id=pmanifestid, data_file=pdatafile,
        created_by=pcreatedby, created_date=pcreateddate, modified_by=pmodifiedby, modified_date=pmodifieddate, status=pstatus, vendor_protocol_id=pvendorprotocolid where experiment_id = eId;
+     GET DIAGNOSTICS i = ROW_COUNT;
+     return i;
      END;
  $function$;
 
@@ -296,7 +304,7 @@ RETURNS integer AS $$
         i integer;
     BEGIN
 	    update marker m set vendor_protocol_id = vendor_protocol_id || ('{"'||pdatasetid||'": '||pvendorprotocolid||'}')::jsonb
-		where m.marker_id = pid
+		where m.marker_id = pid;
 	    GET DIAGNOSTICS i = ROW_COUNT;
 	    return i;
     END;
