@@ -231,7 +231,7 @@ RETURNS integer AS $$
         i integer;
     BEGIN
     update vendor_protocol set name=pname, vendor_id=pvendorid, protocol_id=pprotocolid, status=pstatus
-     where vendor_protocol = pid;
+     where vendor_protocol_id = pid;
       GET DIAGNOSTICS i = ROW_COUNT;
       return i;
     END;
@@ -303,7 +303,7 @@ RETURNS integer AS $$
     DECLARE
         i integer;
     BEGIN
-	    update marker m set vendor_protocol_id = vendor_protocol_id || ('{"'||pdatasetid||'": '||pvendorprotocolid||'}')::jsonb
+	    update marker m set dataset_vendor_protocol = dataset_vendor_protocol || ('{"'||pdatasetid||'": "'||pvendorprotocolid||'"}')::jsonb
 		where m.marker_id = pid;
 	    GET DIAGNOSTICS i = ROW_COUNT;
 	    return i;
