@@ -12,7 +12,7 @@ select * from createContact('Zhang','Xuecai','contact_4','XC.Zhang@cgiar.org','{
 select * from createContact('Hearne','Sarah','contact_5','s.hearne@cgiar.org','{1}',1,NULL,NULL,NULL,1);
 select * from createContact('Nair','Sudha','contact_6','sudha.nair@cgiar.org','{1}',1,NULL,NULL,NULL,1);
 select * from createContact('Semagn','Kassa','contact_7','CIMMYT-DMU@cgiar.org','{1}',1,NULL,NULL,NULL,1);
-select * from createContact('Raman','Babu','contact_8','CIMMYT-DMU@cgiar.org','{1}',1,NULL,NULL,NULL,1);
+select * from createContact('Raman','Babu','contact_8','CIMMYT-DMU2@cgiar.org','{1}',1,NULL,NULL,NULL,1);
 select * from createContact('Gowda','Manje','contact_9','m.gowda@cgiar.org','{1}',1,NULL,NULL,NULL,1);
 select * from createContact('Huestis','Gordon','contact_10','g.huestis@cgiar.org','{1}',1,NULL,NULL,NULL,1);
 select * from createContact('Magorokosho','Cosmos','contact_11','C.Magorokosho@CGIAR.ORG','{1}',1,NULL,NULL,NULL,1);

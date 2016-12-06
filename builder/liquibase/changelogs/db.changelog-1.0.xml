@@ -13,4 +13,5 @@
 	<include file="changelogs/changesets/fix_failing_functions.sql"/>
 	<include file="changelogs/changesets/upsert_kvp.sql"/>
 	<include file="changelogs/changesets/fix_upsert_kvp.sql"/>
+	<include file="changelogs/changesets/create_platform_protocol_module.sql"/>
 </databaseChangeLog>
