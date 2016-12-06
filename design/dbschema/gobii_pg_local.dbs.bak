@@ -3981,14 +3981,14 @@ $function$
 	<layout id="Layout_78ffbd4" name="GOBII_ERD_v1.0.0" joined_routing="y" show_column_type="y" show_relation_columns="y" >
 		<comment><![CDATA[GOBII_ERD_v1.0.0]]></comment>
 		<entity schema="public" name="cvgroup" color="dfdff5" x="690" y="630" />
-		<entity schema="public" name="platform" color="c8fcfc" x="1020" y="60" />
+		<entity schema="public" name="platform" color="d8fcfc" x="1020" y="60" />
 		<entity schema="public" name="dnasample" color="ffdcdc" x="285" y="615" />
 		<entity schema="public" name="germplasm" color="ffdcdc" x="75" y="825" />
 		<entity schema="public" name="cv" color="dfdff5" x="525" y="630" />
 		<entity schema="public" name="display" color="d2d7d7" x="495" y="1215" />
 		<entity schema="public" name="project" color="cddcee" x="915" y="540" />
-		<entity schema="public" name="protocol" color="c8fcfc" x="1230" y="60" />
-		<entity schema="public" name="vendor_protocol" color="c8fcfc" x="1230" y="315" />
+		<entity schema="public" name="protocol" color="d8fcfc" x="1230" y="60" />
+		<entity schema="public" name="vendor_protocol" color="d8fcfc" x="1230" y="315" />
 		<entity schema="public" name="dnarun" color="ffdcdc" x="60" y="615" />
 		<entity schema="public" name="mapset" color="cdf5d8" x="795" y="75" />
 		<entity schema="public" name="linkage_group" color="cdf5d8" x="555" y="105" />
@@ -4018,7 +4018,7 @@ $function$
 			<entity schema="public" name="manifest" />
 			<entity schema="public" name="project" />
 		</group>
-		<group name="Platform-Protocol-Vendor" color="c8fcfc" >
+		<group name="Platform-Protocol-Vendor" color="d8fcfc" >
 			<entity schema="public" name="platform" />
 			<entity schema="public" name="protocol" />
 			<entity schema="public" name="vendor_protocol" />
