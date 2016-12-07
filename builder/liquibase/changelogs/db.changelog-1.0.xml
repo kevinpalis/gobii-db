@@ -9,7 +9,9 @@
 	<include file="changelogs/changesets/fix_constraints.sql"/>
 	<include file="changelogs/changesets/fix_functions_inconsistent_tables.sql"/>
 	<include file="changelogs/changesets/fix_remove_proptables.sql"/>
-	<include file="changelogs/changesets/fix_fxns_propstable.sql"/> 
+	<include file="changelogs/changesets/fix_fxns_propstable.sql"/>
+	<include file="changelogs/changesets/mde_mapset_info.sql"/> 
+	<include file="mde_getMinimalMarkerMetadataByDataset_upd.sql"/>
 	<include file="changelogs/changesets/fix_failing_functions.sql"/>
 	<include file="changelogs/changesets/upsert_kvp.sql"/>
 	<include file="changelogs/changesets/fix_upsert_kvp.sql"/>
