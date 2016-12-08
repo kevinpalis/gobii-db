@@ -57,7 +57,7 @@ RETURNS table (marker_name text,platform_name text, variant_id integer, variant_
 		,(m.props->>getPropertyIdByNamesAndType('marker_prop','genome_build',1)::text)
 		,(m.props->>getPropertyIdByNamesAndType('marker_prop','typeofrefallele_alleleorder',1)::text)
 		,(m.props->>getPropertyIdByNamesAndType('marker_prop','strand_data_read',1)::text)
-	from marker m inner join platform p on m.platform_id = p.platform_id
+	from marker m left join platform p on m.platform_id = p.platform_id
 	left join cv on m.strand_id = cv.cv_id 
 	left join variant v on m.variant_id = v.variant_id
 	where m.dataset_marker_idx ? datasetId::text
