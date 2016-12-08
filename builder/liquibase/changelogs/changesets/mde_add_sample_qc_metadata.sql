@@ -12,9 +12,9 @@ RETURNS table (dnarun_name text
 		,project_division text
 		,project_study_name text
 		,experiment_name text
---		,vendor_protocol_name text
---		,vendor_name text
---		,protocol_name text
+		,vendor_protocol_name text
+		,vendor_name text
+		,protocol_name text
 		,dataset_name text
 		,germplasm_name text
 		,germplasm_external_code text
@@ -52,9 +52,9 @@ RETURNS table (dnarun_name text
 		,(p.props->>getPropertyIdByNamesAndType('project_prop','division',1)::text)
 		,(p.props->>getPropertyIdByNamesAndType('project_prop','study_name',1)::text)
 		,e.name as experiment_name
---		,vp.name 
---		,v.name
---		,pr.name
+		,vp.name as vp_name
+		,v.name as v_name
+		,pr.name as pr_name
 		,ds.name as dataset_name
 		,g.name as germplasm_name
 		,g.external_code
@@ -81,17 +81,17 @@ RETURNS table (dnarun_name text
 		,(p.props->>getPropertyIdByNamesAndType('dnasample_prop','dnasample_sample_parent',1)::text)
 		,(p.props->>getPropertyIdByNamesAndType('dnasample_prop','dnasample_ref_sample',1)::text)
 	from dnarun dr
-	inner join dnasample dns on dr.dnasample_id = dns.dnasample_id 
-	inner join germplasm g on dns.germplasm_id = g.germplasm_id 
-	inner join project p on dns.project_id = p.project_id
-	inner join contact c on c.contact_id = p.pi_contact
-	inner join experiment e on e.experiment_id = dr.experiment_id
-	inner join dataset ds on ds.experiment_id = e.experiment_id
+	left join dnasample dns on dr.dnasample_id = dns.dnasample_id 
+	left join germplasm g on dns.germplasm_id = g.germplasm_id 
+	left join project p on dns.project_id = p.project_id
+	left join contact c on c.contact_id = p.pi_contact
+	left join experiment e on e.experiment_id = dr.experiment_id
+	left join dataset ds on ds.experiment_id = e.experiment_id
 	left join cv on g.species_id = cv.cv_id
 	left join cv cv2 on g.type_id = cv2.cv_id
---	join vendor_protocol vp
---	join vendor v
---	join protoco 
+	left join vendor_protocol vp on vp.vendor_protocol_id = e.vendor_protocol_id
+	left join organization v on v.organization_id = vp.vendor_id
+	left join protocol pr on pr.protocol_id = vp.protocol_id
 	where dr.dataset_dnarun_idx ? datasetId::text
 	order by (dr.dataset_dnarun_idx->>datasetId::text)::integer;
   END;
