@@ -11,7 +11,7 @@ import traceback
 from util.mde_utility import MDEUtility
 from db.extract_metadata_manager import ExtractMetadataManager
 
-def main(isVerbose, connectionStr, datasetId, outputFile, allMeta, namesOnly, mapId, includeChrLen,displayMapId):
+def main(isVerbose, connectionStr, datasetId, outputFile, allMeta, namesOnly, mapId, includeChrLen, displayMapId):
 	if isVerbose:
 		print("Getting marker metadata for dataset with ID: %s" % datasetId)
 		print("Output File: ", outputFile)
@@ -22,14 +22,12 @@ def main(isVerbose, connectionStr, datasetId, outputFile, allMeta, namesOnly, ma
 		elif namesOnly:
 			exMgr.createMarkerNamesFile(outputFile, datasetId, mapId)
 		else:
-			exMgr.createMinimalMarkerMetadataFile(outputFile, datasetId, mapId)
+			exMgr.createQCMarkerMetadataFile(outputFile, datasetId, mapId)
 		if includeChrLen:
 			exMgr.createChrLenFile(outputFile, datasetId, mapId)
 
-		#current versino would pass only one mapId. In future this could be mapId[].
-		if displayMapId <> -1:
+		if displayMapId != -1:
 			exMgr.getMarkerMapsetInfoByDataset(outputFile, datasetId, displayMapId)
-
 
 		exMgr.commitTransaction()
 		exMgr.closeConnection()
@@ -45,6 +43,7 @@ def main(isVerbose, connectionStr, datasetId, outputFile, allMeta, namesOnly, ma
 		exMgr.rollbackTransaction()
 		traceback.print_exc(file=sys.stderr)
 		sys.exit(6)
+
 
 if __name__ == "__main__":
 	if len(sys.argv) < 5:

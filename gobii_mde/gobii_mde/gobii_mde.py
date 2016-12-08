@@ -53,7 +53,7 @@ def main(argv):
 				mapId = arg
 			elif opt in ("-l", "--includeChrLen"):
 				includeChrLen = True
-			elif opt  in ("-D", "--displayMap"):
+			elif opt in ("-D", "--displayMap"):
 				displayMap = arg
 
 		#if verbose:
@@ -64,7 +64,7 @@ def main(argv):
 				try:
 					if verbose:
 						print("Generating marker metadata file...")
-					extract_marker_metadata.main(verbose, connectionStr, datasetId, markerOutputFile, allMeta, namesOnly, mapId, includeChrLen,displayMap)
+					extract_marker_metadata.main(verbose, connectionStr, datasetId, markerOutputFile, allMeta, namesOnly, mapId, includeChrLen, displayMap)
 				except Exception as e1:
 					MDEUtility.printError("Error: %s" % (str(e1)))
 					exitCode = 2
@@ -109,7 +109,7 @@ def printUsageHelp():
 	print ("\t-n or --namesOnly = Generate only names metadata. This flag is ignored if -a / --all is set.")
 	print ("\t-M or --map = Get only the markers in the specified map. This is useful if a dataset contains markers that belongs to multiple maps.")
 	print ("\t-l or --includeChrLen = Generates a file that lists all the chromosomes (or any linkage groups) that appear on the markers list, along with their lengths. Filename is the same as the marker file but appended with .chr.")
-	print ("\t-D or --displayMap = MapsetId for the mapset info to display,if marker exists in more than one mapset. Mapset file is the same as marker file appended  with .mapset.")
+	print ("\t-D or --displayMap = MapsetId for the mapset info to display, if marker exists in more than one mapset. Mapset file is the same as marker file appended  with .mapset.")
 	sys.exit(1)
 
 if __name__ == "__main__":

@@ -57,6 +57,17 @@ class ExtractMetadataManager:
 			self.cur.copy_expert(sql, outputFile, 20480)
 		outputFile.close()
 
+	def createQCMarkerMetadataFile(self, outputFilePath, datasetId, mapId):
+		sql = ""
+		if mapId == -1:
+			sql = "copy (select * from getMarkerQCMetadataByDataset("+datasetId+")) to STDOUT with delimiter E'\\t'"+" csv header;"
+		else:
+			#TODO: in case we offer the feature to filter by mapId, we'll need to create a version of getMarkerQCMetadataByDataset that filters by mapId as well.
+			sql = "copy (select * from getMinimalMarkerMetadataByDatasetAndMap("+datasetId+","+mapId+")) to STDOUT with delimiter E'\\t'"+" csv header;"
+		with open(outputFilePath, 'w') as outputFile:
+			self.cur.copy_expert(sql, outputFile, 20480)
+		outputFile.close()
+
 	def createChrLenFile(self, outputFilePath, datasetId, mapId):
 		sql = ""
 		outputFilePath = outputFilePath+".chr"
@@ -91,8 +102,9 @@ class ExtractMetadataManager:
 		with open(outputFilePath, 'w') as outputFile:
 			self.cur.copy_expert(sql, outputFile, 20480)
 		outputFile.close()
-	
+
 	def getMarkerMapsetInfoByDataset(self, outputFilePath, datasetId, mapId):
+		#rename this function
 		'''
 			For the given datasetId & mapId this funtion would output all markers in dataset and  only the given mapset info.
 		'''
@@ -101,8 +113,6 @@ class ExtractMetadataManager:
 		with open(outputFilePath, 'w') as outputFile:
 			self.cur.copy_expert(sql, outputFile, 20480)
 		outputFile.close()
-
-
 
 	def commitTransaction(self):
 		self.conn.commit()
