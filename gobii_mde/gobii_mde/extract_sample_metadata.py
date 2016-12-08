@@ -24,8 +24,7 @@ def main(isVerbose, connectionStr, datasetId, outputFile, allMeta, namesOnly):
 		elif namesOnly:
 			exMgr.createDnarunNamesFile(outputFile, datasetId)
 		else:
-			#exMgr.createMinimalSampleMetadataFile(outputFile, datasetId)
-			exMgr.createAllSampleMetadataFile(outputFile, datasetId)
+			exMgr.createSampleQCMetadataFile(outputFile, datasetId)
 		exMgr.commitTransaction()
 		exMgr.closeConnection()
 		#print("Created full sample metadata file successfully.")

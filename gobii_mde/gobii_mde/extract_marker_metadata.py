@@ -26,8 +26,9 @@ def main(isVerbose, connectionStr, datasetId, outputFile, allMeta, namesOnly, ma
 		if includeChrLen:
 			exMgr.createChrLenFile(outputFile, datasetId, mapId)
 
+		#current version would pass only one mapId. In future this could be mapId[].
 		if displayMapId != -1:
-			exMgr.getMarkerMapsetInfoByDataset(outputFile, datasetId, displayMapId)
+			exMgr.getMarkerAllMapsetInfoByDataset(outputFile, datasetId, displayMapId)
 
 		exMgr.commitTransaction()
 		exMgr.closeConnection()
