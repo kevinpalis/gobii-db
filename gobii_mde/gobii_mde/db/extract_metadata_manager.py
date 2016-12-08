@@ -102,6 +102,12 @@ class ExtractMetadataManager:
 			self.cur.copy_expert(sql, outputFile, 20480)
 		outputFile.close()
 
+	def createSampleQCMetadataFile(self, outputFilePath, datasetId):
+		sql = "copy (select * from getSampleQCMetadataByDataset("+datasetId+")) to STDOUT with delimiter E'\\t'"+" csv header;"
+		with open(outputFilePath, 'w') as outputFile:
+			self.cur.copy_expert(sql, outputFile, 20480)
+		outputFile.close()
+
 
 
 	def commitTransaction(self):

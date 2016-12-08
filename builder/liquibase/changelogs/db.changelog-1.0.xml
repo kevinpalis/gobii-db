@@ -11,5 +11,6 @@
 	<include file="changelogs/changesets/fix_remove_proptables.sql"/>
 	<include file="changelogs/changesets/fix_fxns_propstable.sql"/> 
 	<include file="changelogs/changesets/mde_mapset_info.sql"/> 
-	<include file="mde_getMinimalMarkerMetadataByDataset_upd.sql"/>
+	<include file="changelogs/mde_getMinimalMarkerMetadataByDataset_upd.sql"/>
+	<include file="changelogs/mde_add_sample_qc_metadata.sql"/>
 </databaseChangeLog>
