@@ -9,9 +9,16 @@
 	<include file="changelogs/changesets/fix_constraints.sql"/>
 	<include file="changelogs/changesets/fix_functions_inconsistent_tables.sql"/>
 	<include file="changelogs/changesets/fix_remove_proptables.sql"/>
-	<include file="changelogs/changesets/fix_fxns_propstable.sql"/> 
+	<include file="changelogs/changesets/fix_fxns_propstable.sql"/>
 	<include file="changelogs/changesets/fix_failing_functions.sql"/>
 	<include file="changelogs/changesets/upsert_kvp.sql"/>
 	<include file="changelogs/changesets/fix_upsert_kvp.sql"/>
 	<include file="changelogs/changesets/create_platform_protocol_module.sql"/>
+	<include file="changelogs/changesets/fix_dangerous_cascade_links.sql"/>
+	<include file="changelogs/changesets/cv_module_extension.sql"/>
+	<include file="changelogs/changesets/gobiiprop_versioning.sql"/>
+	<include file="changelogs/changesets/mde_mapset_info.sql"/> 
+	<include file="changelogs/changesets/mde_get_marker_meta_qc.sql"/>
+	<include file="changelogs/changesets/mde_add_sample_qc_metadata.sql"/>
+	<include file="changelogs/changesets/mde_fix_project_meta_fxn.sql"/>
 </databaseChangeLog>
