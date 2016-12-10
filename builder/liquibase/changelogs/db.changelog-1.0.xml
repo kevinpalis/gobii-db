@@ -21,4 +21,5 @@
 	<include file="changelogs/changesets/mde_get_marker_meta_qc.sql"/>
 	<include file="changelogs/changesets/mde_add_sample_qc_metadata.sql"/>
 	<include file="changelogs/changesets/mde_fix_project_meta_fxn.sql"/>
+	<include file="changelogs/changesets/mde_extraction_by_marker_list.sql"/>
 </databaseChangeLog>
