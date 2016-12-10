@@ -66,6 +66,7 @@ def main(argv):
 		#print("Opts: ", opts)
 		markerList = []
 		sampleList = []
+		#copy content of markerList and sampleList file to their corresponding lists.
 		if markerListFile != "":
 				if verbose:
 					print("Extracting by marker list...")
