@@ -319,4 +319,13 @@ AS $function$
   END;
 $function$;
 
+--changeset kpalis:getMarkerIdxsInDataset context:general splitStatements:false
+--This returns a list of positions in a genotype matrix for a given set of markers in a dataset, sorted by marker_id.
+
+select d.dataset_id, m.marker_id, m.dataset_marker_idx
+from (unnest('{1000,1200,1023,10000,10120,10130,10400}'::integer[]) ml(m_id) 
+left join marker m on ml.m_id = m.marker_id)
+left join dataset d on m.dataset_marker_idx ? d.dataset_id::text;
+
+
 
