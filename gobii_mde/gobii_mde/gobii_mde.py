@@ -75,13 +75,13 @@ def main(argv):
 		sampleList = []
 		#copy content of markerList and sampleList file to their corresponding lists.
 		if markerListFile != "":
-				if verbose:
-					print("Extracting by marker list...")
+				#if verbose:
+				#	print("Extracting by marker list...")
 				markerList = [line.strip() for line in open(markerListFile, 'r')]
 				print("Marker List: %s" % markerList)
 		if sampleListFile != "":
-				if verbose:
-					print("Extracting by marker list...")
+				#if verbose:
+				#	print("Extracting by sample list...")
 				sampleList = [line.strip() for line in open(markerListFile, 'r')]
 				print("Sample List: %s" % sampleList)
 
@@ -89,8 +89,8 @@ def main(argv):
 		if datasetId.isdigit() or markerList or sampleList:
 			if connectionStr != "" and markerOutputFile != "":
 				try:
-					if verbose:
-						print("Generating marker metadata file...")
+					#if verbose:
+					#	print("Generating marker metadata file...")
 					extract_marker_metadata.main(verbose, connectionStr, datasetId, markerOutputFile, allMeta, namesOnly, mapId, includeChrLen, displayMap, markerList, sampleList)
 				except Exception as e1:
 					MDEUtility.printError("Error: %s" % (str(e1)))
@@ -98,8 +98,8 @@ def main(argv):
 				rn = True
 			if connectionStr != "" and sampleOutputFile != "":
 				try:
-					if verbose:
-						print("Generating sample metadata file...")
+					#if verbose:
+					#	print("Generating sample metadata file...")
 					extract_sample_metadata.main(verbose, connectionStr, datasetId, sampleOutputFile, allMeta, namesOnly, markerList, sampleList)
 				except Exception as e:
 					MDEUtility.printError("Error: %s" % str(e))

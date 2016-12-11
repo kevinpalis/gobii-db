@@ -127,6 +127,12 @@ class ExtractMetadataManager:
 			self.cur.copy_expert(sql, outputFile, 20480)
 		outputFile.close()
 
+	def createSampleQCMetadataByMarkerList(self, outputFilePath, markerList):
+		sql = "copy (select * from getSampleQCMetadataByMarkerList('{"+(','.join(markerList))+"}')) to STDOUT with delimiter E'\\t'"+" csv header;"
+		with open(outputFilePath, 'w') as outputFile:
+			self.cur.copy_expert(sql, outputFile, 20480)
+		outputFile.close()
+
 	def getMarkerAllMapsetInfoByDataset(self, outputFilePath, datasetId, mapId):
 		'''
 			For the given datasetId & mapId this funtion would output all markers in dataset and mapsets associated with them.Markers with multiple mapsets will be repeated.

@@ -41,12 +41,16 @@ def main(isVerbose, connectionStr, datasetId, outputFile, allMeta, namesOnly, ma
 					exMgr.createChrLenFile(outputFile, datasetId, mapId, markerList, sampleList)
 		exMgr.commitTransaction()
 		exMgr.closeConnection()
+		''' These things don't make sense anymore
 		if allMeta:
 			print("Created full marker metadata file successfully.")
 		elif namesOnly:
 			print("Created marker names file successfully.")
 		else:
 			print("Created minimal marker metadata file successfully.")
+		'''
+		if isVerbose:
+			print("Created marker metadata file successfully.")
 		return outputFile
 	except Exception as e:
 		MDEUtility.printError('Failed to create marker metadata file. Error: %s' % (str(e)))
