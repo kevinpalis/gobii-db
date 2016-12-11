@@ -13,8 +13,7 @@ from db.extract_metadata_manager import ExtractMetadataManager
 
 def main(isVerbose, connectionStr, datasetId, outputFile, allMeta, namesOnly, mapId, includeChrLen, displayMapId, markerList, sampleList):
 	if isVerbose:
-		print("Getting marker metadata for dataset with ID: %s" % datasetId)
-		print("Output File: ", outputFile)
+		print("Marker Metadata Output File: ", outputFile)
 	exMgr = ExtractMetadataManager(connectionStr)
 	try:
 		if allMeta:
@@ -25,19 +24,21 @@ def main(isVerbose, connectionStr, datasetId, outputFile, allMeta, namesOnly, ma
 			if markerList:
 				if isVerbose:
 					print("Generating marker metadata by marker list.")
+				exMgr.createQCMarkerMetadataByMarkerList(outputFile, markerList)
 			elif sampleList:
 				if isVerbose:
 					print("Generating marker metadata by sample list.")
+					print("!!!Not yet implemented. Aborting...")
+				return outputFile
 			else:
 				if isVerbose:
 					print("Generating marker metadata by datasetID.")
 				exMgr.createQCMarkerMetadataFile(outputFile, datasetId, mapId)
-				if includeChrLen:
-					exMgr.createChrLenFile(outputFile, datasetId, mapId)
 				#current version would pass only one mapId. In future this could be mapId[].
 				if displayMapId != -1:
 					exMgr.getMarkerAllMapsetInfoByDataset(outputFile, datasetId, displayMapId)
-
+		if includeChrLen:
+					exMgr.createChrLenFile(outputFile, datasetId, mapId, markerList, sampleList)
 		exMgr.commitTransaction()
 		exMgr.closeConnection()
 		if allMeta:

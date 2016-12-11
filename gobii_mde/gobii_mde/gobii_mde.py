@@ -1,5 +1,12 @@
 #!/usr/bin/env python
-
+'''
+	PRECEDENCE:
+		1. ALLMETA flag
+		2. NAMESONLY flag
+		1. Marker ID List
+		2. DNARun ID (Sample) List
+		3. Dataset ID
+'''
 from __future__ import print_function
 import sys
 import getopt

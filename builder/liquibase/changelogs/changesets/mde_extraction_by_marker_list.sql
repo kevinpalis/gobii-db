@@ -304,3 +304,19 @@ RETURNS table (ds_id integer, idx integer
   END;
 $$ LANGUAGE plpgsql;
 
+--changeset kpalis:getallchrlenbymarkerlist context:general splitStatements:false
+DROP FUNCTION IF EXISTS getallchrlenbymarkerlist(markerList text);
+CREATE OR REPLACE FUNCTION getallchrlenbymarkerlist(markerList text)
+ RETURNS TABLE(chr_name character varying, length integer)
+ LANGUAGE plpgsql
+AS $function$
+  BEGIN
+    return query
+    select distinct mlp.linkage_group_name, mlp.linkage_group_stop::integer
+    from unnest(markerList::integer[]) ml(m_id) --implicit lateral join
+	left join marker m on ml.m_id = m.marker_id
+    left join v_marker_linkage_physical mlp on m.marker_id = mlp.marker_id;
+  END;
+$function$;
+
+

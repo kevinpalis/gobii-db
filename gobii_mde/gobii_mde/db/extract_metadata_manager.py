@@ -58,23 +58,30 @@ class ExtractMetadataManager:
 		outputFile.close()
 
 	def createQCMarkerMetadataFile(self, outputFilePath, datasetId, mapId):
-		sql = ""
-		if mapId == -1:
-			sql = "copy (select * from getMarkerQCMetadataByDataset("+datasetId+")) to STDOUT with delimiter E'\\t'"+" csv header;"
-		else:
-			#TODO: in case we offer the feature to filter by mapId, we'll need to create a version of getMarkerQCMetadataByDataset that filters by mapId as well.
-			sql = "copy (select * from getMinimalMarkerMetadataByDatasetAndMap("+datasetId+","+mapId+")) to STDOUT with delimiter E'\\t'"+" csv header;"
+		sql = "copy (select * from getMarkerQCMetadataByDataset("+datasetId+")) to STDOUT with delimiter E'\\t'"+" csv header;"
+		#TODO: in case we offer the feature to filter by mapId, we'll need to create a version of getMarkerQCMetadataByDataset that filters by mapId as well. And add the conditional expressions as in createAllMarkerMetadataFile
 		with open(outputFilePath, 'w') as outputFile:
 			self.cur.copy_expert(sql, outputFile, 20480)
 		outputFile.close()
 
-	def createChrLenFile(self, outputFilePath, datasetId, mapId):
+	def createQCMarkerMetadataByMarkerList(self, outputFilePath, markerList):
+		sql = "copy (select * from getMarkerQCMetadataByMarkerList('{"+(','.join(markerList))+"}')) to STDOUT with delimiter E'\\t'"+" csv header;"
+		with open(outputFilePath, 'w') as outputFile:
+			self.cur.copy_expert(sql, outputFile, 20480)
+		outputFile.close()
+
+	def createChrLenFile(self, outputFilePath, datasetId, mapId, markerList, sampleList):
 		sql = ""
 		outputFilePath = outputFilePath+".chr"
-		if mapId == -1:
-			sql = "copy (select * from getAllChrLenByDataset("+datasetId+")) to STDOUT with delimiter E'\\t'"+" csv header;"
+		if markerList:
+			sql = "copy (select * from getAllChrLenByMarkerList('{"+(','.join(markerList))+"}')) to STDOUT with delimiter E'\\t'"+" csv header;"
+		elif sampleList:
+			print("Not yet implemented")
 		else:
-			sql = "copy (select * from getAllChrLenByDatasetAndMap("+datasetId+","+mapId+")) to STDOUT with delimiter E'\\t'"+" csv header;"
+			if mapId == -1:
+				sql = "copy (select * from getAllChrLenByDataset("+datasetId+")) to STDOUT with delimiter E'\\t'"+" csv header;"
+			else:
+				sql = "copy (select * from getAllChrLenByDatasetAndMap("+datasetId+","+mapId+")) to STDOUT with delimiter E'\\t'"+" csv header;"
 		with open(outputFilePath, 'w') as outputFile:
 			self.cur.copy_expert(sql, outputFile, 20480)
 		outputFile.close()
