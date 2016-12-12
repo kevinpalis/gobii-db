@@ -132,7 +132,7 @@ RETURNS table (dnarun_name text
   BEGIN
 	return query
 	with dataset_list as (
-			select jsonb_object_keys(dataset_marker_idx)::integer as ds_id
+			select distinct jsonb_object_keys(dataset_marker_idx)::integer as ds_id
 			from unnest(markerList::integer[]) ml(m_id) --implicit lateral join
 			left join marker m on ml.m_id = m.marker_id
 			order by ds_id
@@ -241,7 +241,7 @@ RETURNS table (ds_id integer, idx integer
   BEGIN
 	return query
 	with dataset_list as (
-			select jsonb_object_keys(dataset_marker_idx)::integer as ds_id
+			select distinct jsonb_object_keys(dataset_marker_idx)::integer as ds_id
 			from unnest(markerList::integer[]) ml(m_id) --implicit lateral join
 			left join marker m on ml.m_id = m.marker_id
 			order by ds_id
@@ -319,13 +319,43 @@ AS $function$
   END;
 $function$;
 
---changeset kpalis:getMarkerIdxsInDataset context:general splitStatements:false
---This returns a list of positions in a genotype matrix for a given set of markers in a dataset, sorted by marker_id.
+--changeset kpalis:getMatrixPosOfMarkers context:general splitStatements:false
+--This returns a list of positions in a genotype matrix for a given set of markers, sorted by marker_id.
+DROP FUNCTION IF EXISTS getMatrixPosOfMarkers(markerList text);
+CREATE OR REPLACE FUNCTION getMatrixPosOfMarkers(markerList text)
+ RETURNS TABLE(dataset_id integer, positions text)
+ LANGUAGE plpgsql
+AS $function$
+  BEGIN
+    return query
+	with marker_list as ( select *
+	from unnest(markerList::integer[]) ml(m_id) 
+	left join marker m on ml.m_id = m.marker_id),
+	dataset_list as (
+		select  distinct jsonb_object_keys(dataset_marker_idx)::integer as dataset_id
+		from marker_list ml
+		order by dataset_id)
+	select dl.dataset_id, string_agg(COALESCE(ml.dataset_marker_idx ->> dl.dataset_id::text, '-1'), ', ') as idx
+	from marker_list ml cross join
+	dataset_list dl
+	group by dl.dataset_id
+	order by dl.dataset_id;
+  END;
+$function$;
+/* Sample calls and direct queries:
+	select * from getMatrixPosOfMarkers('{1,2,3}');
+	select * from getMatrixPosOfMarkers('{1000,1200,1023,10000,5791,30000,80000}');
 
-select d.dataset_id, m.marker_id, m.dataset_marker_idx
-from (unnest('{1000,1200,1023,10000,10120,10130,10400}'::integer[]) ml(m_id) 
-left join marker m on ml.m_id = m.marker_id)
-left join dataset d on m.dataset_marker_idx ? d.dataset_id::text;
-
-
-
+	with marker_list as ( select *
+		from unnest('{1000,1200,1023,10000,5791,30000,80000}'::integer[]) ml(m_id) 
+		left join marker m on ml.m_id = m.marker_id),
+	dataset_list as (
+		select  distinct jsonb_object_keys(dataset_marker_idx)::integer as dataset_id
+		from marker_list ml
+		order by dataset_id)
+	select dl.dataset_id, string_agg(COALESCE(ml.dataset_marker_idx ->> dl.dataset_id::text, '-1'), ', ') as idx
+	from marker_list ml cross join
+	dataset_list dl
+	group by dl.dataset_id
+	order by dl.dataset_id;
+*/
