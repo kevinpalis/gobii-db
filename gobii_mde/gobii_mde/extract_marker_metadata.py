@@ -25,18 +25,19 @@ def main(isVerbose, connectionStr, datasetId, outputFile, allMeta, namesOnly, ma
 				if isVerbose:
 					print("Generating marker metadata by marker list.")
 				exMgr.createQCMarkerMetadataByMarkerList(outputFile, markerList)
+				exMgr.createMarkerPositionsFileByMarkerList(outputFile, markerList)
 			elif sampleList:
 				if isVerbose:
 					print("Generating marker metadata by sample list.")
-					print("!!!Not yet implemented. Aborting...")
+					print("!!!Not yet implemented. Skipping...")
 				return outputFile
 			else:
 				if isVerbose:
 					print("Generating marker metadata by datasetID.")
 				exMgr.createQCMarkerMetadataFile(outputFile, datasetId, mapId)
 				#current version would pass only one mapId. In future this could be mapId[].
-				if displayMapId != -1:
-					exMgr.getMarkerAllMapsetInfoByDataset(outputFile, datasetId, displayMapId)
+		if displayMapId != -1:
+			exMgr.createMapsetFile(outputFile, datasetId, displayMapId, markerList, sampleList)
 		if includeChrLen:
 					exMgr.createChrLenFile(outputFile, datasetId, mapId, markerList, sampleList)
 		exMgr.commitTransaction()
