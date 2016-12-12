@@ -321,7 +321,11 @@ $function$;
 
 --changeset kpalis:getMatrixPosOfMarkers context:general splitStatements:false
 --This returns a list of positions in a genotype matrix for a given set of markers, sorted by marker_id.
-DROP FUNCTION IF EXISTS getMatrixPosOfMarkers(markerList text);
+DROP FUNCTION IF EXISTS outputFilePath = outputFilePath+".mapset"
+		sql = "copy (select * from getMarkerAllMapsetInfoByDataset("+datasetId+","+mapId+")) to STDOUT with delimiter E'\\t'"+" csv header;"
+		with open(outputFilePath, 'w') as outputFile:
+			self.cur.copy_expert(sql, outputFile, 20480)
+		outputFile.close()(markerList text);
 CREATE OR REPLACE FUNCTION getMatrixPosOfMarkers(markerList text)
  RETURNS TABLE(dataset_id integer, positions text)
  LANGUAGE plpgsql
