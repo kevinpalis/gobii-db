@@ -58,23 +58,31 @@ class ExtractMetadataManager:
 		outputFile.close()
 
 	def createQCMarkerMetadataFile(self, outputFilePath, datasetId, mapId):
-		sql = ""
-		if mapId == -1:
-			sql = "copy (select * from getMarkerQCMetadataByDataset("+datasetId+")) to STDOUT with delimiter E'\\t'"+" csv header;"
-		else:
-			#TODO: in case we offer the feature to filter by mapId, we'll need to create a version of getMarkerQCMetadataByDataset that filters by mapId as well.
-			sql = "copy (select * from getMinimalMarkerMetadataByDatasetAndMap("+datasetId+","+mapId+")) to STDOUT with delimiter E'\\t'"+" csv header;"
+		sql = "copy (select * from getMarkerQCMetadataByDataset("+datasetId+")) to STDOUT with delimiter E'\\t'"+" csv header;"
+		#TODO: in case we offer the feature to filter by mapId, we'll need to create a version of getMarkerQCMetadataByDataset that filters by mapId as well. And add the conditional expressions as in createAllMarkerMetadataFile
 		with open(outputFilePath, 'w') as outputFile:
 			self.cur.copy_expert(sql, outputFile, 20480)
 		outputFile.close()
 
-	def createChrLenFile(self, outputFilePath, datasetId, mapId):
+	def createQCMarkerMetadataByMarkerList(self, outputFilePath, markerList):
+		sql = "copy (select * from getMarkerQCMetadataByMarkerList('{"+(','.join(markerList))+"}')) to STDOUT with delimiter E'\\t'"+" csv header;"
+		with open(outputFilePath, 'w') as outputFile:
+			self.cur.copy_expert(sql, outputFile, 20480)
+		outputFile.close()
+
+	def createChrLenFile(self, outputFilePath, datasetId, mapId, markerList, sampleList):
 		sql = ""
 		outputFilePath = outputFilePath+".chr"
-		if mapId == -1:
-			sql = "copy (select * from getAllChrLenByDataset("+datasetId+")) to STDOUT with delimiter E'\\t'"+" csv header;"
+		if markerList:
+			sql = "copy (select * from getAllChrLenByMarkerList('{"+(','.join(markerList))+"}')) to STDOUT with delimiter E'\\t'"+" csv header;"
+		elif sampleList:
+			print("Not yet implemented")
+			return
 		else:
-			sql = "copy (select * from getAllChrLenByDatasetAndMap("+datasetId+","+mapId+")) to STDOUT with delimiter E'\\t'"+" csv header;"
+			if mapId == -1:
+				sql = "copy (select * from getAllChrLenByDataset("+datasetId+")) to STDOUT with delimiter E'\\t'"+" csv header;"
+			else:
+				sql = "copy (select * from getAllChrLenByDatasetAndMap("+datasetId+","+mapId+")) to STDOUT with delimiter E'\\t'"+" csv header;"
 		with open(outputFilePath, 'w') as outputFile:
 			self.cur.copy_expert(sql, outputFile, 20480)
 		outputFile.close()
@@ -120,12 +128,40 @@ class ExtractMetadataManager:
 			self.cur.copy_expert(sql, outputFile, 20480)
 		outputFile.close()
 
+	def createSampleQCMetadataByMarkerList(self, outputFilePath, markerList):
+		sql = "copy (select * from getSampleQCMetadataByMarkerList('{"+(','.join(markerList))+"}')) to STDOUT with delimiter E'\\t'"+" csv header;"
+		with open(outputFilePath, 'w') as outputFile:
+			self.cur.copy_expert(sql, outputFile, 20480)
+		outputFile.close()
+
 	def getMarkerAllMapsetInfoByDataset(self, outputFilePath, datasetId, mapId):
 		'''
 			For the given datasetId & mapId this funtion would output all markers in dataset and mapsets associated with them.Markers with multiple mapsets will be repeated.
 		'''
 		outputFilePath = outputFilePath+".mapset"
 		sql = "copy (select * from getMarkerAllMapsetInfoByDataset("+datasetId+","+mapId+")) to STDOUT with delimiter E'\\t'"+" csv header;"
+		with open(outputFilePath, 'w') as outputFile:
+			self.cur.copy_expert(sql, outputFile, 20480)
+		outputFile.close()
+
+	def createMapsetFile(self, outputFilePath, datasetId, mapId, markerList, sampleList):
+		outputFilePath = outputFilePath+".mapset"
+		sql = ""
+		if markerList:
+			sql = "copy (select * from getMarkerMapsetInfoByMarkerList('{"+(','.join(markerList))+"}')) to STDOUT with delimiter E'\\t'"+" csv header;"
+		elif sampleList:
+			print("Not yet implemented")
+			return
+			#sql = ""
+		else:
+			sql = "copy (select * from getMarkerAllMapsetInfoByDataset("+datasetId+","+mapId+")) to STDOUT with delimiter E'\\t'"+" csv header;"
+		with open(outputFilePath, 'w') as outputFile:
+			self.cur.copy_expert(sql, outputFile, 20480)
+		outputFile.close()
+
+	def createMarkerPositionsFileByMarkerList(self, outputFilePath, markerList):
+		outputFilePath = outputFilePath+".pos"
+		sql = "copy (select * from getMatrixPosOfMarkers('{"+(','.join(markerList))+"}')) to STDOUT with delimiter E'\\t'"+" csv header;"
 		with open(outputFilePath, 'w') as outputFile:
 			self.cur.copy_expert(sql, outputFile, 20480)
 		outputFile.close()

@@ -11,23 +11,31 @@ import traceback
 from util.mde_utility import MDEUtility
 from db.extract_metadata_manager import ExtractMetadataManager
 
-def main(isVerbose, connectionStr, datasetId, outputFile, allMeta, namesOnly):
+def main(isVerbose, connectionStr, datasetId, outputFile, allMeta, namesOnly, markerList, sampleList):
 	if isVerbose:
-		print("Getting sample metadata for dataset with ID: %s" % datasetId)
-		print("Output File: ", outputFile)
+		print("Sample Metadata Output File: ", outputFile)
 	exMgr = ExtractMetadataManager(connectionStr)
 	try:
-		#exMgr.createAllSampleMetadataFile(outputFile, datasetId)
-		''' as per Liz, apparently we need all the sample meta and so the minimum = all, but I'm keeping this here in case it changes.'''
 		if allMeta:
 			exMgr.createAllSampleMetadataFile(outputFile, datasetId)
 		elif namesOnly:
 			exMgr.createDnarunNamesFile(outputFile, datasetId)
 		else:
-			exMgr.createSampleQCMetadataFile(outputFile, datasetId)
+			if markerList:
+				if isVerbose:
+					print("Generating sample metadata by marker list.")
+				exMgr.createSampleQCMetadataByMarkerList(outputFile, markerList)
+			elif sampleList:
+				if isVerbose:
+					print("Generating sample metadata by sample list.")
+					print("!!!Not yet implemented. Skipping...")
+			else:
+				if isVerbose:
+					print("Generating sample metadata by datasetID.")
+				exMgr.createSampleQCMetadataFile(outputFile, datasetId)
 		exMgr.commitTransaction()
 		exMgr.closeConnection()
-		#print("Created full sample metadata file successfully.")
+		''' These don't make sense anymore. Requirements keep changing, I may need to reorganize.
 		if allMeta:
 			print("Created full sample metadata file successfully.")
 		elif namesOnly:
@@ -35,6 +43,9 @@ def main(isVerbose, connectionStr, datasetId, outputFile, allMeta, namesOnly):
 		else:
 			#print("Created minimal sample metadata file successfully.")
 			print("Created full sample metadata file successfully.")
+		'''
+		if isVerbose:
+			print("Created sample metadata file successfully.")
 		return outputFile
 	except Exception as e:
 		MDEUtility.printError('Failed to create sample metadata file. Error: %s' % (str(e)))
@@ -44,6 +55,6 @@ def main(isVerbose, connectionStr, datasetId, outputFile, allMeta, namesOnly):
 
 if __name__ == "__main__":
 	if len(sys.argv) < 5:
-		print("Please supply the parameters. \nUsage: extract_sample_metadata <db_connection_string> <dataset_id> <output_file_abs_path> <all_meta> <names_only>")
+		print("Please supply the parameters. \nUsage: extract_sample_metadata <db_connection_string> <dataset_id> <output_file_abs_path> <all_meta> <names_only> <markerList> <sampleList>")
 		sys.exit(1)
-	main(True, str(sys.argv[1]), str(sys.argv[2]), str(sys.argv[3]), str(sys.argv[4]), str(sys.argv[5]))
+	main(True, str(sys.argv[1]), str(sys.argv[2]), str(sys.argv[3]), str(sys.argv[4]), str(sys.argv[5]), str(sys.argv[6]), str(sys.argv[7]))

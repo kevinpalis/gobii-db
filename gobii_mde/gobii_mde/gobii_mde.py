@@ -1,5 +1,12 @@
 #!/usr/bin/env python
-
+'''
+	PRECEDENCE:
+		1. ALLMETA flag
+		2. NAMESONLY flag
+		1. Marker ID List
+		2. DNARun ID (Sample) List
+		3. Dataset ID
+'''
 from __future__ import print_function
 import sys
 import getopt
@@ -20,10 +27,12 @@ def main(argv):
 		mapId = -1
 		includeChrLen = False
 		displayMap = -1
+		markerListFile = ""
+		sampleListFile = ""
 		exitCode = 0
 		#print("Args count: ", len(argv))
 		try:
-			opts, args = getopt.getopt(argv, "hc:m:s:d:p:avnM:lD:", ["connectionString=", "markerOutputFile=", "sampleOutputFile=", "datasetId=", "projectOutputFile=", "all", "verbose", "namesOnly", "map=", "includeChrLen","displayMap="])
+			opts, args = getopt.getopt(argv, "hc:m:s:d:p:avnM:lD:x:y:", ["connectionString=", "markerOutputFile=", "sampleOutputFile=", "datasetId=", "projectOutputFile=", "all", "verbose", "namesOnly", "map=", "includeChrLen", "displayMap=", "markerList=", "sampleList="])
 			#print (opts, args)
 			if len(args) < 2 and len(opts) < 2:
 				printUsageHelp()
@@ -55,34 +64,54 @@ def main(argv):
 				includeChrLen = True
 			elif opt in ("-D", "--displayMap"):
 				displayMap = arg
+			elif opt in ("-x", "--markerList"):
+				markerListFile = arg
+			elif opt in ("-y", "--sampleList"):
+				sampleListFile = arg
 
 		#if verbose:
 		#print("Opts: ", opts)
+		markerList = []
+		sampleList = []
+		#copy content of markerList and sampleList file to their corresponding lists.
+		if markerListFile != "":
+				#if verbose:
+				#	print("Extracting by marker list...")
+				markerList = [line.strip() for line in open(markerListFile, 'r')]
+				print("Marker List: %s" % markerList)
+		if sampleListFile != "":
+				#if verbose:
+				#	print("Extracting by sample list...")
+				sampleList = [line.strip() for line in open(markerListFile, 'r')]
+				print("Sample List: %s" % sampleList)
+
 		rn = False
-		if datasetId.isdigit():
+		if datasetId.isdigit() or markerList or sampleList:
 			if connectionStr != "" and markerOutputFile != "":
 				try:
-					if verbose:
-						print("Generating marker metadata file...")
-					extract_marker_metadata.main(verbose, connectionStr, datasetId, markerOutputFile, allMeta, namesOnly, mapId, includeChrLen, displayMap)
+					#if verbose:
+					#	print("Generating marker metadata file...")
+					extract_marker_metadata.main(verbose, connectionStr, datasetId, markerOutputFile, allMeta, namesOnly, mapId, includeChrLen, displayMap, markerList, sampleList)
 				except Exception as e1:
 					MDEUtility.printError("Error: %s" % (str(e1)))
 					exitCode = 2
 				rn = True
 			if connectionStr != "" and sampleOutputFile != "":
 				try:
-					if verbose:
-						print("Generating sample metadata file...")
-					extract_sample_metadata.main(verbose, connectionStr, datasetId, sampleOutputFile, allMeta, namesOnly)
+					#if verbose:
+					#	print("Generating sample metadata file...")
+					extract_sample_metadata.main(verbose, connectionStr, datasetId, sampleOutputFile, allMeta, namesOnly, markerList, sampleList)
 				except Exception as e:
 					MDEUtility.printError("Error: %s" % str(e))
 					exitCode = 3
 				rn = True
 			if connectionStr != "" and projectOutputFile != "":
 				try:
-					if verbose:
-						print("Generating project metadata file...")
-					extract_project_metadata.main(verbose, connectionStr, datasetId, projectOutputFile, allMeta)
+					#project metadata is only relevant to extraction by datasetID
+					if not markerList and not sampleList:
+						if verbose:
+							print("Generating project metadata file...")
+						extract_project_metadata.main(verbose, connectionStr, datasetId, projectOutputFile, allMeta)
 				except Exception as e:
 					MDEUtility.printError("Error: %s" % str(e))
 					exitCode = 4
@@ -91,7 +120,7 @@ def main(argv):
 				print("At least one of -m, -s, or -p is required for the extractor to run.")
 				printUsageHelp()
 		else:
-			MDEUtility.printError("The supplied dataset ID is not valid.")
+			MDEUtility.printError("At least one of these is required: a valid dataset_id, a markerID file, or a dnarunID file.")
 			exitCode = 5
 		sys.exit(exitCode)
 		#cleanup
@@ -104,12 +133,14 @@ def printUsageHelp():
 	print ("\t-s or --sampleOutputFile = The sample metadata output file. This should be an absolute path.")
 	print ("\t-p or --projectOutputFile = The project metadata output file. This should be an absolute path.")
 	print ("\t-d or --datasetId = The dataset ID of which marker metadata will be extracted from. This should be a valid integer ID.")
-	print ("\t-a or --all = Get all metadata information available, regardless if they are relevant to HMP, Flapjack, etc. formats.")
+	print ("\t-a or --all = [OBSOLETE] Currently the 'all' metadata is actually less columns than the default. So don't use this for now. We may offer a more verbose output than the default in the future.")
 	print ("\t-v or --verbose = Print the status of the MDE in more detail.")
-	print ("\t-n or --namesOnly = Generate only names metadata. This flag is ignored if -a / --all is set.")
+	print ("\t-n or --namesOnly = [OBSOLETE] This was originally requested to link postgres and monet. But this is not being used and the business logic of the MDEs changed significantly, leaving this behind.")
 	print ("\t-M or --map = Get only the markers in the specified map. This is useful if a dataset contains markers that belongs to multiple maps.")
 	print ("\t-l or --includeChrLen = Generates a file that lists all the chromosomes (or any linkage groups) that appear on the markers list, along with their lengths. Filename is the same as the marker file but appended with .chr.")
 	print ("\t-D or --displayMap = MapsetId for the mapset info to display, if marker exists in more than one mapset. Mapset file is the same as marker file appended  with .mapset.")
+	print ("\t-x or --markerList = Supplies the file containing a list of marker_ids, newline-delimited. Setting this instructs the MDE to do extraction by marker list.")
+	print ("\t-y or --sampleList = Supplies the file containing a list of dnarun_ids, newline-delimited. Setting this instructs the MDE to do extraction by dnarun list.")
 	sys.exit(1)
 
 if __name__ == "__main__":
