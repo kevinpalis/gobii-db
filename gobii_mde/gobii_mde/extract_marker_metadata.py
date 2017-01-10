@@ -7,11 +7,15 @@
 '''
 from __future__ import print_function
 import sys
+import csv
 import traceback
 from util.mde_utility import MDEUtility
 from db.extract_metadata_manager import ExtractMetadataManager
 
 def main(isVerbose, connectionStr, datasetId, outputFile, allMeta, namesOnly, mapId, includeChrLen, displayMapId, markerList, sampleList):
+	MAPID_COL_POS = 2
+	MARKERNAME_COL_POS_1 = 0
+	MARKERNAME_COL_POS_2 = 0
 	if isVerbose:
 		print("Marker Metadata Output File: ", outputFile)
 	exMgr = ExtractMetadataManager(connectionStr)
@@ -38,6 +42,54 @@ def main(isVerbose, connectionStr, datasetId, outputFile, allMeta, namesOnly, ma
 				#current version would pass only one mapId. In future this could be mapId[].
 		if displayMapId != -1:
 			exMgr.createMapsetFile(outputFile, datasetId, displayMapId, markerList, sampleList)
+			#integrating the mapset info with the marker metadata file should be done here
+			#Open marker meta file (markerMeta) and mapset meta file (mapsetMeta) and another file for writing.
+			#Scan mapsetMeta for the displayMapId. Stop at the first instance found. These files are ordered accordingly, which saves the algorithm a lot of processing time.
+			#For the first row found with the displayMapId, look for the row in markerMeta where markerMeta.marker_name=mapsetMeta.marker_name and append all columns of mapsetMeta to that row of markerMeta.
+			#Iterate through the next rows until mapsetMeta.mapset_id!=displayMapId
+			with open(outputFile+'.mapset', 'r') as mapsetMeta:
+				with open(outputFile, 'r') as markerMeta:
+					with open(outputFile+'.new', 'w') as markerMetaExt:
+						mapsetReader = csv.reader(mapsetMeta, delimiter='\t')
+						markerReader = csv.reader(markerMeta, delimiter='\t')
+						markerWriter = csv.writer(markerMetaExt, delimiter='\t')
+						headerRow = next(markerReader) + next(mapsetReader)[MAPID_COL_POS+1:]
+						markerWriter.writerow(headerRow)
+						mapsetRowNum = 0
+						mapsetRow = None
+						for mapsetRow in mapsetReader:
+								mapsetRowNum += 1
+								print(mapsetRow[MAPID_COL_POS])
+								if mapsetRow[MAPID_COL_POS] == displayMapId:
+									print ('Found mapid.')
+									break
+
+						for markerRow in markerReader:
+							if markerRow[MARKERNAME_COL_POS_2] == mapsetRow[MARKERNAME_COL_POS_1]:
+								newRow = markerRow + mapsetRow[MAPID_COL_POS+1:]
+								markerWriter.writerow(newRow)
+								try:
+									mapsetRow = next(mapsetReader)
+								except StopIteration as e:
+									print ('End of file. Break.')
+									break
+								if mapsetRow[MAPID_COL_POS] != displayMapId:
+									break
+							else:
+								markerWriter.writerow(markerRow)  # need to add blank tabs
+							'''
+							for mapsetRow in mapsetReader:
+								print(mapsetRow[MAPID_COL_POS])
+								#if mapsetRow[MAPID_COL_POS] == displayMapId:
+								#	print ('Found mapid.')
+								while mapsetRow[MAPID_COL_POS] == displayMapId:
+									print ('Found mapid.')
+									for markerRow in markerReader:
+										if markerRow[MARKERNAME_COL_POS_2] == mapsetRow[MARKERNAME_COL_POS_1]:
+											print ('Concat cols here.')
+											newRow = markerRow + mapsetRow[MAPID_COL_POS+1:]
+											markerWriter.writerow(newRow)
+							'''
 		if includeChrLen:
 					exMgr.createChrLenFile(outputFile, datasetId, mapId, markerList, sampleList)
 		exMgr.commitTransaction()
