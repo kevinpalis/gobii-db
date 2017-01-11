@@ -8,6 +8,7 @@
 from __future__ import print_function
 import sys
 import csv
+import os
 import traceback
 from util.mde_utility import MDEUtility
 from db.extract_metadata_manager import ExtractMetadataManager
@@ -46,7 +47,7 @@ def main(isVerbose, connectionStr, datasetId, outputFile, allMeta, namesOnly, ma
 			#Open marker meta file (markerMeta) and mapset meta file (mapsetMeta) and another file for writing.
 			#Scan mapsetMeta for the displayMapId. Stop at the first instance found. These files are ordered accordingly, which saves the algorithm a lot of processing time.
 			#For the first row found with the displayMapId, look for the row in markerMeta where markerMeta.marker_name=mapsetMeta.marker_name and append all columns of mapsetMeta to that row of markerMeta.
-			#Iterate through the next rows until mapsetMeta.mapset_id!=displayMapId
+			#Iterate through the next rows until mapsetMeta.mapset_id!=displayMapId or eof
 			with open(outputFile+'.mapset', 'r') as mapsetMeta:
 				with open(outputFile, 'r') as markerMeta:
 					with open(outputFile+'.new', 'w') as markerMetaExt:
@@ -59,11 +60,15 @@ def main(isVerbose, connectionStr, datasetId, outputFile, allMeta, namesOnly, ma
 						mapsetRow = None
 						for mapsetRow in mapsetReader:
 								mapsetRowNum += 1
-								print(mapsetRow[MAPID_COL_POS])
 								if mapsetRow[MAPID_COL_POS] == displayMapId:
-									print ('Found mapid.')
+									if isVerbose:
+										print ('Integrating map data to marker meta file. Found mapId at row %s.' % mapsetRowNum)
 									break
-
+						columnsCount = len(mapsetRow[MAPID_COL_POS+1:])
+						fillerList = ['' for x in range(columnsCount)]
+						if isVerbose:
+							print('Mapset Row currently at marker_name=%s' % mapsetRow[MARKERNAME_COL_POS_1])
+							print('Total number of columns to append: %s' % columnsCount)
 						for markerRow in markerReader:
 							if markerRow[MARKERNAME_COL_POS_2] == mapsetRow[MARKERNAME_COL_POS_1]:
 								newRow = markerRow + mapsetRow[MAPID_COL_POS+1:]
@@ -71,25 +76,16 @@ def main(isVerbose, connectionStr, datasetId, outputFile, allMeta, namesOnly, ma
 								try:
 									mapsetRow = next(mapsetReader)
 								except StopIteration as e:
-									print ('End of file. Break.')
+									if isVerbose:
+										print ('End of file reached.')
 									break
 								if mapsetRow[MAPID_COL_POS] != displayMapId:
 									break
 							else:
-								markerWriter.writerow(markerRow)  # need to add blank tabs
-							'''
-							for mapsetRow in mapsetReader:
-								print(mapsetRow[MAPID_COL_POS])
-								#if mapsetRow[MAPID_COL_POS] == displayMapId:
-								#	print ('Found mapid.')
-								while mapsetRow[MAPID_COL_POS] == displayMapId:
-									print ('Found mapid.')
-									for markerRow in markerReader:
-										if markerRow[MARKERNAME_COL_POS_2] == mapsetRow[MARKERNAME_COL_POS_1]:
-											print ('Concat cols here.')
-											newRow = markerRow + mapsetRow[MAPID_COL_POS+1:]
-											markerWriter.writerow(newRow)
-							'''
+								newRow = markerRow + fillerList
+								markerWriter.writerow(newRow)
+			os.remove(outputFile)  # not needed on unix
+			os.rename(outputFile+'.new', outputFile)
 		if includeChrLen:
 					exMgr.createChrLenFile(outputFile, datasetId, mapId, markerList, sampleList)
 		exMgr.commitTransaction()
