@@ -5,7 +5,7 @@
 	especially in cases when the physical structure is different from the logical structure of the schema.
 
 	IMPORTANT: ALL Views SHOULD start with V_
-	---TEST: this is just to trigger the branch plan.
+	---TEST2: this is just to trigger the branch plan.
 */
 
 --
