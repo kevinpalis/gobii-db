@@ -2,7 +2,7 @@
 '''
 	This script extracts sample metadata given a dataset ID.
 	Prerequisites:
-
+	Exit codes: 20-29
 	@author kdp44 Kevin Palis
 '''
 from __future__ import print_function
@@ -51,7 +51,7 @@ def main(isVerbose, connectionStr, datasetId, outputFile, allMeta, namesOnly, ma
 		MDEUtility.printError('Failed to create sample metadata file. Error: %s' % (str(e)))
 		exMgr.rollbackTransaction()
 		traceback.print_exc(file=sys.stderr)
-		sys.exit(7)
+		sys.exit(20)
 
 if __name__ == "__main__":
 	if len(sys.argv) < 5:

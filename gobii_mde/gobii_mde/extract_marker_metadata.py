@@ -2,18 +2,17 @@
 '''
 	This script extracts marker metadata given a dataset ID.
 	Prerequisites:
-
+	Exit Codes: 10-19
 	@author kdp44 Kevin Palis
 '''
 from __future__ import print_function
 import sys
 import csv
-import os
 import traceback
 from util.mde_utility import MDEUtility
 from db.extract_metadata_manager import ExtractMetadataManager
 
-def main(isVerbose, connectionStr, datasetId, outputFile, allMeta, namesOnly, mapId, includeChrLen, displayMapId, markerList, sampleList):
+def main(isVerbose, connectionStr, datasetId, outputFile, allMeta, namesOnly, mapId, includeChrLen, displayMapId, markerList, sampleList, mapsetOutputFile):
 	MAPID_COL_POS = 2
 	MARKERNAME_COL_POS_1 = 0
 	MARKERNAME_COL_POS_2 = 0
@@ -42,15 +41,19 @@ def main(isVerbose, connectionStr, datasetId, outputFile, allMeta, namesOnly, ma
 				exMgr.createQCMarkerMetadataFile(outputFile, datasetId, mapId)
 				#current version would pass only one mapId. In future this could be mapId[].
 		if displayMapId != -1:
-			exMgr.createMapsetFile(outputFile, datasetId, displayMapId, markerList, sampleList)
+			if mapsetOutputFile == '':
+				MDEUtility.printError('ERROR: Mapset output file path is not set.')
+				sys.exit(11)
+			else:
+				exMgr.createMapsetFile(mapsetOutputFile, datasetId, displayMapId, markerList, sampleList)
 			#integrating the mapset info with the marker metadata file should be done here
 			#Open marker meta file (markerMeta) and mapset meta file (mapsetMeta) and another file for writing.
 			#Scan mapsetMeta for the displayMapId. Stop at the first instance found. These files are ordered accordingly, which saves the algorithm a lot of processing time.
 			#For the first row found with the displayMapId, look for the row in markerMeta where markerMeta.marker_name=mapsetMeta.marker_name and append all columns of mapsetMeta to that row of markerMeta.
 			#Iterate through the next rows until mapsetMeta.mapset_id!=displayMapId or eof
-			with open(outputFile+'.mapset', 'r') as mapsetMeta:
+			with open(mapsetOutputFile, 'r') as mapsetMeta:
 				with open(outputFile, 'r') as markerMeta:
-					with open(outputFile+'.new', 'w') as markerMetaExt:
+					with open(outputFile+'.ext', 'w') as markerMetaExt:
 						mapsetReader = csv.reader(mapsetMeta, delimiter='\t')
 						markerReader = csv.reader(markerMeta, delimiter='\t')
 						markerWriter = csv.writer(markerMetaExt, delimiter='\t')
@@ -84,8 +87,6 @@ def main(isVerbose, connectionStr, datasetId, outputFile, allMeta, namesOnly, ma
 							else:
 								newRow = markerRow + fillerList
 								markerWriter.writerow(newRow)
-			os.remove(outputFile)  # not needed on unix
-			os.rename(outputFile+'.new', outputFile)
 		if includeChrLen:
 					exMgr.createChrLenFile(outputFile, datasetId, mapId, markerList, sampleList)
 		exMgr.commitTransaction()
@@ -105,11 +106,11 @@ def main(isVerbose, connectionStr, datasetId, outputFile, allMeta, namesOnly, ma
 		MDEUtility.printError('Failed to create marker metadata file. Error: %s' % (str(e)))
 		exMgr.rollbackTransaction()
 		traceback.print_exc(file=sys.stderr)
-		sys.exit(6)
+		sys.exit(10)
 
 
 if __name__ == "__main__":
 	if len(sys.argv) < 5:
-		print("Please supply the parameters. \nUsage: extract_marker_metadata <db_connection_string> <dataset_id> <output_file_abs_path> <all_meta> <names_only:boolean> <map_id> <includeChrLen:boolean> <displayMapId> <markerList> <sampleList>")
+		print("Please supply the parameters. \nUsage: extract_marker_metadata <db_connection_string> <dataset_id> <output_file_abs_path> <all_meta> <names_only:boolean> <map_id> <includeChrLen:boolean> <displayMapId> <markerList> <sampleList> <mapsetOutputFile>")
 		sys.exit(1)
-	main(True, str(sys.argv[1]), str(sys.argv[2]), str(sys.argv[3]), str(sys.argv[4]), str(sys.argv[5]), str(sys.argv[6]), str(sys.argv[7]), str(sys.argv[8]), str(sys.argv[9]), str(sys.argv[10]))
+	main(True, str(sys.argv[1]), str(sys.argv[2]), str(sys.argv[3]), str(sys.argv[4]), str(sys.argv[5]), str(sys.argv[6]), str(sys.argv[7]), str(sys.argv[8]), str(sys.argv[9]), str(sys.argv[10]), str(sys.argv[11]))

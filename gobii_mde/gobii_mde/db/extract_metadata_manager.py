@@ -145,7 +145,7 @@ class ExtractMetadataManager:
 		outputFile.close()
 
 	def createMapsetFile(self, outputFilePath, datasetId, mapId, markerList, sampleList):
-		outputFilePath = outputFilePath+".mapset"
+		#outputFilePath = outputFilePath+".mapset"
 		sql = ""
 		if markerList:
 			sql = "copy (select * from getMarkerMapsetInfoByMarkerList('{"+(','.join(markerList))+"}')) to STDOUT with delimiter E'\\t'"+" csv header;"
