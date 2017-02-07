@@ -25,4 +25,5 @@
 	<include file="changelogs/changesets/fix_mde_fxns_output_names.sql"/>
 	<include file="changelogs/changesets/mde_fix_2_project_meta_fxn.sql"/>
 	<include file="changelogs/changesets/get_cvterms.sql"/>
+	<include file="changelogs/changesets/mde_append_map_info_to_markerfile.sql"/>
 </databaseChangeLog>
