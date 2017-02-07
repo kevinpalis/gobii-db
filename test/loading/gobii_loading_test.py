@@ -1,5 +1,12 @@
 #!/usr/bin/env python
-
+'''
+Tests/Steps:
+1. Copy the data files (ie. codominant/data/*) to the target server's gobii_bundle file directory (ie. <bundle>/crops/<crop_name>/files/)
+2. Modify the marker instruction file with the correct parameter values, then copy the file (ie. codominant/instruction/m_test.json) to the target server's gobii_bundle instruction dir (ie. <bundle>/crops/<cropname>/loader/instructions)
+3. Wait for N minutes (where N=cron job interval)
+4. Check the target server's gobii_bundle done directory (ie. <bundle>/crops/<cropname>/loader/done) if the instruction file has been moved
+5. Run a query against the DB to check that the file really loaded
+'''
 import unittest
 import xmlrunner
 
