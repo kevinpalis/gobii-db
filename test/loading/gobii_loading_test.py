@@ -26,4 +26,6 @@ class GLoadingTest(unittest.TestCase):
 
 if __name__ == '__main__':
 	#unittest.main()
-	unittest.main(testRunner=xmlrunner.XMLTestRunner(output='test-reports'))
+	#unittest.main(testRunner=xmlrunner.XMLTestRunner(output='test-reports'))
+	with open('test-reports/loading_test_results.xml', 'wb') as output:
+		unittest.main(testRunner=xmlrunner.XMLTestRunner(output=output))
