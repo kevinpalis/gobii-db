@@ -7,11 +7,24 @@ Tests/Steps:
 4. Check the target server's gobii_bundle done directory (ie. <bundle>/crops/<cropname>/loader/done) if the instruction file has been moved
 5. Run a query against the DB to check that the file really loaded
 '''
+from __future__ import print_function
 import unittest
 import xmlrunner
+import sys
 
 class GLoadingTest(unittest.TestCase):
-	def test(self):
+	DB_CONN = 'postgresql://appuser:appuser@localhost:5432/test'
+	FS_HOST = 'localhost'
+	FS_USERNAME = 'gadm'
+	FS_PASSWORD = 'dummypass'
+	BUNDLE_PATH = '/storage1/gobii_bundle'
+	MARKER_INPUT_FILE = 'codominant/data/codominant_markers.txt'
+	MARKER_INSTRUCTION_FILE = 'codominant/instruction/m_test.json'
+	SAMPLE_INPUT_FILE = 'codominant/data/codominant_samples.csv'
+	SAMPLE_INSTRUCTION_FILE = 'codominant/instruction/s_test.json'
+	CRONS_INTERVAL = '5'  # in minutes
+
+	def test_create_marker_instruction_file(self):
 		a = 'a'
 		b = 'a'
 		self.assertEqual(a, b)
@@ -32,7 +45,22 @@ class GLoadingTest(unittest.TestCase):
 
 
 if __name__ == '__main__':
-	#unittest.main()
+	if len(sys.argv) < 11:
+		print("Please supply the parameters. \nUsage: gobii_loading_test <db_connection_string> <fs_host> <fs_username> <fs_password> <bundle_path> <marker_input_file> <marker_instruction_file> <sample_input_file> <sample_instruction_file> <crons_interval:minutes>")
+		sys.exit(1)
+	else:
+		GLoadingTest.DB_CONN = str(sys.argv.pop())
+		GLoadingTest.FS_HOST = str(sys.argv.pop())
+		GLoadingTest.FS_USERNAME = str(sys.argv.pop())
+		GLoadingTest.FS_PASSWORD = str(sys.argv.pop())
+		GLoadingTest.BUNDLE_PATH = str(sys.argv.pop())
+		GLoadingTest.MARKER_INPUT_FILE = str(sys.argv.pop())
+		GLoadingTest.MARKER_INSTRUCTION_FILE = str(sys.argv.pop())
+		GLoadingTest.SAMPLE_INPUT_FILE = str(sys.argv.pop())
+		GLoadingTest.SAMPLE_INSTRUCTION_FILE = str(sys.argv.pop())
+		GLoadingTest.CRONS_INTERVAL = str(sys.argv.pop())
+		print('\n '.join("%s: %s" % item for item in vars(GLoadingTest).items()))
+	unittest.main()
 	#unittest.main(testRunner=xmlrunner.XMLTestRunner(output='test-reports'))
-	with open('test-reports/loading_test_results.xml', 'wb') as output:
-		unittest.main(testRunner=xmlrunner.XMLTestRunner(output=output))
+	#with open('test-reports/loading_test_results.xml', 'wb') as output:
+	#	unittest.main(testRunner=xmlrunner.XMLTestRunner(output=output))
