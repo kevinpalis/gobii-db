@@ -59,8 +59,8 @@ if __name__ == '__main__':
 		GLoadingTest.FS_USERNAME = str(sys.argv.pop())
 		GLoadingTest.FS_HOST = str(sys.argv.pop())
 		GLoadingTest.DB_CONN = str(sys.argv.pop())
-		print('\n '.join("%s: %s" % item for item in vars(GLoadingTest).items()))
-	unittest.main()
+		#print('\n '.join("%s: %s" % item for item in vars(GLoadingTest).items()))
+	#unittest.main()
 	#unittest.main(testRunner=xmlrunner.XMLTestRunner(output='test-reports'))
-	#with open('test-reports/loading_test_results.xml', 'wb') as output:
-	#	unittest.main(testRunner=xmlrunner.XMLTestRunner(output=output))
+	with open('test-reports/loading_test_results.xml', 'wb') as output:
+		unittest.main(testRunner=xmlrunner.XMLTestRunner(output=output))
