@@ -17,17 +17,28 @@ class GLoadingTest(unittest.TestCase):
 	FS_HOST = 'localhost'
 	FS_USERNAME = 'gadm'
 	FS_PASSWORD = 'dummypass'
-	BUNDLE_PATH = '/storage1/gobii_bundle'
+	BUNDLE_PATH = '/storage1/gobii_sys_int/gobii_bundle'
 	MARKER_INPUT_FILE = 'codominant/data/codominant_markers.txt'
 	MARKER_INSTRUCTION_FILE = 'codominant/instruction/m_test.json'
 	SAMPLE_INPUT_FILE = 'codominant/data/codominant_samples.csv'
 	SAMPLE_INSTRUCTION_FILE = 'codominant/instruction/s_test.json'
+	MARKER_FILE_TARGET_DIR = ''
+	MARKER_OUTPUT_TARGET_DIR = ''
+	SAMPLE_FILE_TARGET_DIR = ''
+	SAMPLE_OUTPUT_TARGET_DIR = ''
 	CRONS_INTERVAL = '5'  # in minutes
 
 	def test_create_marker_instruction_file(self):
-		a = 'a'
-		b = 'a'
-		self.assertEqual(a, b)
+		try:
+			with open(self.MARKER_INSTRUCTION_FILE, "r") as fin:
+				with open(self.MARKER_INSTRUCTION_FILE+'.new', "w") as fout:
+					for line in fin:
+						line = line.replace('SOURCE_replace_me_I_am_a_temporary_string', self.MARKER_FILE_TARGET_DIR)
+						line = line.replace('DESTINATION_replace_me_I_am_a_temporary_string', self.MARKER_OUTPUT_TARGET_DIR)
+						fout.write(line)
+			self.assertTrue(True)
+		except Exception:
+			self.assertTrue(False)
 
 	def test_upper(self):
 		self.assertEqual('foo'.upper(), 'FOO')
@@ -46,10 +57,14 @@ class GLoadingTest(unittest.TestCase):
 
 if __name__ == '__main__':
 	if len(sys.argv) < 11:
-		print("Please supply the parameters. \nUsage: gobii_loading_test <db_connection_string> <fs_host> <fs_username> <fs_password> <bundle_path> <marker_input_file> <marker_instruction_file> <sample_input_file> <sample_instruction_file> <crons_interval:minutes>")
+		print("Please supply the parameters. \nUsage: gobii_loading_test <db_connection_string> <fs_host> <fs_username> <fs_password> <bundle_path> <marker_input_file> <marker_instruction_file> <sample_input_file> <sample_instruction_file> <marker_file_target_dir> <marker_output_target_dir> <sample_file_target_dir> <sample_output_target_dir> <crons_interval:minutes>")
 		sys.exit(1)
 	else:
 		GLoadingTest.CRONS_INTERVAL = str(sys.argv.pop())
+		GLoadingTest.SAMPLE_OUTPUT_TARGET_DIR = str(sys.argv.pop())
+		GLoadingTest.SAMPLE_FILE_TARGET_DIR = str(sys.argv.pop())
+		GLoadingTest.MARKER_OUTPUT_TARGET_DIR = str(sys.argv.pop())
+		GLoadingTest.MARKER_FILE_TARGET_DIR = str(sys.argv.pop())
 		GLoadingTest.SAMPLE_INSTRUCTION_FILE = str(sys.argv.pop())
 		GLoadingTest.SAMPLE_INPUT_FILE = str(sys.argv.pop())
 		GLoadingTest.MARKER_INSTRUCTION_FILE = str(sys.argv.pop())
