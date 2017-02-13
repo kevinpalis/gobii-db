@@ -40,6 +40,18 @@ class GLoadingTest(unittest.TestCase):
 		except Exception:
 			self.assertTrue(False)
 
+	def test_create_sample_instruction_file(self):
+		try:
+			with open(self.SAMPLE_INSTRUCTION_FILE, "r") as fin:
+				with open(self.SAMPLE_INSTRUCTION_FILE+'.new', "w") as fout:
+					for line in fin:
+						line = line.replace('SOURCE_replace_me_I_am_a_temporary_string', self.SAMPLE_FILE_TARGET_DIR)
+						line = line.replace('DESTINATION_replace_me_I_am_a_temporary_string', self.SAMPLE_OUTPUT_TARGET_DIR)
+						fout.write(line)
+			self.assertTrue(True)
+		except Exception:
+			self.assertTrue(False)
+
 	def test_upper(self):
 		self.assertEqual('foo'.upper(), 'FOO')
 

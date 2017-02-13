@@ -67,7 +67,7 @@
   "dataSetId" : null,
   "gobiiCropType" : "dev",
   "contactId" : 2,
-  "contactEmail" : "jdl232@cornell.edu",
+  "contactEmail" : "dummyEmail@gmail.com",
   "project" : {
     "name" : "codom_test",
     "id" : 1
@@ -177,7 +177,7 @@
   "dataSetId" : null,
   "gobiiCropType" : "dev",
   "contactId" : 2,
-  "contactEmail" : "yn259@cornell.edu",
+  "contactEmail" : "dummyEmail@gmail.com",
   "project" : {
     "name" : "codom_test",
     "id" : 1
@@ -319,7 +319,7 @@
   "dataSetId" : null,
   "gobiiCropType" : "dev",
   "contactId" : 2,
-  "contactEmail" : "yn259@cornell.edu",
+  "contactEmail" : "dummyEmail@gmail.com",
   "project" : {
     "name" : "codom_test",
     "id" : 1
