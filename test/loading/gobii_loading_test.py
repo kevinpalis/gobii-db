@@ -11,13 +11,18 @@ from __future__ import print_function
 import unittest
 import xmlrunner
 import sys
+import subprocess
+import time
+from os.path import basename
+from os.path import splitext
 
 class GLoadingTest(unittest.TestCase):
 	DB_CONN = 'postgresql://appuser:appuser@localhost:5432/test'
 	FS_HOST = 'localhost'
 	FS_USERNAME = 'gadm'
 	FS_PASSWORD = 'dummypass'
-	BUNDLE_PATH = '/storage1/gobii_sys_int/gobii_bundle'
+	CROP_PATH = '/storage1/gobii_sys_int/gobii_bundle/crops/dev'
+	#LOADING_INSTRUCTION_PATH = '/storage1/gobii_sys_int/gobii_bundle/crops/dev/loader/instructions'
 	MARKER_INPUT_FILE = 'codominant/data/codominant_markers.txt'
 	MARKER_INSTRUCTION_FILE = 'codominant/instruction/m_test.json'
 	SAMPLE_INPUT_FILE = 'codominant/data/codominant_samples.csv'
@@ -28,7 +33,15 @@ class GLoadingTest(unittest.TestCase):
 	SAMPLE_OUTPUT_TARGET_DIR = ''
 	CRONS_INTERVAL = '5'  # in minutes
 
-	def test_create_marker_instruction_file(self):
+	@classmethod
+	def setUpClass(self):
+		try:
+			#print('ssh '+self.FS_USERNAME+'@'+self.FS_HOST+' mkdir -p '+self.MARKER_FILE_TARGET_DIR)
+			retCode = subprocess.call('ssh '+self.FS_USERNAME+'@'+self.FS_HOST+' mkdir -p '+self.MARKER_FILE_TARGET_DIR+' '+self.SAMPLE_FILE_TARGET_DIR+' '+self.MARKER_OUTPUT_TARGET_DIR+' '+self.SAMPLE_OUTPUT_TARGET_DIR, shell=True)
+		except OSError as e:
+			print('Failed to create target directories in server. Retcode: %s Cause: %s' % (retCode, e))
+
+	def test_1_create_marker_instruction_file(self):
 		try:
 			with open(self.MARKER_INSTRUCTION_FILE, "r") as fin:
 				with open(self.MARKER_INSTRUCTION_FILE+'.new', "w") as fout:
@@ -40,7 +53,15 @@ class GLoadingTest(unittest.TestCase):
 		except Exception:
 			self.assertTrue(False)
 
-	def test_create_sample_instruction_file(self):
+	'''def test_create_target_path_in_gobii_server(self):
+		try:
+			#print('ssh '+self.FS_USERNAME+'@'+self.FS_HOST+' mkdir -p '+self.MARKER_FILE_TARGET_DIR)
+			retCode = subprocess.call('ssh '+self.FS_USERNAME+'@'+self.FS_HOST+' mkdir -p '+self.MARKER_FILE_TARGET_DIR+' '+self.SAMPLE_FILE_TARGET_DIR+' '+self.MARKER_OUTPUT_TARGET_DIR+' '+self.SAMPLE_OUTPUT_TARGET_DIR, shell=True)
+			self.assertEquals(retCode, 0)
+		except OSError as e:
+			self.fail('Failed to create target directories in server. Cause: %s' % e)'''
+
+	def test_1_create_sample_instruction_file(self):
 		try:
 			with open(self.SAMPLE_INSTRUCTION_FILE, "r") as fin:
 				with open(self.SAMPLE_INSTRUCTION_FILE+'.new', "w") as fout:
@@ -48,28 +69,59 @@ class GLoadingTest(unittest.TestCase):
 						line = line.replace('SOURCE_replace_me_I_am_a_temporary_string', self.SAMPLE_FILE_TARGET_DIR)
 						line = line.replace('DESTINATION_replace_me_I_am_a_temporary_string', self.SAMPLE_OUTPUT_TARGET_DIR)
 						fout.write(line)
-			self.assertTrue(True)
+			#self.assertTrue(True)
 		except Exception:
-			self.assertTrue(False)
+			self.fail('Failed to create sample instruction file.')
 
-	def test_upper(self):
-		self.assertEqual('foo'.upper(), 'FOO')
+	def test_2_upload_marker_data_file(self):
+		try:
+			retCode = subprocess.call('scp '+self.MARKER_INPUT_FILE+' '+self.FS_USERNAME+'@'+self.FS_HOST+':'+self.MARKER_FILE_TARGET_DIR, shell=True)
+			self.assertEquals(retCode, 0)
+		except OSError as e:
+			self.fail('Failed to upload marker data file. Cause: %s' % e)
 
-	def test_isupper(self):
-		self.assertTrue('FOO'.isupper())
-		self.assertFalse('Foo'.isupper())
+	def test_2_upload_sample_data_file(self):
+		try:
+			retCode = subprocess.call('scp '+self.SAMPLE_INPUT_FILE+' '+self.FS_USERNAME+'@'+self.FS_HOST+':'+self.SAMPLE_FILE_TARGET_DIR, shell=True)
+			self.assertEquals(retCode, 0)
+		except OSError as e:
+			self.fail('Failed to upload sample data file. Cause: %s' % e)
 
-	def test_split(self):
-		s = 'hello world'
-		self.assertEqual(s.split(), ['hello', 'world'])
-		# check that s.split fails when the separator is not a string
-		with self.assertRaises(TypeError):
-			s.split(2)
+	def test_3_upload_marker_instruction_file(self):
+		try:
+			retCode = subprocess.call('scp '+self.MARKER_INSTRUCTION_FILE+' '+self.FS_USERNAME+'@'+self.FS_HOST+':'+self.CROP_PATH+'/loader/instructions', shell=True)
+			self.assertEquals(retCode, 0)
+		except OSError as e:
+			self.fail('Failed to upload marker instruction file. Cause: %s' % e)
+
+	def test_3_upload_sample_instruction_file(self):
+		try:
+			retCode = subprocess.call('scp '+self.SAMPLE_INSTRUCTION_FILE+' '+self.FS_USERNAME+'@'+self.FS_HOST+':'+self.CROP_PATH+'/loader/instructions', shell=True)
+			self.assertEquals(retCode, 0)
+		except OSError as e:
+			self.fail('Failed to upload sample instruction file. Cause: %s' % e)
+
+	def test_4_check_if_digester_consumed_marker_file(self):
+		try:
+			#print('ssh '+self.FS_USERNAME+'@'+self.FS_HOST+' test -f '+self.CROP_PATH+'/loader/done/'+basename(self.MARKER_INSTRUCTION_FILE+'.new'))
+			time.sleep(int(self.CRONS_INTERVAL) * 60 * 2.3)
+			retCode = subprocess.call('ssh '+self.FS_USERNAME+'@'+self.FS_HOST+' test -f '+self.CROP_PATH+'/loader/done/'+basename(self.MARKER_INSTRUCTION_FILE+'.new'), shell=True)
+			self.assertEquals(retCode, 0)
+		except OSError as e:
+			self.fail('Failed to check finished marker instruction file. Cause: %s' % e)
+
+	def test_4_check_if_digester_consumed_sample_file(self):
+		try:
+			#time.sleep(int(self.CRONS_INTERVAL) * 2.3)
+			retCode = subprocess.call('ssh '+self.FS_USERNAME+'@'+self.FS_HOST+' test -f '+self.CROP_PATH+'/loader/done/'+basename(self.SAMPLE_INSTRUCTION_FILE+'.new'), shell=True)
+			self.assertEquals(retCode, 0)
+		except OSError as e:
+			self.fail('Failed to check finished sample instruction file. Cause: %s' % e)
 
 
 if __name__ == '__main__':
 	if len(sys.argv) < 11:
-		print("Please supply the parameters. \nUsage: gobii_loading_test <db_connection_string> <fs_host> <fs_username> <fs_password> <bundle_path> <marker_input_file> <marker_instruction_file> <sample_input_file> <sample_instruction_file> <marker_file_target_dir> <marker_output_target_dir> <sample_file_target_dir> <sample_output_target_dir> <crons_interval:minutes>")
+		print("Please supply the parameters. \nUsage: gobii_loading_test <db_connection_string> <fs_host> <fs_username> <fs_password> <crop_path> <marker_input_file> <marker_instruction_file> <sample_input_file> <sample_instruction_file> <marker_file_target_dir> <marker_output_target_dir> <sample_file_target_dir> <sample_output_target_dir> <crons_interval:minutes>")
 		sys.exit(1)
 	else:
 		GLoadingTest.CRONS_INTERVAL = str(sys.argv.pop())
@@ -81,7 +133,7 @@ if __name__ == '__main__':
 		GLoadingTest.SAMPLE_INPUT_FILE = str(sys.argv.pop())
 		GLoadingTest.MARKER_INSTRUCTION_FILE = str(sys.argv.pop())
 		GLoadingTest.MARKER_INPUT_FILE = str(sys.argv.pop())
-		GLoadingTest.BUNDLE_PATH = str(sys.argv.pop())
+		GLoadingTest.CROP_PATH = str(sys.argv.pop())
 		GLoadingTest.FS_PASSWORD = str(sys.argv.pop())
 		GLoadingTest.FS_USERNAME = str(sys.argv.pop())
 		GLoadingTest.FS_HOST = str(sys.argv.pop())
