@@ -1,7 +1,7 @@
 [ {
   "gobiiFile" : {
-    "source" : "/storage1/gobii_sys_int/gobii_bundle/crops/dev/files/integration_test_samples",
-    "destination" : "/storage1/gobii_sys_int/gobii_bundle/crops/dev/loader/digest/integration_test_samples",
+    "source" : "SOURCE_replace_me_I_am_a_temporary_string",
+    "destination" : "DESTINATION_replace_me_I_am_a_temporary_string",
     "delimiter" : ",",
     "gobiiFileType" : "GENERIC",
     "requireDirectoriesToExist" : false,

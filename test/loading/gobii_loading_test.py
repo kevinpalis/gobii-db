@@ -14,7 +14,7 @@ import sys
 import subprocess
 import time
 from os.path import basename
-from os.path import splitext
+
 
 class GLoadingTest(unittest.TestCase):
 	DB_CONN = 'postgresql://appuser:appuser@localhost:5432/test'
@@ -24,9 +24,9 @@ class GLoadingTest(unittest.TestCase):
 	CROP_PATH = '/storage1/gobii_sys_int/gobii_bundle/crops/dev'
 	#LOADING_INSTRUCTION_PATH = '/storage1/gobii_sys_int/gobii_bundle/crops/dev/loader/instructions'
 	MARKER_INPUT_FILE = 'codominant/data/codominant_markers.txt'
-	MARKER_INSTRUCTION_FILE = 'codominant/instruction/m_test.json'
+	MARKER_INSTRUCTION_FILE = 'codominant/instruction/m_test.json.template'
 	SAMPLE_INPUT_FILE = 'codominant/data/codominant_samples.csv'
-	SAMPLE_INSTRUCTION_FILE = 'codominant/instruction/s_test.json'
+	SAMPLE_INSTRUCTION_FILE = 'codominant/instruction/s_test.json.template'
 	MARKER_FILE_TARGET_DIR = ''
 	MARKER_OUTPUT_TARGET_DIR = ''
 	SAMPLE_FILE_TARGET_DIR = ''
@@ -43,8 +43,9 @@ class GLoadingTest(unittest.TestCase):
 
 	def test_1_create_marker_instruction_file(self):
 		try:
+			markerInstructionFile = self.MARKER_INSTRUCTION_FILE.replace('.template', '')
 			with open(self.MARKER_INSTRUCTION_FILE, "r") as fin:
-				with open(self.MARKER_INSTRUCTION_FILE+'.new', "w") as fout:
+				with open(markerInstructionFile, "w") as fout:
 					for line in fin:
 						line = line.replace('SOURCE_replace_me_I_am_a_temporary_string', self.MARKER_FILE_TARGET_DIR)
 						line = line.replace('DESTINATION_replace_me_I_am_a_temporary_string', self.MARKER_OUTPUT_TARGET_DIR)
@@ -63,8 +64,9 @@ class GLoadingTest(unittest.TestCase):
 
 	def test_1_create_sample_instruction_file(self):
 		try:
+			sampleInstructionFile = self.SAMPLE_INSTRUCTION_FILE.replace('.template', '')
 			with open(self.SAMPLE_INSTRUCTION_FILE, "r") as fin:
-				with open(self.SAMPLE_INSTRUCTION_FILE+'.new', "w") as fout:
+				with open(sampleInstructionFile, "w") as fout:
 					for line in fin:
 						line = line.replace('SOURCE_replace_me_I_am_a_temporary_string', self.SAMPLE_FILE_TARGET_DIR)
 						line = line.replace('DESTINATION_replace_me_I_am_a_temporary_string', self.SAMPLE_OUTPUT_TARGET_DIR)
@@ -89,14 +91,14 @@ class GLoadingTest(unittest.TestCase):
 
 	def test_3_upload_marker_instruction_file(self):
 		try:
-			retCode = subprocess.call('scp '+self.MARKER_INSTRUCTION_FILE+' '+self.FS_USERNAME+'@'+self.FS_HOST+':'+self.CROP_PATH+'/loader/instructions', shell=True)
+			retCode = subprocess.call('scp '+self.MARKER_INSTRUCTION_FILE.replace('.template', '')+' '+self.FS_USERNAME+'@'+self.FS_HOST+':'+self.CROP_PATH+'/loader/instructions', shell=True)
 			self.assertEquals(retCode, 0)
 		except OSError as e:
 			self.fail('Failed to upload marker instruction file. Cause: %s' % e)
 
 	def test_3_upload_sample_instruction_file(self):
 		try:
-			retCode = subprocess.call('scp '+self.SAMPLE_INSTRUCTION_FILE+' '+self.FS_USERNAME+'@'+self.FS_HOST+':'+self.CROP_PATH+'/loader/instructions', shell=True)
+			retCode = subprocess.call('scp '+self.SAMPLE_INSTRUCTION_FILE.replace('.template', '')+' '+self.FS_USERNAME+'@'+self.FS_HOST+':'+self.CROP_PATH+'/loader/instructions', shell=True)
 			self.assertEquals(retCode, 0)
 		except OSError as e:
 			self.fail('Failed to upload sample instruction file. Cause: %s' % e)
@@ -105,7 +107,7 @@ class GLoadingTest(unittest.TestCase):
 		try:
 			#print('ssh '+self.FS_USERNAME+'@'+self.FS_HOST+' test -f '+self.CROP_PATH+'/loader/done/'+basename(self.MARKER_INSTRUCTION_FILE+'.new'))
 			time.sleep(int(self.CRONS_INTERVAL) * 60 * 2.3)
-			retCode = subprocess.call('ssh '+self.FS_USERNAME+'@'+self.FS_HOST+' test -f '+self.CROP_PATH+'/loader/done/'+basename(self.MARKER_INSTRUCTION_FILE+'.new'), shell=True)
+			retCode = subprocess.call('ssh '+self.FS_USERNAME+'@'+self.FS_HOST+' test -f '+self.CROP_PATH+'/loader/done/'+basename(self.MARKER_INSTRUCTION_FILE.replace('.template', '')), shell=True)
 			self.assertEquals(retCode, 0)
 		except OSError as e:
 			self.fail('Failed to check finished marker instruction file. Cause: %s' % e)
@@ -113,7 +115,7 @@ class GLoadingTest(unittest.TestCase):
 	def test_4_check_if_digester_consumed_sample_file(self):
 		try:
 			#time.sleep(int(self.CRONS_INTERVAL) * 2.3)
-			retCode = subprocess.call('ssh '+self.FS_USERNAME+'@'+self.FS_HOST+' test -f '+self.CROP_PATH+'/loader/done/'+basename(self.SAMPLE_INSTRUCTION_FILE+'.new'), shell=True)
+			retCode = subprocess.call('ssh '+self.FS_USERNAME+'@'+self.FS_HOST+' test -f '+self.CROP_PATH+'/loader/done/'+basename(self.SAMPLE_INSTRUCTION_FILE.replace('.template', '')), shell=True)
 			self.assertEquals(retCode, 0)
 		except OSError as e:
 			self.fail('Failed to check finished sample instruction file. Cause: %s' % e)
