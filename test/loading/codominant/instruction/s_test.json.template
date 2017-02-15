@@ -94,8 +94,8 @@
   }
 }, {
   "gobiiFile" : {
-    "source" : "/home/jdl232/tst_data",
-    "destination" : "/home/jdl232/tst_out",
+    "source" : "SOURCE_replace_me_I_am_a_temporary_string",
+    "destination" : "DESTINATION_replace_me_I_am_a_temporary_string",
     "delimiter" : ",",
     "gobiiFileType" : "GENERIC",
     "requireDirectoriesToExist" : false,
@@ -236,8 +236,8 @@
   }
 }, {
   "gobiiFile" : {
-    "source" : "/home/jdl232/tst_data",
-    "destination" : "/home/jdl232/tst_out",
+    "source" : "SOURCE_replace_me_I_am_a_temporary_string",
+    "destination" : "DESTINATION_replace_me_I_am_a_temporary_string",
     "delimiter" : ",",
     "gobiiFileType" : "GENERIC",
     "requireDirectoriesToExist" : false,
