@@ -34,6 +34,8 @@ class GLoadingTest(unittest.TestCase):
 	SAMPLE_FILE_TARGET_DIR = ''
 	SAMPLE_OUTPUT_TARGET_DIR = ''
 	CRONS_INTERVAL = '5'  # in minutes
+	FILE_AGE = '5'
+	PROCESSING_TIME = '1'
 	conMgr = None
 	conn = None
 	cur = None
@@ -125,7 +127,7 @@ class GLoadingTest(unittest.TestCase):
 	def test_4_check_if_digester_consumed_marker_file(self):
 		try:
 			#print('ssh '+self.FS_USERNAME+'@'+self.FS_HOST+' test -f '+self.CROP_PATH+'/loader/done/'+basename(self.MARKER_INSTRUCTION_FILE+'.new'))
-			time.sleep(int(self.CRONS_INTERVAL) * 60 * 2.3)
+			time.sleep((int(self.CRONS_INTERVAL) * 60) + (int(self.FILE_AGE) * 60) + int(self.PROCESSING_TIME))
 			retCode = subprocess.call('ssh '+self.FS_USERNAME+'@'+self.FS_HOST+' test -f '+self.CROP_PATH+'/loader/done/'+basename(self.MARKER_INSTRUCTION_FILE.replace('.template', '')), shell=True)
 			self.assertEqual(retCode, 0)
 		except OSError as e:
@@ -182,9 +184,11 @@ def test_5_check_if_dnarun_loaded(self):
 
 if __name__ == '__main__':
 	if len(sys.argv) < 11:
-		print("Please supply the parameters. \nUsage: gobii_loading_test <db_connection_string> <fs_host> <fs_username> <fs_password> <crop_path> <marker_input_file> <marker_instruction_file> <sample_input_file> <sample_instruction_file> <marker_file_target_dir> <marker_output_target_dir> <sample_file_target_dir> <sample_output_target_dir> <crons_interval:minutes>")
+		print("Please supply the parameters. \nUsage: gobii_loading_test <db_connection_string> <fs_host> <fs_username> <fs_password> <crop_path> <marker_input_file> <marker_instruction_file> <sample_input_file> <sample_instruction_file> <marker_file_target_dir> <marker_output_target_dir> <sample_file_target_dir> <sample_output_target_dir> <crons_interval:minutes> <file_age:minutes> <processing_time:seconds>")
 		sys.exit(1)
 	else:
+		GLoadingTest.PROCESSING_TIME = str(sys.argv.pop())
+		GLoadingTest.FILE_AGE = str(sys.argv.pop())
 		GLoadingTest.CRONS_INTERVAL = str(sys.argv.pop())
 		GLoadingTest.SAMPLE_OUTPUT_TARGET_DIR = str(sys.argv.pop())
 		GLoadingTest.SAMPLE_FILE_TARGET_DIR = str(sys.argv.pop())
