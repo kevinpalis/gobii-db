@@ -13,7 +13,9 @@ import xmlrunner
 import sys
 import subprocess
 import time
+from db.connection_manager import ConnectionManager
 from os.path import basename
+import csv
 
 
 class GLoadingTest(unittest.TestCase):
@@ -32,14 +34,31 @@ class GLoadingTest(unittest.TestCase):
 	SAMPLE_FILE_TARGET_DIR = ''
 	SAMPLE_OUTPUT_TARGET_DIR = ''
 	CRONS_INTERVAL = '5'  # in minutes
+	conMgr = None
+	conn = None
+	cur = None
 
 	@classmethod
 	def setUpClass(self):
+		try:
+			self.connMgr = ConnectionManager()
+			self.conn = self.connMgr.connectToDatabase(self.DB_CONN)
+			self.cur = self.conn.cursor()
+			#self.fdm = ForeignDataManager()
+		except Exception as e1:
+			print('Failed to connect to the database. Please check connection string. Cause: %s' % e1)
 		try:
 			#print('ssh '+self.FS_USERNAME+'@'+self.FS_HOST+' mkdir -p '+self.MARKER_FILE_TARGET_DIR)
 			retCode = subprocess.call('ssh '+self.FS_USERNAME+'@'+self.FS_HOST+' mkdir -p '+self.MARKER_FILE_TARGET_DIR+' '+self.SAMPLE_FILE_TARGET_DIR+' '+self.MARKER_OUTPUT_TARGET_DIR+' '+self.SAMPLE_OUTPUT_TARGET_DIR, shell=True)
 		except OSError as e:
 			print('Failed to create target directories in server. Retcode: %s Cause: %s' % (retCode, e))
+
+	@classmethod
+	def tearDownClass(self):
+		try:
+			self.connMgr.disconnectFromDatabase()
+		except Exception as e1:
+			print('Failed to disconnect from the database. Please check connection string. Cause: %s' % e1)
 
 	def test_1_create_marker_instruction_file(self):
 		try:
@@ -58,7 +77,7 @@ class GLoadingTest(unittest.TestCase):
 		try:
 			#print('ssh '+self.FS_USERNAME+'@'+self.FS_HOST+' mkdir -p '+self.MARKER_FILE_TARGET_DIR)
 			retCode = subprocess.call('ssh '+self.FS_USERNAME+'@'+self.FS_HOST+' mkdir -p '+self.MARKER_FILE_TARGET_DIR+' '+self.SAMPLE_FILE_TARGET_DIR+' '+self.MARKER_OUTPUT_TARGET_DIR+' '+self.SAMPLE_OUTPUT_TARGET_DIR, shell=True)
-			self.assertEquals(retCode, 0)
+			self.assertEqual(retCode, 0)
 		except OSError as e:
 			self.fail('Failed to create target directories in server. Cause: %s' % e)'''
 
@@ -78,28 +97,28 @@ class GLoadingTest(unittest.TestCase):
 	def test_2_upload_marker_data_file(self):
 		try:
 			retCode = subprocess.call('scp '+self.MARKER_INPUT_FILE+' '+self.FS_USERNAME+'@'+self.FS_HOST+':'+self.MARKER_FILE_TARGET_DIR, shell=True)
-			self.assertEquals(retCode, 0)
+			self.assertEqual(retCode, 0)
 		except OSError as e:
 			self.fail('Failed to upload marker data file. Cause: %s' % e)
 
 	def test_2_upload_sample_data_file(self):
 		try:
 			retCode = subprocess.call('scp '+self.SAMPLE_INPUT_FILE+' '+self.FS_USERNAME+'@'+self.FS_HOST+':'+self.SAMPLE_FILE_TARGET_DIR, shell=True)
-			self.assertEquals(retCode, 0)
+			self.assertEqual(retCode, 0)
 		except OSError as e:
 			self.fail('Failed to upload sample data file. Cause: %s' % e)
 
 	def test_3_upload_marker_instruction_file(self):
 		try:
 			retCode = subprocess.call('scp '+self.MARKER_INSTRUCTION_FILE.replace('.template', '')+' '+self.FS_USERNAME+'@'+self.FS_HOST+':'+self.CROP_PATH+'/loader/instructions', shell=True)
-			self.assertEquals(retCode, 0)
+			self.assertEqual(retCode, 0)
 		except OSError as e:
 			self.fail('Failed to upload marker instruction file. Cause: %s' % e)
 
 	def test_3_upload_sample_instruction_file(self):
 		try:
 			retCode = subprocess.call('scp '+self.SAMPLE_INSTRUCTION_FILE.replace('.template', '')+' '+self.FS_USERNAME+'@'+self.FS_HOST+':'+self.CROP_PATH+'/loader/instructions', shell=True)
-			self.assertEquals(retCode, 0)
+			self.assertEqual(retCode, 0)
 		except OSError as e:
 			self.fail('Failed to upload sample instruction file. Cause: %s' % e)
 
@@ -108,7 +127,7 @@ class GLoadingTest(unittest.TestCase):
 			#print('ssh '+self.FS_USERNAME+'@'+self.FS_HOST+' test -f '+self.CROP_PATH+'/loader/done/'+basename(self.MARKER_INSTRUCTION_FILE+'.new'))
 			time.sleep(int(self.CRONS_INTERVAL) * 60 * 2.3)
 			retCode = subprocess.call('ssh '+self.FS_USERNAME+'@'+self.FS_HOST+' test -f '+self.CROP_PATH+'/loader/done/'+basename(self.MARKER_INSTRUCTION_FILE.replace('.template', '')), shell=True)
-			self.assertEquals(retCode, 0)
+			self.assertEqual(retCode, 0)
 		except OSError as e:
 			self.fail('Failed to check finished marker instruction file. Cause: %s' % e)
 
@@ -116,9 +135,49 @@ class GLoadingTest(unittest.TestCase):
 		try:
 			#time.sleep(int(self.CRONS_INTERVAL) * 2.3)
 			retCode = subprocess.call('ssh '+self.FS_USERNAME+'@'+self.FS_HOST+' test -f '+self.CROP_PATH+'/loader/done/'+basename(self.SAMPLE_INSTRUCTION_FILE.replace('.template', '')), shell=True)
-			self.assertEquals(retCode, 0)
+			self.assertEqual(retCode, 0)
 		except OSError as e:
 			self.fail('Failed to check finished sample instruction file. Cause: %s' % e)
+
+def test_5_check_if_markers_loaded(self):
+		#get all marker_names and store it in a list -- note that we're only checking via names as the DB will have no markers when the integration test runs anyway. If in the future, that assumption will no longer hold, add the whole criteria here: right now it's marker_name + platfrom_id
+		with open(self.MARKER_INPUT_FILE, "r") as markerFile:
+			next(markerFile)
+			markerReader = csv.reader(markerFile, delimiter='\t')
+			markerList = [i[0] for i in markerReader]
+			#print ('markers count: ', len(markerList))
+			#print ('markers: ', ','.join(markerList))
+			#self.cur.mogrify("select count(*) from marker where name in %s;", (tuple(markerList),))
+			self.cur.execute("select count(*) from marker where name in %s;", (tuple(markerList),))
+			markerCount = self.cur.fetchone()
+			self.assertEqual(markerCount[0], len(markerList), msg='Row counts did not match. Either the file did not load correctly or it did not load at all.')
+
+def test_5_check_if_germplasm_loaded(self):
+		with open(self.SAMPLE_INPUT_FILE, "r") as sampleFile:
+			next(sampleFile)
+			sampleReader = csv.reader(sampleFile, delimiter='\t')
+			sampleList = [i[1] for i in sampleReader]
+			self.cur.execute("select count(*) from germplasm where external_code in %s;", (tuple(sampleList),))
+			count = self.cur.fetchone()
+			self.assertEqual(count[0], len(sampleList), msg='Row counts did not match. Either the file did not load correctly or it did not load at all.')
+
+def test_5_check_if_dnasample_loaded(self):
+		with open(self.SAMPLE_INPUT_FILE, "r") as sampleFile:
+			next(sampleFile)
+			sampleReader = csv.reader(sampleFile, delimiter='\t')
+			sampleList = [i[2] for i in sampleReader]
+			self.cur.execute("select count(*) from dnasample where name in %s;", (tuple(sampleList),))
+			count = self.cur.fetchone()
+			self.assertEqual(count[0], len(sampleList), msg='Row counts did not match. Either the file did not load correctly or it did not load at all.')
+
+def test_5_check_if_dnarun_loaded(self):
+		with open(self.SAMPLE_INPUT_FILE, "r") as sampleFile:
+			next(sampleFile)
+			sampleReader = csv.reader(sampleFile, delimiter='\t')
+			sampleList = [i[5] for i in sampleReader]
+			self.cur.execute("select count(*) from dnarun where name in %s;", (tuple(sampleList),))
+			count = self.cur.fetchone()
+			self.assertEqual(count[0], len(sampleList), msg='Row counts did not match. Either the file did not load correctly or it did not load at all.')
 
 
 if __name__ == '__main__':

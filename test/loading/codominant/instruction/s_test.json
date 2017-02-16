@@ -94,8 +94,8 @@
   }
 }, {
   "gobiiFile" : {
-    "source" : "/home/jdl232/tst_data",
-    "destination" : "/home/jdl232/tst_out",
+    "source" : "/storage1/gobii_sys_int/gobii_bundle/crops/dev/files/integration_test_samples",
+    "destination" : "/storage1/gobii_sys_int/gobii_bundle/crops/dev/loader/digest/integration_test_samples",
     "delimiter" : ",",
     "gobiiFileType" : "GENERIC",
     "requireDirectoriesToExist" : false,
@@ -236,8 +236,8 @@
   }
 }, {
   "gobiiFile" : {
-    "source" : "/home/jdl232/tst_data",
-    "destination" : "/home/jdl232/tst_out",
+    "source" : "/storage1/gobii_sys_int/gobii_bundle/crops/dev/files/integration_test_samples",
+    "destination" : "/storage1/gobii_sys_int/gobii_bundle/crops/dev/loader/digest/integration_test_samples",
     "delimiter" : ",",
     "gobiiFileType" : "GENERIC",
     "requireDirectoriesToExist" : false,
