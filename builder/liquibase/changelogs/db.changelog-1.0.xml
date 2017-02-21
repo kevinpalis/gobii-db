@@ -27,4 +27,5 @@
 	<include file="changelogs/changesets/get_cvterms.sql"/>
 	<include file="changelogs/changesets/mde_append_map_info_to_markerfile.sql"/>
 	<include file="changelogs/changesets/mde_fix_duplicated_samples.sql"/>
+	<include file="changelogs/changesets/add_nothingness_cvterm.sql"/>
 </databaseChangeLog>
