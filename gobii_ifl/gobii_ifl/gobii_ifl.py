@@ -7,6 +7,8 @@ import getopt
 import load_ifile
 import preprocess_ifile
 from util.ifl_utility import IFLUtility
+from os.path import basename
+from os.path import splitext
 
 #exit codes used here: 1, 2, 3, 4
 def main(argv):
@@ -49,17 +51,31 @@ def main(argv):
 					try:
 						if verbose:
 							print("Processing file %s..." % f)
+						tableName = splitext(basename(f))[1][1:]
+						isProp = tableName.endswith('_prop')
+						if isProp:
+							longPropFilename = outputPath+"long_"+basename(f)
+						#preprocessing happens here
 						preprocessedFile, exitCode = preprocess_ifile.main(verbose, connectionStr, os.path.join(inputDir, f), outputPath)
 						if exitCode != 0:
 							sys.exit(exitCode)
-						if flCheck and not checkDataIntegrity(f, preprocessedFile, verbose):
-							IFLUtility.printError("File length mismatch detected on %s. You have duplicate entries in the table where the NMAP file maps to, please fix it. Aborting operation." % f)
-							exitCode = 4
-							sys.exit(exitCode)
-						else:
-							loadFile, exitCode = load_ifile.main(verbose, connectionStr, preprocessedFile, outputPath)
-							if exitCode != 0:
+
+						#use the input file vs ppd file for general cases
+						if flCheck and not isProp:
+							if not checkDataIntegrity(f, preprocessedFile, verbose):
+								IFLUtility.printError("File length mismatch detected on %s. You either have duplicate entries in the table where the NMAP file maps to OR you're trying to load data to entities that do not exist, please fix it first. Loading will abort." % f)
+								exitCode = 4
 								sys.exit(exitCode)
+						#use the long format file vs the ppd file for property data
+						if flCheck and isProp:
+							if not checkDataIntegrity(longPropFilename, preprocessedFile, verbose):
+								IFLUtility.printError("File length mismatch detected on %s. You either have duplicate entries in the table where the NMAP file maps to OR you're trying to load data to entities that do not exist, please fix it first. Loading will abort." % f)
+								exitCode = 5
+								sys.exit(exitCode)
+
+						loadFile, exitCode = load_ifile.main(verbose, connectionStr, preprocessedFile, outputPath)
+						if exitCode != 0:
+							sys.exit(exitCode)
 						'''
 						In light of enhanced error logging, we decided that there is value to these files and so IFLs will not delete them.
 						try:
@@ -75,16 +91,32 @@ def main(argv):
 						sys.exit(exitCode)
 			elif iFile != "":
 				#Per file run
+				tableName = splitext(basename(iFile))[1][1:]
+				isProp = tableName.endswith('_prop')
+				if isProp:
+					longPropFilename = outputPath+"long_"+basename(iFile)
+				#preprocessing happens here
 				preprocessedFile, exitCode = preprocess_ifile.main(verbose, connectionStr, iFile, outputPath)
+				#terminate if there are any errors in preprocessing stage
 				if exitCode != 0:
 					sys.exit(exitCode)
 				loadFile = None
-				if flCheck and not checkDataIntegrity(iFile, preprocessedFile, verbose):
-					IFLUtility.printError("File length mismatch detected on %s. You have duplicate entries in the table where the NMAP file maps to, please fix it first. Loading will abort." % iFile)
-				else:
-					loadFile, exitCode = load_ifile.main(verbose, connectionStr, preprocessedFile, outputPath)
-					if exitCode != 0:
-							sys.exit(exitCode)
+				#use the input file vs ppd file for general cases
+				if flCheck and not isProp:
+					if not checkDataIntegrity(iFile, preprocessedFile, verbose):
+						IFLUtility.printError("File length mismatch detected on %s. You either have duplicate entries in the table where the NMAP file maps to OR you're trying to load data to entities that do not exist, please fix it first. Loading will abort." % iFile)
+						exitCode = 4
+						sys.exit(exitCode)
+				#use the long format file vs the ppd file for property data
+				if flCheck and isProp:
+					if not checkDataIntegrity(longPropFilename, preprocessedFile, verbose):
+						IFLUtility.printError("File length mismatch detected on %s. You either have duplicate entries in the table where the NMAP file maps to OR you're trying to load data to entities that do not exist, please fix it first. Loading will abort." % iFile)
+						exitCode = 5
+						sys.exit(exitCode)
+
+				loadFile, exitCode = load_ifile.main(verbose, connectionStr, preprocessedFile, outputPath)
+				if exitCode != 0:
+						sys.exit(exitCode)
 				'''
 				In light of enhanced error logging, we decided that there is value to these files and so IFLs will not delete them.
 				try:
