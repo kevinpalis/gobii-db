@@ -1,13 +1,16 @@
 #!/usr/bin/env python
 '''
 	PRECEDENCE:
-		1. ALLMETA flag
-		2. NAMESONLY flag
-		1. Marker ID List
-		2. DNARun ID (Sample) List
-		3. Dataset ID
+		1. Extraction by Dataset
+		2. Extraction by Markers
+		3. Extraction by Samples
 
 	Exit Codes: 2-9
+	2 -- Missing a required field
+	3 -- Failed to extract marker meta
+	4 -- Failed to extract sample meta
+	5 -- Failed to extract project meta
+	6 -- Validation Failure
 '''
 from __future__ import print_function
 import sys
@@ -22,7 +25,7 @@ def main(argv):
 		connectionStr = ""
 		markerOutputFile = ""
 		sampleOutputFile = ""
-		datasetId = ""
+		datasetId = -1
 		projectOutputFile = ""
 		allMeta = False
 		namesOnly = False
@@ -32,19 +35,23 @@ def main(argv):
 		markerListFile = ""
 		sampleListFile = ""
 		mapsetOutputFile = ""
+		markerNamesFile = ""
+		datasetType = -1
+		platformList = ""
+		#1 = By dataset, 2 = By Markers, 3 = By Samples
+		extractionType = 1
 		exitCode = 0
-		#print("Args count: ", len(argv))
+		#PARSE PARAMETERS/ARGUMENTS
 		try:
-			opts, args = getopt.getopt(argv, "hc:m:s:d:p:avnM:lD:x:y:b:", ["connectionString=", "markerOutputFile=", "sampleOutputFile=", "datasetId=", "projectOutputFile=", "all", "verbose", "namesOnly", "map=", "includeChrLen", "displayMap=", "markerList=", "sampleList=", "mapsetOutputFile="])
+			opts, args = getopt.getopt(argv, "hc:m:s:d:p:avnM:lD:x:y:b:X:P:t:", ["connectionString=", "markerOutputFile=", "sampleOutputFile=", "datasetId=", "projectOutputFile=", "all", "verbose", "namesOnly", "map=", "includeChrLen", "displayMap=", "markerList=", "sampleList=", "mapsetOutputFile=", "extractByMarkers", "markerNames=", "platformList=", "datasetType=", "extractByDataset"])
 			#print (opts, args)
 			if len(args) < 2 and len(opts) < 2:
-				printUsageHelp()
+				printUsageHelp(2)
 		except getopt.GetoptError:
-			printUsageHelp()
-			sys.exit(2)
+			printUsageHelp(9)
 		for opt, arg in opts:
 			if opt == '-h':
-				printUsageHelp()
+				printUsageHelp(1)
 			elif opt in ("-c", "--connectionString"):
 				connectionStr = arg
 			elif opt in ("-m", "--markerOutputFile"):
@@ -73,22 +80,44 @@ def main(argv):
 				sampleListFile = arg
 			elif opt in ("-b", "--mapsetOutputFile"):
 				mapsetOutputFile = arg
+			elif opt in ("--extractByMarkers"):
+				extractionType = 2
+			elif opt in ("--extractByDataset"):
+				extractionType = 1
+			elif opt in ("-X", "--markerNames"):
+				markerNamesFile = arg
+			elif opt in ("-P","--platformList"):
+				platformList = arg
+			elif opt in ("t","--datasetType"):
+				datasetType = arg
+
+		#VALIDATIONS
+		if connectionStr == "" or markerOutputFile == "" or sampleOutputFile == "" or projectOutputFile == "":
+			MDEUtility.printError("Invalid usage. All of the following parameters are required: connectionStr, markerOutputFile, sampleOutputFile, and projectOutputFile.")
+			printUsageHelp(2)
+		if extractionType == 1:
+			if datasetId == -1:
+				MDEUtility.printError("Invalid usage. Extraction by dataset requires a dataset ID.")
+				printUsageHelp(6)
+		elif extractionType == 2:
+			if datasetType == -1 or (markerNamesFile == "" and platformList == ""):
+				MDEUtility.printError("Invalid usage. Extraction by marker list requires a dataset type and at least one of: markerNamesFile and platformList.")
+				printUsageHelp(6)
 
 		if verbose:
 			print("Opts: ", opts)
 		markerList = []
 		sampleList = []
-		#copy content of markerList and sampleList file to their corresponding lists.
+		markerNames = []
+
+		#PREPARE PARAMETERS
+		#convert file contents to lists
 		if markerListFile != "":
-				if verbose:
-					print("Extracting by marker list...")
 				markerList = [line.strip() for line in open(markerListFile, 'r')]
-				print("Marker List: %s" % markerList)
 		if sampleListFile != "":
-				#if verbose:
-				#	print("Extracting by sample list...")
-				sampleList = [line.strip() for line in open(markerListFile, 'r')]
-				print("Sample List: %s" % sampleList)
+				sampleList = [line.strip() for line in open(sampleListFile, 'r')]
+		if markerNamesFile != "":
+				markerNames = [line.strip() for line in open(markerNamesFile, 'r')]
 
 		rn = False
 		if datasetId.isdigit() or markerList or sampleList:
@@ -98,8 +127,8 @@ def main(argv):
 					#	print("Generating marker metadata file...")
 					extract_marker_metadata.main(verbose, connectionStr, datasetId, markerOutputFile, allMeta, namesOnly, mapId, includeChrLen, displayMap, markerList, sampleList, mapsetOutputFile)
 				except Exception as e1:
-					MDEUtility.printError("Error: %s" % (str(e1)))
-					exitCode = 2
+					MDEUtility.printError("Extraction of marker metadata failed. Error: %s" % (str(e1)))
+					exitCode = 3
 				rn = True
 			if connectionStr != "" and sampleOutputFile != "":
 				try:
@@ -107,8 +136,8 @@ def main(argv):
 					#	print("Generating sample metadata file...")
 					extract_sample_metadata.main(verbose, connectionStr, datasetId, sampleOutputFile, allMeta, namesOnly, markerList, sampleList)
 				except Exception as e:
-					MDEUtility.printError("Error: %s" % str(e))
-					exitCode = 3
+					MDEUtility.printError("Extraction of sample metadata failed. Error: %s" % str(e))
+					exitCode = 4
 				rn = True
 			if connectionStr != "" and projectOutputFile != "":
 				try:
@@ -119,18 +148,18 @@ def main(argv):
 						extract_project_metadata.main(verbose, connectionStr, datasetId, projectOutputFile, allMeta)
 				except Exception as e:
 					MDEUtility.printError("Error: %s" % str(e))
-					exitCode = 4
+					exitCode = 5
 				rn = True
 			if not rn:
 				print("At least one of -m, -s, or -p is required for the extractor to run.")
-				printUsageHelp()
+				printUsageHelp(2)
 		else:
 			MDEUtility.printError("At least one of these is required: a valid dataset_id, a markerID file, or a dnarunID file.")
 			exitCode = 5
 		sys.exit(exitCode)
 		#cleanup
 
-def printUsageHelp():
+def printUsageHelp(eCode):
 	print ("gobii_mde.py -c <connectionString> -m <markerOutputFile> -s <sampleOutputFile> -p <projectOutputFile> -d <dataset_id> -M <mapset_id> -D <mapset_id> for Display> -a -v -n")
 	print ("\t-h = Usage help")
 	print ("\t-c or --connectionString = Database connection string (RFC 3986 URI).\n\t\tFormat: postgresql://[user[:password]@][netloc][:port][/dbname][?param1=value1&...]")
@@ -147,7 +176,8 @@ def printUsageHelp():
 	print ("\t-D or --displayMap = This creates two files: one with the marker metadata appended with the map data of the selected mapset (marker_filename.ext) and a mapset metadata file. The mapset metadata filename is fetched from the value passed to  the -b (--mapsetOutputFile) parameter.")
 	print ("\t-x or --markerList = Supplies the file containing a list of marker_ids, newline-delimited. Setting this instructs the MDE to do extraction by marker list.")
 	print ("\t-y or --sampleList = Supplies the file containing a list of dnarun_ids, newline-delimited. Setting this instructs the MDE to do extraction by dnarun list.")
-	sys.exit(1)
+	print ("\t-X or --markerNames = Supplies the file containing a list of marker names, newline-delimited. Setting this instructs the MDE to do extraction by marker list.")
+	sys.exit(eCode)
 
 if __name__ == "__main__":
 	main(sys.argv[1:])
