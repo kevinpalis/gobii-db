@@ -86,17 +86,17 @@ def main(argv):
 				extractionType = 1
 			elif opt in ("-X", "--markerNames"):
 				markerNamesFile = arg
-			elif opt in ("-P","--platformList"):
+			elif opt in ("-P", "--platformList"):
 				platformList = arg
-			elif opt in ("t","--datasetType"):
+			elif opt in ("t", "--datasetType"):
 				datasetType = arg
 
 		#VALIDATIONS
-		if connectionStr == "" or markerOutputFile == "" or sampleOutputFile == "" or projectOutputFile == "":
-			MDEUtility.printError("Invalid usage. All of the following parameters are required: connectionStr, markerOutputFile, sampleOutputFile, and projectOutputFile.")
+		if connectionStr == "" or markerOutputFile == "" or sampleOutputFile == "":
+			MDEUtility.printError("Invalid usage. All of the following parameters are required: connectionStr, markerOutputFile, and sampleOutputFile.")
 			printUsageHelp(2)
 		if extractionType == 1:
-			if datasetId == -1:
+			if datasetId == -1 or not datasetId.isdigit:
 				MDEUtility.printError("Invalid usage. Extraction by dataset requires a dataset ID.")
 				printUsageHelp(6)
 		elif extractionType == 2:
@@ -119,43 +119,41 @@ def main(argv):
 		if markerNamesFile != "":
 				markerNames = [line.strip() for line in open(markerNamesFile, 'r')]
 
+		#Do the Dew
 		rn = False
-		if datasetId.isdigit() or markerList or sampleList:
-			if connectionStr != "" and markerOutputFile != "":
-				try:
-					#if verbose:
-					#	print("Generating marker metadata file...")
-					extract_marker_metadata.main(verbose, connectionStr, datasetId, markerOutputFile, allMeta, namesOnly, mapId, includeChrLen, displayMap, markerList, sampleList, mapsetOutputFile)
-				except Exception as e1:
-					MDEUtility.printError("Extraction of marker metadata failed. Error: %s" % (str(e1)))
-					exitCode = 3
-				rn = True
-			if connectionStr != "" and sampleOutputFile != "":
-				try:
-					#if verbose:
-					#	print("Generating sample metadata file...")
-					extract_sample_metadata.main(verbose, connectionStr, datasetId, sampleOutputFile, allMeta, namesOnly, markerList, sampleList)
-				except Exception as e:
-					MDEUtility.printError("Extraction of sample metadata failed. Error: %s" % str(e))
-					exitCode = 4
-				rn = True
-			if connectionStr != "" and projectOutputFile != "":
-				try:
-					#project metadata is only relevant to extraction by datasetID
-					if not markerList and not sampleList:
-						if verbose:
-							print("Generating project metadata file...")
-						extract_project_metadata.main(verbose, connectionStr, datasetId, projectOutputFile, allMeta)
-				except Exception as e:
-					MDEUtility.printError("Error: %s" % str(e))
-					exitCode = 5
-				rn = True
-			if not rn:
-				print("At least one of -m, -s, or -p is required for the extractor to run.")
-				printUsageHelp(2)
-		else:
-			MDEUtility.printError("At least one of these is required: a valid dataset_id, a markerID file, or a dnarunID file.")
-			exitCode = 5
+		if connectionStr != "" and markerOutputFile != "":
+			try:
+				#if verbose:
+				#	print("Generating marker metadata file...")
+				extract_marker_metadata.main(verbose, connectionStr, datasetId, markerOutputFile, allMeta, namesOnly, mapId, includeChrLen, displayMap, markerList, sampleList, mapsetOutputFile, extractionType, datasetType, markerNames, platformList)
+			except Exception as e1:
+				MDEUtility.printError("Extraction of marker metadata failed. Error: %s" % (str(e1)))
+				exitCode = 3
+			rn = True
+		if connectionStr != "" and sampleOutputFile != "":
+			try:
+				#if verbose:
+				#	print("Generating sample metadata file...")
+				extract_sample_metadata.main(verbose, connectionStr, datasetId, sampleOutputFile, allMeta, namesOnly, markerList, sampleList, extractionType, datasetType, markerNames, platformList)
+			except Exception as e:
+				MDEUtility.printError("Extraction of sample metadata failed. Error: %s" % str(e))
+				exitCode = 4
+			rn = True
+		if connectionStr != "" and projectOutputFile != "":
+			try:
+				#project metadata is only relevant to extraction by datasetID ---- OR IS IT? GOTTA ASK PEOPLE IF WE WANT THIS FANCY
+				if not markerList and not sampleList:
+					if verbose:
+						print("Generating project metadata file...")
+					extract_project_metadata.main(verbose, connectionStr, datasetId, projectOutputFile, allMeta, extractionType, datasetType, markerNames, platformList)
+			except Exception as e:
+				MDEUtility.printError("Error: %s" % str(e))
+				exitCode = 5
+			rn = True
+		if not rn:
+			print("At least one of -m, -s, or -p is required for the extractor to run.")
+			printUsageHelp(2)
+
 		sys.exit(exitCode)
 		#cleanup
 
