@@ -4,6 +4,11 @@
 	Prerequisites:
 	Exit Codes: 10-19
 	@author kdp44 Kevin Palis
+
+	Extraction types:
+	#1 = By dataset, 2 = By Markers, 3 = By Samples
+
+	TODO: Extraction types to constants across IFLs
 '''
 from __future__ import print_function
 import sys
@@ -12,7 +17,7 @@ import traceback
 from util.mde_utility import MDEUtility
 from db.extract_metadata_manager import ExtractMetadataManager
 
-def main(isVerbose, connectionStr, datasetId, outputFile, allMeta, namesOnly, mapId, includeChrLen, displayMapId, markerList, sampleList, mapsetOutputFile):
+def main(isVerbose, connectionStr, datasetId, outputFile, allMeta, namesOnly, mapId, includeChrLen, displayMapId, markerList, sampleList, mapsetOutputFile, extractionType, datasetType, markerNames, platformList):
 	MAPID_COL_POS = 2
 	MARKERNAME_COL_POS_1 = 0
 	MARKERNAME_COL_POS_2 = 0
@@ -20,26 +25,29 @@ def main(isVerbose, connectionStr, datasetId, outputFile, allMeta, namesOnly, ma
 		print("Marker Metadata Output File: ", outputFile)
 	exMgr = ExtractMetadataManager(connectionStr)
 	try:
-		if allMeta:
+		if allMeta:  # deprecated
 			exMgr.createAllMarkerMetadataFile(outputFile, datasetId, mapId)
-		elif namesOnly:
+		elif namesOnly:  # deprecated
 			exMgr.createMarkerNamesFile(outputFile, datasetId, mapId)
 		else:
-			if markerList:
+			if extractionType == 1:  # by dataset
+				if isVerbose:
+					print("Generating marker metadata by dataset.")
+				exMgr.createQCMarkerMetadataFile(outputFile, datasetId, mapId)
+			elif extractionType == 2:  # by markers
 				if isVerbose:
 					print("Generating marker metadata by marker list.")
 				exMgr.createQCMarkerMetadataByMarkerList(outputFile, markerList)
 				exMgr.createMarkerPositionsFileByMarkerList(outputFile, markerList)
-			elif sampleList:
+			elif extractionType == 3:  # by samples
 				if isVerbose:
 					print("Generating marker metadata by sample list.")
 					print("!!!Not yet implemented. Skipping...")
 				return outputFile
 			else:
-				if isVerbose:
-					print("Generating marker metadata by datasetID.")
-				exMgr.createQCMarkerMetadataFile(outputFile, datasetId, mapId)
-				#current version would pass only one mapId. In future this could be mapId[].
+				MDEUtility.printError('ERROR: Extraction type is required.')
+				sys.exit(12)
+
 		if displayMapId != -1:
 			if mapsetOutputFile == '':
 				MDEUtility.printError('ERROR: Mapset output file path is not set.')
@@ -108,9 +116,9 @@ def main(isVerbose, connectionStr, datasetId, outputFile, allMeta, namesOnly, ma
 		traceback.print_exc(file=sys.stderr)
 		sys.exit(10)
 
-
+#extractionType, datasetType, markerNames, platformList
 if __name__ == "__main__":
-	if len(sys.argv) < 5:
-		print("Please supply the parameters. \nUsage: extract_marker_metadata <db_connection_string> <dataset_id> <output_file_abs_path> <all_meta> <names_only:boolean> <map_id> <includeChrLen:boolean> <displayMapId> <markerList> <sampleList> <mapsetOutputFile>")
+	if len(sys.argv) < 15:
+		print("Please supply the parameters. \nUsage: extract_marker_metadata <db_connection_string> <dataset_id> <output_file_abs_path> <all_meta> <names_only:boolean> <map_id> <includeChrLen:boolean> <displayMapId> <markerList> <sampleList> <mapsetOutputFile> <extractionType> <datasetType> <markerNames> <platformList>")
 		sys.exit(1)
-	main(True, str(sys.argv[1]), str(sys.argv[2]), str(sys.argv[3]), str(sys.argv[4]), str(sys.argv[5]), str(sys.argv[6]), str(sys.argv[7]), str(sys.argv[8]), str(sys.argv[9]), str(sys.argv[10]), str(sys.argv[11]))
+	main(True, str(sys.argv[1]), str(sys.argv[2]), str(sys.argv[3]), str(sys.argv[4]), str(sys.argv[5]), str(sys.argv[6]), str(sys.argv[7]), str(sys.argv[8]), str(sys.argv[9]), str(sys.argv[10]), str(sys.argv[11]), str(sys.argv[12]), str(sys.argv[13]), str(sys.argv[14]), str(sys.argv[15]))
