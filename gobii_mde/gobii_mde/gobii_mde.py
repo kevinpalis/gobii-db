@@ -120,26 +120,26 @@ def main(argv):
 				markerNames = [line.strip() for line in open(markerNamesFile, 'r')]
 
 		#Do the Dew
-		rn = False
-		if connectionStr != "" and markerOutputFile != "":
-			try:
-				#if verbose:
-				#	print("Generating marker metadata file...")
-				extract_marker_metadata.main(verbose, connectionStr, datasetId, markerOutputFile, allMeta, namesOnly, mapId, includeChrLen, displayMap, markerList, sampleList, mapsetOutputFile, extractionType, datasetType, markerNames, platformList)
-			except Exception as e1:
-				MDEUtility.printError("Extraction of marker metadata failed. Error: %s" % (str(e1)))
-				exitCode = 3
-			rn = True
-		if connectionStr != "" and sampleOutputFile != "":
-			try:
-				#if verbose:
-				#	print("Generating sample metadata file...")
-				extract_sample_metadata.main(verbose, connectionStr, datasetId, sampleOutputFile, allMeta, namesOnly, markerList, sampleList, extractionType, datasetType, markerNames, platformList)
-			except Exception as e:
-				MDEUtility.printError("Extraction of sample metadata failed. Error: %s" % str(e))
-				exitCode = 4
-			rn = True
-		if connectionStr != "" and projectOutputFile != "":
+		#rn = False
+		#if connectionStr != "" and markerOutputFile != "":
+		try:
+			#if verbose:
+			#	print("Generating marker metadata file...")
+			extract_marker_metadata.main(verbose, connectionStr, datasetId, markerOutputFile, allMeta, namesOnly, mapId, includeChrLen, displayMap, markerList, sampleList, mapsetOutputFile, extractionType, datasetType, markerNames, platformList)
+		except Exception as e1:
+			MDEUtility.printError("Extraction of marker metadata failed. Error: %s" % (str(e1)))
+			exitCode = 3
+		#rn = True
+		#if connectionStr != "" and sampleOutputFile != "":
+		try:
+			#if verbose:
+			#	print("Generating sample metadata file...")
+			extract_sample_metadata.main(verbose, connectionStr, datasetId, sampleOutputFile, allMeta, namesOnly, markerList, sampleList, extractionType, datasetType, markerNames, platformList)
+		except Exception as e:
+			MDEUtility.printError("Extraction of sample metadata failed. Error: %s" % str(e))
+			exitCode = 4
+		#rn = True
+		if projectOutputFile != "":
 			try:
 				#project metadata is only relevant to extraction by datasetID ---- OR IS IT? GOTTA ASK PEOPLE IF WE WANT THIS FANCY
 				if not markerList and not sampleList:
@@ -149,10 +149,10 @@ def main(argv):
 			except Exception as e:
 				MDEUtility.printError("Error: %s" % str(e))
 				exitCode = 5
-			rn = True
-		if not rn:
-			print("At least one of -m, -s, or -p is required for the extractor to run.")
-			printUsageHelp(2)
+			#rn = True
+		#if not rn:
+		#	print("At least one of -m, -s, or -p is required for the extractor to run.")
+		#	printUsageHelp(2)
 
 		sys.exit(exitCode)
 		#cleanup
