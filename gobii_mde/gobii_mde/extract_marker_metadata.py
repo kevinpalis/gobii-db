@@ -37,6 +37,9 @@ def main(isVerbose, connectionStr, datasetId, outputFile, allMeta, namesOnly, ma
 			elif extractionType == 2:  # by markers
 				if isVerbose:
 					print("Generating marker metadata by marker list.")
+				if not markerList:
+					if isVerbose:
+						print("Deriving marker IDs based on the given parameters: markerNames, platformList, datasetType.")
 				exMgr.createQCMarkerMetadataByMarkerList(outputFile, markerList)
 				exMgr.createMarkerPositionsFileByMarkerList(outputFile, markerList)
 			elif extractionType == 3:  # by samples
