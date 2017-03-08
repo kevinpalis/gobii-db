@@ -37,7 +37,7 @@ def main(argv):
 		mapsetOutputFile = ""
 		markerNamesFile = ""
 		datasetType = -1
-		platformList = ""
+		platformList = []
 		#1 = By dataset, 2 = By Markers, 3 = By Samples
 		extractionType = 1
 		exitCode = 0
@@ -87,7 +87,12 @@ def main(argv):
 			elif opt in ("-X", "--markerNames"):
 				markerNamesFile = arg
 			elif opt in ("-P", "--platformList"):
-				platformList = arg
+				try:
+					platformList = arg.split(",")
+				except Exception as e:
+					MDEUtility.printError("Invalid platformList format. Only comma-delimited ID list is accepted. Error: %s" % str(e))
+					exitCode = 6
+					sys.exit(exitCode)
 			elif opt in ("t", "--datasetType"):
 				datasetType = arg
 
@@ -125,7 +130,7 @@ def main(argv):
 		try:
 			#if verbose:
 			#	print("Generating marker metadata file...")
-			extract_marker_metadata.main(verbose, connectionStr, datasetId, markerOutputFile, allMeta, namesOnly, mapId, includeChrLen, displayMap, markerList, sampleList, mapsetOutputFile, extractionType, datasetType, markerNames, platformList)
+			mFile, markerList = extract_marker_metadata.main(verbose, connectionStr, datasetId, markerOutputFile, allMeta, namesOnly, mapId, includeChrLen, displayMap, markerList, sampleList, mapsetOutputFile, extractionType, datasetType, markerNames, platformList)
 		except Exception as e1:
 			MDEUtility.printError("Extraction of marker metadata failed. Error: %s" % (str(e1)))
 			exitCode = 3
@@ -134,7 +139,7 @@ def main(argv):
 		try:
 			#if verbose:
 			#	print("Generating sample metadata file...")
-			extract_sample_metadata.main(verbose, connectionStr, datasetId, sampleOutputFile, allMeta, namesOnly, markerList, sampleList, extractionType, datasetType, markerNames, platformList)
+			extract_sample_metadata.main(verbose, connectionStr, datasetId, sampleOutputFile, allMeta, namesOnly, markerList, sampleList, extractionType, datasetType)
 		except Exception as e:
 			MDEUtility.printError("Extraction of sample metadata failed. Error: %s" % str(e))
 			exitCode = 4

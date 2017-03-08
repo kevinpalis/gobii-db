@@ -40,9 +40,17 @@ def main(isVerbose, connectionStr, datasetId, outputFile, allMeta, namesOnly, ma
 				if not markerList:
 					if isVerbose:
 						print("Deriving marker IDs based on the given parameters: markerNames, platformList.")
-						#new function here
+						#get the marker ids list
+						res = exMgr.getMarkerIds(markerNames, platformList)
+						if res is None:
+							MDEUtility.printError('MarkerNames and PlatformList cannot be both empty.')
+							sys.exit(13)
+						markerList = [i[0] for i in res]
 				exMgr.createQCMarkerMetadataByMarkerList(outputFile, markerList)
-				exMgr.createMarkerPositionsFileByMarkerList(outputFile, markerList)  # this generates the pos file - will get affected by the inroduction of filtering by dataset type
+				if datasetType is None:
+					MDEUtility.printError('Dataset type is required for extraction by marker list.')
+					sys.exit(14)
+				exMgr.createMarkerPositionsFile(outputFile, markerList, datasetType)  # this generates the pos file - will get affected by the inroduction of filtering by dataset type
 			elif extractionType == 3:  # by samples
 				if isVerbose:
 					print("Generating marker metadata by sample list.")
@@ -113,7 +121,7 @@ def main(isVerbose, connectionStr, datasetId, outputFile, allMeta, namesOnly, ma
 		'''
 		if isVerbose:
 			print("Created marker metadata file successfully.")
-		return outputFile
+		return outputFile, markerList
 	except Exception as e:
 		MDEUtility.printError('Failed to create marker metadata file. Error: %s' % (str(e)))
 		exMgr.rollbackTransaction()
