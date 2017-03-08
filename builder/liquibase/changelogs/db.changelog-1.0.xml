@@ -30,4 +30,5 @@
 	<include file="changelogs/changesets/mde_fix_duplicated_samples.sql"/>
 	<include file="changelogs/changesets/add_nothingness_cvterm.sql"/>
 	<include file="changelogs/changesets/fix_mde_fxn_chr_length.sql"/>
+	<include file="changelogs/changesets/mde_derive_marker_ids.sql"/>
 </databaseChangeLog>
