@@ -57,23 +57,28 @@ def main(argv):
 							longPropFilename = outputPath+"long_"+basename(f)
 						#preprocessing happens here
 						preprocessedFile, exitCode = preprocess_ifile.main(verbose, connectionStr, os.path.join(inputDir, f), outputPath)
+						#dFile = deduplcate_ifile.main(verbose, preprocessedFile,outputhPath,tableName)
 						if exitCode != 0:
 							sys.exit(exitCode)
 
 						#use the input file vs ppd file for general cases
 						if flCheck and not isProp:
-							if not checkDataIntegrity(f, preprocessedFile, verbose):
+							#if not checkDataIntegrity(f, preprocessedFile, verbose):
+							if not checkDataIntegrity(f, dFile, verbose):
 								IFLUtility.printError("File length mismatch detected on %s. You either have duplicate entries in the table where the NMAP file maps to OR you're trying to load data to entities that do not exist, please fix it first. Loading will abort." % f)
 								exitCode = 4
 								sys.exit(exitCode)
 						#use the long format file vs the ppd file for property data
 						if flCheck and isProp:
-							if not checkDataIntegrity(longPropFilename, preprocessedFile, verbose):
+							#if not checkDataIntegrity(longPropFilename, preprocessedFile, verbose):
+							if not checkDataIntegrity(longPropFilename, dFile, verbose):
 								IFLUtility.printError("File length mismatch detected on %s. You either have duplicate entries in the table where the NMAP file maps to OR you're trying to load data to entities that do not exist, please fix it first. Loading will abort." % f)
 								exitCode = 5
 								sys.exit(exitCode)
 
-						loadFile, exitCode = load_ifile.main(verbose, connectionStr, preprocessedFile, outputPath)
+						#loadFile, exitCode = load_ifile.main(verbose, connectionStr, preprocessedFile, outputPath)
+						# load the deduplicated file here
+						loadFile, exitCode = load_ifile.main(verbose, connectionStr,dFile, outputPath)
 						if exitCode != 0:
 							sys.exit(exitCode)
 						'''
