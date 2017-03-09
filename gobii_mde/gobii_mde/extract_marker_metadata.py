@@ -41,14 +41,14 @@ def main(isVerbose, connectionStr, datasetId, outputFile, allMeta, namesOnly, ma
 					if isVerbose:
 						print("Deriving marker IDs based on the given parameters: markerNames, platformList.")
 						#get the marker ids list
-						res = exMgr.getMarkerIds(markerNames, platformList)
-						if res is None:
-							MDEUtility.printError('MarkerNames and PlatformList cannot be both empty.')
-							sys.exit(13)
-						markerList = [i[0] for i in res]
-						if not markerList:
-							MDEUtility.printError("Resulting list of marker IDs is empty. Nothing to extract.")
-							sys.exit(15)
+					res = exMgr.getMarkerIds(markerNames, platformList)
+					if res is None:
+						MDEUtility.printError('MarkerNames and PlatformList cannot be both empty.')
+						sys.exit(13)
+					markerList = [str(i[0]) for i in res]
+					if not markerList:
+						MDEUtility.printError("Resulting list of marker IDs is empty. Nothing to extract.")
+						sys.exit(15)
 				exMgr.createQCMarkerMetadataByMarkerList(outputFile, markerList)
 				if datasetType is None:
 					MDEUtility.printError('Dataset type is required for extraction by marker list.')
@@ -95,7 +95,12 @@ def main(isVerbose, connectionStr, datasetId, outputFile, allMeta, namesOnly, ma
 						if isVerbose:
 							print('Mapset Row currently at marker_name=%s' % mapsetRow[MARKERNAME_COL_POS_1])
 							print('Total number of columns to append: %s' % columnsCount)
+						eomReached = False
 						for markerRow in markerReader:
+							if eomReached:
+								newRow = markerRow + fillerList
+								markerWriter.writerow(newRow)
+								continue
 							if markerRow[MARKERNAME_COL_POS_2] == mapsetRow[MARKERNAME_COL_POS_1]:
 								newRow = markerRow + mapsetRow[MAPID_COL_POS+1:]
 								markerWriter.writerow(newRow)
@@ -104,9 +109,11 @@ def main(isVerbose, connectionStr, datasetId, outputFile, allMeta, namesOnly, ma
 								except StopIteration as e:
 									if isVerbose:
 										print ('End of file reached.')
-									break
+									eomReached = True
+									#break
 								if mapsetRow[MAPID_COL_POS] != displayMapId:
-									break
+									eomReached = True
+									#break
 							else:
 								newRow = markerRow + fillerList
 								markerWriter.writerow(newRow)

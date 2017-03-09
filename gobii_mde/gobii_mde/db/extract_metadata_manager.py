@@ -166,7 +166,7 @@ class ExtractMetadataManager:
 		outputFile.close()
 
 	def getMarkerIds(self, markerNames, platformList):
-		print("Generating marker ids...")
+		#print("Generating marker ids...")
 		if markerNames and platformList:
 			self.cur.execute("select marker_id from getMarkerIdsByMarkerNamesAndPlatformList(%s, %s)", ("{"+(','.join(markerNames))+"}", "{"+(','.join(platformList))+"}"))
 		elif markerNames and not platformList:

@@ -132,7 +132,7 @@ def main(argv):
 			#if verbose:
 			#	print("Generating marker metadata file...")
 			mFile, markerList = extract_marker_metadata.main(verbose, connectionStr, datasetId, markerOutputFile, allMeta, namesOnly, mapId, includeChrLen, displayMap, markerList, sampleList, mapsetOutputFile, extractionType, datasetType, markerNames, platformList)
-			if not markerList:
+			if extractionType == 2 and not markerList:
 				MDEUtility.printError("Resulting list of marker IDs is empty. Nothing to extract.")
 				sys.exit(7)
 		except Exception as e1:
