@@ -47,7 +47,8 @@ def main(argv):
 			#print (opts, args)
 			if len(args) < 2 and len(opts) < 2:
 				printUsageHelp(2)
-		except getopt.GetoptError:
+		except getopt.GetoptError as e:
+			MDEUtility.printError("Error parsing parameters: %s" % str(e))
 			printUsageHelp(9)
 		for opt, arg in opts:
 			if opt == '-h':
@@ -131,6 +132,9 @@ def main(argv):
 			#if verbose:
 			#	print("Generating marker metadata file...")
 			mFile, markerList = extract_marker_metadata.main(verbose, connectionStr, datasetId, markerOutputFile, allMeta, namesOnly, mapId, includeChrLen, displayMap, markerList, sampleList, mapsetOutputFile, extractionType, datasetType, markerNames, platformList)
+			if not markerList:
+				MDEUtility.printError("Resulting list of marker IDs is empty. Nothing to extract.")
+				sys.exit(7)
 		except Exception as e1:
 			MDEUtility.printError("Extraction of marker metadata failed. Error: %s" % (str(e1)))
 			exitCode = 3
@@ -150,7 +154,7 @@ def main(argv):
 				if extractionType == 1:
 					if verbose:
 						print("Generating project metadata file...")
-					extract_project_metadata.main(verbose, connectionStr, datasetId, projectOutputFile, allMeta, extractionType, datasetType, markerNames, platformList)
+					extract_project_metadata.main(verbose, connectionStr, datasetId, projectOutputFile, allMeta)
 			except Exception as e:
 				MDEUtility.printError("Error: %s" % str(e))
 				exitCode = 5

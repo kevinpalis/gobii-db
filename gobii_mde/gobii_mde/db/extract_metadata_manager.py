@@ -144,16 +144,15 @@ class ExtractMetadataManager:
 			self.cur.copy_expert(sql, outputFile, 20480)
 		outputFile.close()
 
-	def createMapsetFile(self, outputFilePath, datasetId, mapId, markerList, sampleList):
+	def createMapsetFile(self, outputFilePath, datasetId, mapId, markerList, sampleList, extractionType):
 		#outputFilePath = outputFilePath+".mapset"
 		sql = ""
-		if markerList:
+		if extractionType == 2:
 			sql = "copy (select * from getMarkerMapsetInfoByMarkerList('{"+(','.join(markerList))+"}')) to STDOUT with delimiter E'\\t'"+" csv header;"
-		elif sampleList:
+		elif extractionType == 3:
 			print("Not yet implemented")
 			return
-			#sql = ""
-		else:
+		elif extractionType == 1:
 			sql = "copy (select * from getMarkerAllMapsetInfoByDataset("+datasetId+","+mapId+")) to STDOUT with delimiter E'\\t'"+" csv header;"
 		with open(outputFilePath, 'w') as outputFile:
 			self.cur.copy_expert(sql, outputFile, 20480)
@@ -169,11 +168,11 @@ class ExtractMetadataManager:
 	def getMarkerIds(self, markerNames, platformList):
 		print("Generating marker ids...")
 		if markerNames and platformList:
-			self.cur.execute("select marker_id from getMarkerIdsByMarkerNamesAndPlatformList(%s, %s)", ("'{"+(','.join(markerNames))+"}'", "'{"+(','.join(platformList))+"}'"))
+			self.cur.execute("select marker_id from getMarkerIdsByMarkerNamesAndPlatformList(%s, %s)", ("{"+(','.join(markerNames))+"}", "{"+(','.join(platformList))+"}"))
 		elif markerNames and not platformList:
-			self.cur.execute("select marker_id from getMarkerIdsByMarkerNames(%s)", ("'{"+(','.join(markerNames))+"}'",))
+			self.cur.execute("select marker_id from getMarkerIdsByMarkerNames(%s)", ("{"+(','.join(markerNames))+"}",))
 		elif platformList and not markerNames:
-			self.cur.execute("select marker_id from getMarkerIdsByPlatformList(%s)", ("'{"+(','.join(platformList))+"}'",))
+			self.cur.execute("select marker_id from getMarkerIdsByPlatformList(%s)", ("{"+(','.join(platformList))+"}",))
 		else:  # both params are null
 			return None
 		res = self.cur.fetchall()

@@ -46,6 +46,9 @@ def main(isVerbose, connectionStr, datasetId, outputFile, allMeta, namesOnly, ma
 							MDEUtility.printError('MarkerNames and PlatformList cannot be both empty.')
 							sys.exit(13)
 						markerList = [i[0] for i in res]
+						if not markerList:
+							MDEUtility.printError("Resulting list of marker IDs is empty. Nothing to extract.")
+							sys.exit(15)
 				exMgr.createQCMarkerMetadataByMarkerList(outputFile, markerList)
 				if datasetType is None:
 					MDEUtility.printError('Dataset type is required for extraction by marker list.')
@@ -65,7 +68,7 @@ def main(isVerbose, connectionStr, datasetId, outputFile, allMeta, namesOnly, ma
 				MDEUtility.printError('ERROR: Mapset output file path is not set.')
 				sys.exit(11)
 			else:
-				exMgr.createMapsetFile(mapsetOutputFile, datasetId, displayMapId, markerList, sampleList)
+				exMgr.createMapsetFile(mapsetOutputFile, datasetId, displayMapId, markerList, sampleList, extractionType)
 			#integrating the mapset info with the marker metadata file should be done here
 			#Open marker meta file (markerMeta) and mapset meta file (mapsetMeta) and another file for writing.
 			#Scan mapsetMeta for the displayMapId. Stop at the first instance found. These files are ordered accordingly, which saves the algorithm a lot of processing time.
@@ -127,6 +130,7 @@ def main(isVerbose, connectionStr, datasetId, outputFile, allMeta, namesOnly, ma
 		exMgr.rollbackTransaction()
 		traceback.print_exc(file=sys.stderr)
 		sys.exit(10)
+
 
 #extractionType, datasetType, markerNames, platformList
 if __name__ == "__main__":
