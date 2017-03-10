@@ -138,8 +138,8 @@ RETURNS table (dnarun_name text
   END;
 $$ LANGUAGE plpgsql;
 
-DROP FUNCTION IF EXISTS getSampleQCMetadataByMarkerListX(text, text);
-CREATE OR REPLACE FUNCTION getSampleQCMetadataByMarkerListX(markerList text, datasetTypeId text)
+DROP FUNCTION IF EXISTS getSampleQCMetadataByMarkerListX(text, integer);
+CREATE OR REPLACE FUNCTION getSampleQCMetadataByMarkerListX(markerList text, datasetTypeId integer)
 RETURNS table (ds_id integer, idx integer
 		,dnarun_name text
 		,dnarun_barcode text

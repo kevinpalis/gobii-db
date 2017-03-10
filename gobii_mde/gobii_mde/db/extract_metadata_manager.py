@@ -129,6 +129,7 @@ class ExtractMetadataManager:
 		outputFile.close()
 
 	def createSampleQCMetadataByMarkerList(self, outputFilePath, markerList, datasetType):
+		#print(self.cur.mogrify("copy (select * from getSampleQCMetadataByMarkerList('{"+(','.join(markerList))+"}',"+datasetType+")) to STDOUT with delimiter E'\\t'"+" csv header;"))
 		sql = "copy (select * from getSampleQCMetadataByMarkerList('{"+(','.join(markerList))+"}',"+datasetType+")) to STDOUT with delimiter E'\\t'"+" csv header;"
 		with open(outputFilePath, 'w') as outputFile:
 			self.cur.copy_expert(sql, outputFile, 20480)
@@ -168,10 +169,13 @@ class ExtractMetadataManager:
 	def getMarkerIds(self, markerNames, platformList):
 		#print("Generating marker ids...")
 		if markerNames and platformList:
+			#print(self.cur.mogrify("select marker_id from getMarkerIdsByMarkerNamesAndPlatformList(%s, %s)", ("{"+(','.join(markerNames))+"}", "{"+(','.join(platformList))+"}")))
 			self.cur.execute("select marker_id from getMarkerIdsByMarkerNamesAndPlatformList(%s, %s)", ("{"+(','.join(markerNames))+"}", "{"+(','.join(platformList))+"}"))
 		elif markerNames and not platformList:
+			#print(self.cur.mogrify("select marker_id from getMarkerIdsByMarkerNames(%s)", ("{"+(','.join(markerNames))+"}",)))
 			self.cur.execute("select marker_id from getMarkerIdsByMarkerNames(%s)", ("{"+(','.join(markerNames))+"}",))
 		elif platformList and not markerNames:
+			#print(self.cur.mogrify("select marker_id from getMarkerIdsByPlatformList(%s)", ("{"+(','.join(platformList))+"}",)))
 			self.cur.execute("select marker_id from getMarkerIdsByPlatformList(%s)", ("{"+(','.join(platformList))+"}",))
 		else:  # both params are null
 			return None
