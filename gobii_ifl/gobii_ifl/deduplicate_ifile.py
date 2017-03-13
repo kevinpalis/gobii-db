@@ -4,6 +4,7 @@ import sys
 import csv
 import traceback
 import itertools
+import pandas as pd
 from os.path import basename
 from os.path import splitext
 from pkg_resources import resource_stream
@@ -27,22 +28,28 @@ def main(isVerbose,preprocessedFile,outputPath, tableName):
 		print("Table Name: ", tableName)
 		print("Output File: ", outputFile)
 		print("Getting info from dupmap file: ", tableName+'.dupmap')
-		#print("")
-
 	isProp = tableName.endswith('_prop')
 	dupMapFile = resource_stream('res.map',tableName+'.dupmap')
-
-	##open preprocessedFile
-	with open(preprocessedFile,'r') as preProcFile:
-		for row in preProcFile:
-			print(row)
-		
-		## get columns from dupmap
-		reader = csv.reader(dupMapFile,delimiter='\t')
-		dupMapColList = [i[0].split(",")[0] for i in reader]
-		print ("Check for this columns: ", dupMapColList)
+	## get columns from dupmap
+	dreader = csv.reader(dupMapFile,delimiter='\t')
+	dupMapColList = [i[0].split(",")[0] for i in dreader]
 	
-		
+	## read preprocessed file 
+	## create pandas Data Frame
+	data = pd.read_table(preprocessedFile)
+	for col in dupMapColList:
+		if col in data.columns:
+			print("Column %s in preprocessed file." % col)
+		else:
+                        ## exit if one of cols specified is not in preprocessed file
+                	IFLUtility.printError('\nFailed to preprocess %s. \nColumn %s does not exist in %s.' % (preprocessedFile,col,preprocessedFile))
+                        exitCode = 21
+                        traceback.print_exc(file=sys.stderr)
+			return outputFile, exitCode
+
+	data = data.drop_duplicates(subset=dupMapColList, keep='first')	
+	print('Deduplicated %s. Output written to: %s' % (preprocessedFile,outputFile))
+	data.to_csv(outputFile,sep='\t', line_terminator='\n',index=False)	
 
 if __name__ == "__main__":
 	if len(sys.argv) < 3:
