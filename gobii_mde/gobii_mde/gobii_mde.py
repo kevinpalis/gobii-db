@@ -36,14 +36,19 @@ def main(argv):
 		sampleListFile = ""
 		mapsetOutputFile = ""
 		markerNamesFile = ""
+		sampleNamesFile = ""
 		datasetType = -1
 		platformList = []
+		piId = -1
+		projectId = -1
 		#1 = By dataset, 2 = By Markers, 3 = By Samples
 		extractionType = 1
+		#1 = Germplasm Names, 2 = External Codes, 3 = DnaSample Names
+		sampleType = 1
 		exitCode = 0
 		#PARSE PARAMETERS/ARGUMENTS
 		try:
-			opts, args = getopt.getopt(argv, "hc:m:s:d:p:avnM:lD:x:y:b:X:P:t:", ["connectionString=", "markerOutputFile=", "sampleOutputFile=", "datasetId=", "projectOutputFile=", "all", "verbose", "namesOnly", "map=", "includeChrLen", "displayMap=", "markerList=", "sampleList=", "mapsetOutputFile=", "extractByMarkers", "markerNames=", "platformList=", "datasetType=", "extractByDataset"])
+			opts, args = getopt.getopt(argv, "hc:m:s:d:p:avnM:lD:x:y:b:X:P:t:", ["connectionString=", "markerOutputFile=", "sampleOutputFile=", "datasetId=", "projectOutputFile=", "all", "verbose", "namesOnly", "map=", "includeChrLen", "displayMap=", "markerList=", "sampleList=", "mapsetOutputFile=", "extractByMarkers", "markerNames=", "platformList=", "datasetType=", "extractByDataset", "piId=", "projectId=", "sampleType=", "sampleNames"])
 			#print (opts, args)
 			if len(args) < 2 and len(opts) < 2:
 				printUsageHelp(2)
@@ -96,6 +101,14 @@ def main(argv):
 					sys.exit(exitCode)
 			elif opt in ("t", "--datasetType"):
 				datasetType = arg
+			elif opt in ("--piId"):
+				piId = arg
+			elif opt in ("--projectId"):
+				projectId = arg
+			elif opt in ("--sampleType"):
+				sampleType = arg
+			elif opt in ("--sampleNames"):
+				sampleNamesFile = arg
 
 		#VALIDATIONS
 		if connectionStr == "" or markerOutputFile == "" or sampleOutputFile == "":
@@ -109,13 +122,20 @@ def main(argv):
 			if datasetType == -1 or (markerNamesFile == "" and platformList == ""):
 				MDEUtility.printError("Invalid usage. Extraction by marker list requires a dataset type and at least one of: markerNamesFile and platformList.")
 				printUsageHelp(6)
+		elif extractionType == 3:  # INPROGRESS
+			if datasetType == -1:
+				MDEUtility.printError("Invalid usage. Extraction by samples list requires a dataset type.")
+				printUsageHelp(8)
+			if piId < 1 and projectId < 1 and sampleNamesFile == "":
+				MDEUtility.printError("Invalid usage. Extraction by samples list requires at least one fo the following: PI, Project, Samples List.")
+				printUsageHelp(8)
 
 		if verbose:
 			print("Opts: ", opts)
 		markerList = []
 		sampleList = []
 		markerNames = []
-
+		sampleNames = []
 		#PREPARE PARAMETERS
 		#convert file contents to lists
 		if markerListFile != "":
@@ -124,6 +144,8 @@ def main(argv):
 				sampleList = [line.strip() for line in open(sampleListFile, 'r')]
 		if markerNamesFile != "":
 				markerNames = [line.strip() for line in open(markerNamesFile, 'r')]
+		if sampleNamesFile != "":
+				sampleNames = [line.strip() for line in open(sampleNamesFile, 'r')]
 
 		#Do the Dew
 		#rn = False
@@ -187,7 +209,7 @@ def printUsageHelp(eCode):
 	print ("\t-Y or --sampleNames = Supplies the file containing a list of sample names, newline-delimited. Sample names can be any of the following: germplasm_name, external_code, or dnasample_name. The type is set by --samplesType")
 	print ("\t--datasetType = Filters the data by the type of dataset. This should be a valid dataset type ID, otherwise no results will be returned. This is only used for --extractionByMarkers and --extractionBySamples")
 	print ("\t--platformList = Comma-delimited string of platform IDs to filter --extractionByMarkers.")
-	print ("\t--samplesType = Tells the MDE what kind of sample names are in the file passed to --sampleNames. Valid values: 1 = germplasm_name, 2 = external_code, 3 = dnasample_name.")
+	print ("\t--sampleType = Tells the MDE what kind of sample names are in the file passed to --sampleNames. Valid values: 1 = germplasm_name, 2 = external_code, 3 = dnasample_name.")
 	print ("\t-v or --verbose = Print the status of the MDE in more detail.")
 	#---------------------------
 	print ("\nDEPRECATED:")
