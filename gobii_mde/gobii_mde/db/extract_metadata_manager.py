@@ -182,6 +182,9 @@ class ExtractMetadataManager:
 		res = self.cur.fetchall()
 		return res
 
+	def getDnarunIds(self, piId, projectId, sampleType, sampleNames):
+		print("Hello world")
+
 	def commitTransaction(self):
 		self.conn.commit()
 

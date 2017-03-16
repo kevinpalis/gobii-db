@@ -1,16 +1,11 @@
 #!/usr/bin/env python
 '''
-	PRECEDENCE:
+	This module offers the following functionalities:
 		1. Extraction by Dataset
 		2. Extraction by Markers
 		3. Extraction by Samples
 
 	Exit Codes: 2-9
-	2 -- Missing a required field
-	3 -- Failed to extract marker meta
-	4 -- Failed to extract sample meta
-	5 -- Failed to extract project meta
-	6 -- Validation Failure
 '''
 from __future__ import print_function
 import sys
@@ -21,6 +16,10 @@ import extract_project_metadata
 from util.mde_utility import MDEUtility
 
 def main(argv):
+		#TODO: Create a constant class when there's time, probably post-V1
+		EXTRACTION_TYPES = [1, 2, 3]
+		SAMPLE_TYPES = [1, 2, 3]
+
 		verbose = False
 		connectionStr = ""
 		markerOutputFile = ""
@@ -42,9 +41,9 @@ def main(argv):
 		piId = -1
 		projectId = -1
 		#1 = By dataset, 2 = By Markers, 3 = By Samples
-		extractionType = 1
+		extractionType = -1
 		#1 = Germplasm Names, 2 = External Codes, 3 = DnaSample Names
-		sampleType = 1
+		sampleType = -1
 		exitCode = 0
 		#PARSE PARAMETERS/ARGUMENTS
 		try:
@@ -114,22 +113,27 @@ def main(argv):
 		if connectionStr == "" or markerOutputFile == "" or sampleOutputFile == "":
 			MDEUtility.printError("Invalid usage. All of the following parameters are required: connectionStr, markerOutputFile, and sampleOutputFile.")
 			printUsageHelp(2)
+		if extractionType not in EXTRACTION_TYPES:
+			MDEUtility.printError("Invalid usage. Invalid extraction type.")
+			printUsageHelp(2)
 		if extractionType == 1:
-			if datasetId == -1 or not datasetId.isdigit:
+			if datasetId < 1:
 				MDEUtility.printError("Invalid usage. Extraction by dataset requires a dataset ID.")
 				printUsageHelp(6)
 		elif extractionType == 2:
-			if datasetType == -1 or (markerNamesFile == "" and platformList == ""):
+			if datasetType < 1 or (markerNamesFile == "" and platformList == ""):
 				MDEUtility.printError("Invalid usage. Extraction by marker list requires a dataset type and at least one of: markerNamesFile and platformList.")
 				printUsageHelp(6)
-		elif extractionType == 3:  # INPROGRESS
-			if datasetType == -1:
+		elif extractionType == 3:
+			if datasetType < 1:
 				MDEUtility.printError("Invalid usage. Extraction by samples list requires a dataset type.")
 				printUsageHelp(8)
 			if piId < 1 and projectId < 1 and sampleNamesFile == "":
-				MDEUtility.printError("Invalid usage. Extraction by samples list requires at least one fo the following: PI, Project, Samples List.")
+				MDEUtility.printError("Invalid usage. Extraction by samples list requires at least one of the following: PI, Project, Samples List.")
 				printUsageHelp(8)
-
+			if sampleNamesFile != "" and sampleType not in SAMPLE_TYPES:
+				MDEUtility.printError("Invalid usage. Providing a sample names list requires a sample type: 1 = Germplasm Names, 2 = External Codes, 3 = DnaSample Names.")
+				printUsageHelp(8)
 		if verbose:
 			print("Opts: ", opts)
 		markerList = []
@@ -153,7 +157,7 @@ def main(argv):
 		try:
 			#if verbose:
 			#	print("Generating marker metadata file...")
-			mFile, markerList = extract_marker_metadata.main(verbose, connectionStr, datasetId, markerOutputFile, allMeta, namesOnly, mapId, includeChrLen, displayMap, markerList, sampleList, mapsetOutputFile, extractionType, datasetType, markerNames, platformList)
+			mFile, markerList = extract_marker_metadata.main(verbose, connectionStr, datasetId, markerOutputFile, allMeta, namesOnly, mapId, includeChrLen, displayMap, markerList, sampleList, mapsetOutputFile, extractionType, datasetType, markerNames, platformList, piId, projectId, sampleType, sampleNames)
 			if extractionType == 2 and not markerList:
 				MDEUtility.printError("Resulting list of marker IDs is empty. Nothing to extract.")
 				sys.exit(7)
