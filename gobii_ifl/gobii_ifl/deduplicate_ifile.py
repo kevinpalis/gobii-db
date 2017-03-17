@@ -12,23 +12,15 @@ from util.ifl_utility import IFLUtility
 
 def main(isVerbose,preprocessedFile,outputPath, tableName):
 	IS_VERBOSE =isVerbose
-	SUFFIX_LEN = 8 
-	#if IS_VERBOSE:
-	#	print("arguments: %s" % str(sys.argv))
 	
 	outputFile = outputPath+"ddp_"+basename(preprocessedFile)
 	longPreProcFile = outputPath+"long_"+basename(preprocessedFile)
 	exitCode = 0
-	#isKVP = False
-	#isProp = False
-	tableName = splitext(basename(preprocessedFile))[1][1:]
-	randomStr = IFLUtility.generateRandomString(SUFFIX_LEN)
 	if IS_VERBOSE:
 		print("PreprocessedFile: ", preprocessedFile)
 		print("Table Name: ", tableName)
 		print("Output File: ", outputFile)
 		print("Getting info from dupmap file: ", tableName+'.dupmap')
-	isProp = tableName.endswith('_prop')
 	dupMapFile = resource_stream('res.map',tableName+'.dupmap')
 	## get columns from dupmap
 	dreader = csv.reader(dupMapFile,delimiter='\t')
