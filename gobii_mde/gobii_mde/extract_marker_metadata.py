@@ -63,13 +63,18 @@ def main(isVerbose, connectionStr, datasetId, outputFile, allMeta, namesOnly, ma
 						#piId, projectId, sampleType, sampleNames
 					res = exMgr.getDnarunIds(piId, projectId, sampleType, sampleNames)
 					if res is None:
-						MDEUtility.printError('MarkerNames and PlatformList cannot be both empty.')
+						MDEUtility.printError('No Dnarun IDs fetched. Possible invalid usage. Check your criteria.')
 						sys.exit(13)
-					markerList = [str(i[0]) for i in res]
-					if not markerList:
-						MDEUtility.printError("Resulting list of marker IDs is empty. Nothing to extract.")
+					sampleList = [str(i[0]) for i in res]
+					if not sampleList:
+						MDEUtility.printError("Resulting list of Dnarun IDs is empty. Nothing to extract.")
 						sys.exit(15)
-				return outputFile
+					if isVerbose:
+						print("Deriving marker IDs based on Dnarun IDs (using the dataset_dnarun_idx route).")
+					#get the marker ids list
+					#TODO: IMPLEMENT!
+					res2 = exMgr.getMarkerIds(sampleList, datasetType, platformList)
+				#return outputFile
 			else:
 				MDEUtility.printError('ERROR: Extraction type is required.')
 				sys.exit(12)
