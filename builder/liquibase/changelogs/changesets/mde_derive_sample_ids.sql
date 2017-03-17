@@ -16,7 +16,7 @@ RETURNS table (dnarun_id integer)
 	inner join dnasample ds on p.project_id = ds.project_id
 	inner join dnarun dr on ds.dnasample_id = dr.dnasample_id
 	where p.pi_contact = piId
-	order by dr.dnarun_id
+	order by dr.dnarun_id;
   END;
 $$ LANGUAGE plpgsql;
 
@@ -31,7 +31,7 @@ RETURNS table (dnarun_id integer)
 	inner join dnasample ds on p.project_id = ds.project_id
 	inner join dnarun dr on ds.dnasample_id = dr.dnasample_id
 	where p.project_id = projectId
-	order by dr.dnarun_id
+	order by dr.dnarun_id;
   END;
 $$ LANGUAGE plpgsql;
 
@@ -45,7 +45,7 @@ RETURNS table (dnarun_id integer)
 	from dnasample ds
 	inner join unnest(dnasampleNames::text[]) dsn(s_name) on ds.name = dsn.s_name
 	inner join dnarun dr on dr.dnasample_id = ds.dnasample_id
-	order by dr.dnarun_id
+	order by dr.dnarun_id;
   END;
 $$ LANGUAGE plpgsql;
 
@@ -60,7 +60,7 @@ RETURNS table (dnarun_id integer)
 	inner join unnest(externalCodes::text[]) gx(ex_code) on g.external_code = gx.ex_code
 	inner join dnasample ds on ds.germplasm_id = g.germplasm_id
 	inner join dnarun dr on dr.dnasample_id = ds.dnasample_id
-	order by dr.dnarun_id
+	order by dr.dnarun_id;
   END;
 $$ LANGUAGE plpgsql;
 
@@ -75,6 +75,7 @@ RETURNS table (dnarun_id integer)
 	inner join unnest(germplasmNames::text[]) gn(g_name) on g.name = gn.g_name
 	inner join dnasample ds on ds.germplasm_id = g.germplasm_id
 	inner join dnarun dr on dr.dnasample_id = ds.dnasample_id
-	order by dr.dnarun_id
+	order by dr.dnarun_id;
   END;
 $$ LANGUAGE plpgsql;
+
