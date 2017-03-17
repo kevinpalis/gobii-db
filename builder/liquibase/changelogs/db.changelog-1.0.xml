@@ -32,4 +32,5 @@
 	<include file="changelogs/changesets/fix_mde_fxn_chr_length.sql"/>
 	<include file="changelogs/changesets/mde_derive_marker_ids.sql"/>
 	<include file="changelogs/changesets/mde_filter_by_dataset_typeid.sql"/>
+	<include file="changelogs/changesets/mde_derive_sample_ids.sql"/>
 </databaseChangeLog>

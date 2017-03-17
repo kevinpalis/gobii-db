@@ -32,7 +32,7 @@ class ExtractMetadataManager:
 			sql = "copy (select * from getAllMarkerMetadataByDataset("+datasetId+")) to STDOUT with delimiter E'\\t'"+" csv header;"
 		else:
 			sql = "copy (select * from getAllMarkerMetadataByDatasetAndMap("+datasetId+","+mapId+")) to STDOUT with delimiter E'\\t'"+" csv header;"
-		print (sql)
+		#print (sql)
 		with open(outputFilePath, 'w') as outputFile:
 			self.cur.copy_expert(sql, outputFile, 20480)
 		outputFile.close()
@@ -183,7 +183,16 @@ class ExtractMetadataManager:
 		return res
 
 	def getDnarunIds(self, piId, projectId, sampleType, sampleNames):
-		print("Hello world")
+		print("Deriving Dnarun IDs...")
+		if sampleNames and sampleType > 0:
+			print("...based on sampleNames")
+		elif projectId > 0:
+			print("...based on projectID")
+		elif piId > 0:
+			print("...based on PI")
+		else:
+			print("Invalid usage.")
+			return None
 
 	def commitTransaction(self):
 		self.conn.commit()
