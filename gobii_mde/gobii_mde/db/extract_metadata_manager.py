@@ -185,11 +185,25 @@ class ExtractMetadataManager:
 	def getDnarunIds(self, piId, projectId, sampleType, sampleNames):
 		print("Deriving Dnarun IDs...")
 		if sampleNames and sampleType > 0:
-			print("...based on sampleNames")
+			#1 = Germplasm Names, 2 = External Codes, 3 = DnaSample Names
+			if sampleType == 1:
+				print("...based on Germplasm Names")
+				self.cur.execute("select dnarun_id from getDnarunIdsByGermplasmNames(%s)", ("{"+(','.join(sampleNames))+"}",))
+			elif sampleType == 2:
+				print("...based on External Codes")
+				self.cur.execute("select dnarun_id from getDnarunIdsByExternalCodes(%s)", ("{"+(','.join(sampleNames))+"}",))
+			elif sampleType == 3:
+				print("...based on External Codes")
+				self.cur.execute("select dnarun_id from getDnarunIdsByDnasampleNames(%s)", ("{"+(','.join(sampleNames))+"}",))
+			else:
+				print("Invalid usage.")
+				return None
 		elif projectId > 0:
 			print("...based on projectID")
+			self.cur.execute("select dnarun_id from getDnarunIdsByProject(%s)", (projectId,))
 		elif piId > 0:
 			print("...based on PI")
+			self.cur.execute("select dnarun_id from getDnarunIdsByPI(%s)", (piId,))
 		else:
 			print("Invalid usage.")
 			return None
