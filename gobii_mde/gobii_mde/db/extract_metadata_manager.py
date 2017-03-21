@@ -208,6 +208,17 @@ class ExtractMetadataManager:
 			print("Invalid usage.")
 			return None
 
+	#datasetType = required, sampleList = required, platformList = optional
+	def getMarkerIdsFromSamples(self, sampleList, datasetType, platformList):
+		if sampleList and platformList:
+			self.cur.execute("select marker_id from getMarkerIdsBySamplesPlatformsAndDatasetType(%s, %s, %s)", ("{"+(','.join(sampleList))+"}", "{"+(','.join(platformList))+"}", datasetType))
+		elif sampleList and not platformList:
+			self.cur.execute("select marker_id from getMarkerIdsBySamplesAndDatasetType(%s)", ("{"+(','.join(sampleList))+"}",))
+		else:  # invalid usage
+			return None
+		res = self.cur.fetchall()
+		return res
+
 	def commitTransaction(self):
 		self.conn.commit()
 

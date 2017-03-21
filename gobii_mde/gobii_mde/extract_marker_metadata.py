@@ -71,9 +71,8 @@ def main(isVerbose, connectionStr, datasetId, outputFile, allMeta, namesOnly, ma
 						sys.exit(15)
 					if isVerbose:
 						print("Deriving marker IDs based on Dnarun IDs (using the dataset_dnarun_idx route).")
-					#get the marker ids list
-					#TODO: IMPLEMENT!
-					res2 = exMgr.getMarkerIds(sampleList, datasetType, platformList)
+					#get the marker ids list based on the derived samples
+					res2 = exMgr.getMarkerIdsFromSamples(sampleList, datasetType, platformList)
 				#return outputFile
 			else:
 				MDEUtility.printError('ERROR: Extraction type is required.')
