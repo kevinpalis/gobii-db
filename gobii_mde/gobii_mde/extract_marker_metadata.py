@@ -73,6 +73,14 @@ def main(isVerbose, connectionStr, datasetId, outputFile, allMeta, namesOnly, ma
 						print("Deriving marker IDs based on Dnarun IDs (using the dataset_dnarun_idx route).")
 					#get the marker ids list based on the derived samples
 					res2 = exMgr.getMarkerIdsFromSamples(sampleList, datasetType, platformList)
+					if res2 is None:
+						MDEUtility.printError('No Marker IDs fetched. Possible invalid usage. Check your criteria.')
+						sys.exit(13)
+					markerList = [str(i[0]) for i in res]
+					if not markerList:
+						MDEUtility.printError("Resulting list of marker IDs is empty. Nothing to extract.")
+						sys.exit(15)
+					#YOU ARE HERE! :)
 				#return outputFile
 			else:
 				MDEUtility.printError('ERROR: Extraction type is required.')
