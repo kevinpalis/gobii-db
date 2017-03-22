@@ -76,12 +76,15 @@ def main(isVerbose, connectionStr, datasetId, outputFile, allMeta, namesOnly, ma
 					if res2 is None:
 						MDEUtility.printError('No Marker IDs fetched. Possible invalid usage. Check your criteria.')
 						sys.exit(13)
-					markerList = [str(i[0]) for i in res]
+					markerList = [str(i[0]) for i in res2]
 					if not markerList:
 						MDEUtility.printError("Resulting list of marker IDs is empty. Nothing to extract.")
 						sys.exit(15)
-					#YOU ARE HERE! :)
-				#return outputFile
+				exMgr.createQCMarkerMetadataByMarkerList(outputFile, markerList)
+				if datasetType is None:
+					MDEUtility.printError('Dataset type is required for extraction by sample list.')
+					sys.exit(14)
+				exMgr.createMarkerPositionsFile(outputFile, markerList, datasetType)  # this generates the marker.pos file
 			else:
 				MDEUtility.printError('ERROR: Extraction type is required.')
 				sys.exit(12)
@@ -92,7 +95,7 @@ def main(isVerbose, connectionStr, datasetId, outputFile, allMeta, namesOnly, ma
 				sys.exit(11)
 			else:
 				exMgr.createMapsetFile(mapsetOutputFile, datasetId, displayMapId, markerList, sampleList, extractionType)
-			#integrating the mapset info with the marker metadata file should be done here
+			#integrating the mapset info with the marker metadata file:
 			#Open marker meta file (markerMeta) and mapset meta file (mapsetMeta) and another file for writing.
 			#Scan mapsetMeta for the displayMapId. Stop at the first instance found. These files are ordered accordingly, which saves the algorithm a lot of processing time.
 			#For the first row found with the displayMapId, look for the row in markerMeta where markerMeta.marker_name=mapsetMeta.marker_name and append all columns of mapsetMeta to that row of markerMeta.
