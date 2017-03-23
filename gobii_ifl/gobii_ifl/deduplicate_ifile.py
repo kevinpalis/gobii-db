@@ -44,10 +44,18 @@ def main(isVerbose,preprocessedFile,outputPath, tableName):
 	data.to_csv(outputFile,sep='\t', line_terminator='\n',index=False)	
 
 if __name__ == "__main__":
-	if len(sys.argv) < 3:
-		print("Please supply the parameters. \nUsage: deduplicate_ifile <preprocessed_file> <output_directory_path> <tableName>")
+	#if len(sys.argv) < 3:
+	#	print("Please supply the parameters. \nUsage: deduplicate_ifile <preprocessed_file> <output_directory_path> <tableName>")
+	#	sys.exit(1)
+	try:
+		preprocessedFile = str(sys.argv[1])
+		outputPath = str(sys.argv[2])
+		tableName = str(sys.argv[3])
+		main(True, preprocessedFile, outputPath,tableName)
+	except IOError as err:
+		print("Cannot open %s" % sys.argv[1])
 		sys.exit(1)
-	preprocessedFile = str(sys.argv[1])
-	outputPath = str(sys.argv[2])
-	tableName = str(sys.argv[3])
-	main(True, preprocessedFile, outputPath,tableName)
+	except IndexError:
+		print("\nPlease supply the correct parameters. \nUsage: deduplicate_ifile <preprocessed_file> <output_directory_path> <tableName>\n")
+		sys.exit(1)
+		
