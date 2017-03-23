@@ -157,7 +157,7 @@ def main(isVerbose, connectionStr, datasetId, outputFile, allMeta, namesOnly, ma
 		'''
 		if isVerbose:
 			print("Created marker metadata file successfully.")
-		return outputFile, markerList
+		return outputFile, markerList, sampleList
 	except Exception as e:
 		MDEUtility.printError('Failed to create marker metadata file. Error: %s' % (str(e)))
 		exMgr.rollbackTransaction()

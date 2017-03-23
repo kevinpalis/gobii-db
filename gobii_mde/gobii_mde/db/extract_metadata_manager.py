@@ -77,6 +77,7 @@ class ExtractMetadataManager:
 			sql = "copy (select * from getAllChrLenByMarkerList('{"+(','.join(markerList))+"}')) to STDOUT with delimiter E'\\t'"+" csv header;"
 		elif sampleList:
 			print("Not yet implemented")
+			#with the decision on doing an extraction by marker list in the background of an extraction by samples request, this is now an unreachable condition. Code cleanup pending.
 			return
 		else:
 			if mapId == -1:
@@ -148,11 +149,8 @@ class ExtractMetadataManager:
 	def createMapsetFile(self, outputFilePath, datasetId, mapId, markerList, sampleList, extractionType):
 		#outputFilePath = outputFilePath+".mapset"
 		sql = ""
-		if extractionType == 2:
+		if extractionType == 2 or extractionType == 3:
 			sql = "copy (select * from getMarkerMapsetInfoByMarkerList('{"+(','.join(markerList))+"}')) to STDOUT with delimiter E'\\t'"+" csv header;"
-		elif extractionType == 3:
-			print("Not yet implemented")
-			return
 		elif extractionType == 1:
 			sql = "copy (select * from getMarkerAllMapsetInfoByDataset("+datasetId+","+mapId+")) to STDOUT with delimiter E'\\t'"+" csv header;"
 		with open(outputFilePath, 'w') as outputFile:

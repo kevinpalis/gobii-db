@@ -16,9 +16,9 @@ def main(isVerbose, connectionStr, datasetId, outputFile, allMeta, namesOnly, ma
 		print("Sample Metadata Output File: ", outputFile)
 	exMgr = ExtractMetadataManager(connectionStr)
 	try:
-		if allMeta:
+		if allMeta:  # deprecated
 			exMgr.createAllSampleMetadataFile(outputFile, datasetId)
-		elif namesOnly:
+		elif namesOnly:  # deprecated
 			exMgr.createDnarunNamesFile(outputFile, datasetId)
 		else:
 			if extractionType == 2:
