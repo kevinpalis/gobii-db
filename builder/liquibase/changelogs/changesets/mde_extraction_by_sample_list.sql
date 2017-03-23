@@ -163,3 +163,53 @@ RETURNS table (dnarun_name text
   END;
 $$ LANGUAGE plpgsql;
 -- sample usage: select * from getSampleQCMetadataBySampleList('{1,2,3,4,5,6,7,8,9,10}', 164);
+
+--changeset kpalis:getMatrixPosOfSamples context:general splitStatements:false
+--This returns a list of positions in a genotype matrix for a given set of samples, sorted by dataset_dnarun_idx.
+DROP FUNCTION IF EXISTS getMatrixPosOfSamples(sampleList text, datasetTypeId integer);
+CREATE OR REPLACE FUNCTION getMatrixPosOfSamples(sampleList text, datasetTypeId integer)
+ RETURNS TABLE(dataset_id integer, positions text)
+ LANGUAGE plpgsql
+AS $function$
+  BEGIN
+    return query
+	with sample_list as ( select *
+		from unnest(sampleList::integer[]) sl(s_id) 
+		left join dnarun dr on sl.s_id = dr.dnarun_id
+		order by sl.s_id), ---YOU ARE HERE!
+	dataset_list as (
+		select distinct jsonb_object_keys(dataset_dnarun_idx)::integer as dataset_id
+		from sample_list sl
+		order by dataset_id)
+	select rdl.dataset_id, string_agg(COALESCE(ml.dataset_marker_idx ->> rdl.dataset_id::text, '-1'), ', ') as idx
+	from sample_list sl cross join
+	(select dl.dataset_id from dataset_list dl inner join dataset d on dl.dataset_id = d.dataset_id where d.type_id=datasetTypeId) rdl
+	group by rdl.dataset_id
+	order by rdl.dataset_id;
+  END;
+$function$;
+
+--changeset kpalis:fixGetMatrixPosOfMarkers context:general splitStatements:false
+--This had to be sorted by marker_id across, so as not to allow a case when the resulting output can be misaligned with the marker meta file
+DROP FUNCTION IF EXISTS getMatrixPosOfMarkers(markerList text, datasetTypeId integer);
+CREATE OR REPLACE FUNCTION getMatrixPosOfMarkers(markerList text, datasetTypeId integer)
+ RETURNS TABLE(dataset_id integer, positions text)
+ LANGUAGE plpgsql
+AS $function$
+  BEGIN
+    return query
+	with marker_list as ( select *
+		from unnest(markerList::integer[]) ml(m_id) 
+		left join marker m on ml.m_id = m.marker_id
+		order by ml.m_id),
+	dataset_list as (
+		select distinct jsonb_object_keys(dataset_marker_idx)::integer as dataset_id
+		from marker_list ml
+		order by dataset_id)
+	select rdl.dataset_id, string_agg(COALESCE(ml.dataset_marker_idx ->> rdl.dataset_id::text, '-1'), ', ') as idx
+	from marker_list ml cross join
+	(select dl.dataset_id from dataset_list dl inner join dataset d on dl.dataset_id = d.dataset_id where d.type_id=datasetTypeId) rdl
+	group by rdl.dataset_id
+	order by rdl.dataset_id;
+  END;
+$function$;

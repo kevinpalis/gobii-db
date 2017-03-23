@@ -170,6 +170,13 @@ class ExtractMetadataManager:
 			self.cur.copy_expert(sql, outputFile, 20480)
 		outputFile.close()
 
+	def createSamplePositionsFile(self, outputFilePath, sampleList, datasetType):
+		outputFilePath = outputFilePath+".pos"
+		sql = "copy (select * from getMatrixPosOfSamples('{"+(','.join(sampleList))+"}',"+datasetType+")) to STDOUT with delimiter E'\\t'"+" csv header;"
+		with open(outputFilePath, 'w') as outputFile:
+			self.cur.copy_expert(sql, outputFile, 20480)
+		outputFile.close()
+
 	def getMarkerIds(self, markerNames, platformList):
 		#print("Generating marker ids...")
 		if markerNames and platformList:
