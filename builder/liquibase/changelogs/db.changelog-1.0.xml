@@ -31,4 +31,5 @@
 	<include file="changelogs/changesets/add_nothingness_cvterm.sql"/>
 	<include file="changelogs/changesets/fix_mde_fxn_chr_length.sql"/>
 	<include file="changelogs/changesets/platform_protocol_data.sql"/>
+	<include file="changelogs/changesets/add_username_to_contact.sql"/>
 </databaseChangeLog>
