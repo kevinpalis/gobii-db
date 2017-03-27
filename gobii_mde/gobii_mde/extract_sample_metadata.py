@@ -28,7 +28,6 @@ def main(isVerbose, connectionStr, datasetId, outputFile, allMeta, namesOnly, ma
 			elif extractionType == 3:
 				if isVerbose:
 					print("Generating sample metadata by sample list.")
-				# TODO: Implement!
 				exMgr.createSampleQCMetadataBySampleList(outputFile, sampleList, datasetType)
 				exMgr.createSamplePositionsFile(outputFile, sampleList, datasetType)
 			elif extractionType == 1:

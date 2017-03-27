@@ -165,7 +165,7 @@ $$ LANGUAGE plpgsql;
 -- sample usage: select * from getSampleQCMetadataBySampleList('{1,2,3,4,5,6,7,8,9,10}', 164);
 
 --changeset kpalis:getMatrixPosOfSamples context:general splitStatements:false
---This returns a list of positions in a genotype matrix for a given set of samples, sorted by dataset_dnarun_idx.
+--This returns a list of positions in a genotype matrix for a given set of samples, sorted by dnarun_id.
 DROP FUNCTION IF EXISTS getMatrixPosOfSamples(sampleList text, datasetTypeId integer);
 CREATE OR REPLACE FUNCTION getMatrixPosOfSamples(sampleList text, datasetTypeId integer)
  RETURNS TABLE(dataset_id integer, positions text)
@@ -176,15 +176,19 @@ AS $function$
 	with sample_list as ( select *
 		from unnest(sampleList::integer[]) sl(s_id) 
 		left join dnarun dr on sl.s_id = dr.dnarun_id
-		order by sl.s_id), ---YOU ARE HERE!
+		order by sl.s_id),
 	dataset_list as (
 		select distinct jsonb_object_keys(dataset_dnarun_idx)::integer as dataset_id
 		from sample_list sl
 		order by dataset_id)
-	select rdl.dataset_id, string_agg(COALESCE(ml.dataset_marker_idx ->> rdl.dataset_id::text, '-1'), ', ') as idx
+	select rdl.dataset_id, string_agg(COALESCE(sl.dataset_dnarun_idx ->> rdl.dataset_id::text, '-1'), ', ') as idx
 	from sample_list sl cross join
 	(select dl.dataset_id from dataset_list dl inner join dataset d on dl.dataset_id = d.dataset_id where d.type_id=datasetTypeId) rdl
 	group by rdl.dataset_id
 	order by rdl.dataset_id;
   END;
 $function$;
+--sample usage: select * from getMatrixPosOfSamples('{1,2,3,4,5,6,7,8,9,10}', 164);
+--sample usage: select * from getMatrixPosOfSamples('{401,402,403,404,405,4601,4602,4603,6081,6082,6083}', 161);
+
+
