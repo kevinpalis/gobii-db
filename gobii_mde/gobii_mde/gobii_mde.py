@@ -216,6 +216,8 @@ def printUsageHelp(eCode):
 	print ("\t--datasetType = Filters the data by the type of dataset. This should be a valid dataset type ID, otherwise no results will be returned. This is only used for --extractionByMarkers and --extractionBySamples")
 	print ("\t--platformList = Comma-delimited string of platform IDs to filter --extractionByMarkers.")
 	print ("\t--sampleType = Tells the MDE what kind of sample names are in the file passed to --sampleNames. Valid values: 1 = germplasm_name, 2 = external_code, 3 = dnasample_name.")
+	print ("\t--projectId = Filters by project for extraction by samples. This can also be used independently to pull all samples in a given project.")
+	print ("\t--piId = Filters by PI contact for extraction by samples. This can also be used independently to pull all samples under a given PI.")
 	print ("\t-v or --verbose = Print the status of the MDE in more detail.")
 	#---------------------------
 	print ("\nDEPRECATED:")
