@@ -204,7 +204,8 @@ class ExtractMetadataManager:
 				print("...based on External Codes")
 				self.cur.execute("select dnarun_id from getDnarunIdsByExternalCodes(%s)", ("{"+(','.join(sampleNames))+"}",))
 			elif sampleType == 3:
-				print("...based on External Codes")
+				print("...based on Dnasample Names")
+				#print(self.cur.mogrify("select dnarun_id from getDnarunIdsByDnasampleNames(%s)", ("{"+(','.join(sampleNames))+"}",)))
 				self.cur.execute("select dnarun_id from getDnarunIdsByDnasampleNames(%s)", ("{"+(','.join(sampleNames))+"}",))
 			else:
 				print("Invalid usage.")
@@ -218,6 +219,8 @@ class ExtractMetadataManager:
 		else:
 			print("Invalid usage.")
 			return None
+		res = self.cur.fetchall()
+		return res
 
 	#datasetType = required, sampleList = required, platformList = optional
 	def getMarkerIdsFromSamples(self, sampleList, datasetType, platformList):

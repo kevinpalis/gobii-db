@@ -47,7 +47,7 @@ def main(argv):
 		exitCode = 0
 		#PARSE PARAMETERS/ARGUMENTS
 		try:
-			opts, args = getopt.getopt(argv, "hc:m:s:d:p:avnM:lD:x:y:b:X:P:t:", ["connectionString=", "markerOutputFile=", "sampleOutputFile=", "datasetId=", "projectOutputFile=", "all", "verbose", "namesOnly", "map=", "includeChrLen", "displayMap=", "markerList=", "sampleList=", "mapsetOutputFile=", "extractByMarkers", "markerNames=", "platformList=", "datasetType=", "extractByDataset", "piId=", "projectId=", "sampleType=", "sampleNames"])
+			opts, args = getopt.getopt(argv, "hc:m:s:d:p:avnM:lD:x:y:b:X:P:t:Y:", ["connectionString=", "markerOutputFile=", "sampleOutputFile=", "datasetId=", "projectOutputFile=", "all", "verbose", "namesOnly", "map=", "includeChrLen", "displayMap=", "markerList=", "sampleList=", "mapsetOutputFile=", "extractByMarkers", "markerNames=", "platformList=", "datasetType=", "extractByDataset", "piId=", "projectId=", "sampleType=", "sampleNames=", "extractBySamples"])
 			#print (opts, args)
 			if len(args) < 2 and len(opts) < 2:
 				printUsageHelp(2)
@@ -85,6 +85,8 @@ def main(argv):
 				sampleListFile = arg
 			elif opt in ("-b", "--mapsetOutputFile"):
 				mapsetOutputFile = arg
+			elif opt in ("--extractBySamples"):
+				extractionType = 3
 			elif opt in ("--extractByMarkers"):
 				extractionType = 2
 			elif opt in ("--extractByDataset"):
@@ -105,8 +107,8 @@ def main(argv):
 			elif opt in ("--projectId"):
 				projectId = arg
 			elif opt in ("--sampleType"):
-				sampleType = arg
-			elif opt in ("--sampleNames"):
+				sampleType = int(arg)
+			elif opt in ("-Y", "--sampleNames"):
 				sampleNamesFile = arg
 
 		#VALIDATIONS
@@ -210,7 +212,7 @@ def printUsageHelp(eCode):
 	print ("\t-x or --markerList = Supplies the file containing a list of marker_ids, newline-delimited.")
 	print ("\t-y or --sampleList = Supplies the file containing a list of dnarun_ids, newline-delimited.")
 	print ("\t-X or --markerNames = Supplies the file containing a list of marker names, newline-delimited.")
-	print ("\t-Y or --sampleNames = Supplies the file containing a list of sample names, newline-delimited. Sample names can be any of the following: germplasm_name, external_code, or dnasample_name. The type is set by --samplesType")
+	print ("\t-Y or --sampleNames = Supplies the file containing a list of sample names, newline-delimited. Sample names can be any of the following: germplasm_name, external_code, or dnasample_name. The type is set by --sampleType")
 	print ("\t--datasetType = Filters the data by the type of dataset. This should be a valid dataset type ID, otherwise no results will be returned. This is only used for --extractionByMarkers and --extractionBySamples")
 	print ("\t--platformList = Comma-delimited string of platform IDs to filter --extractionByMarkers.")
 	print ("\t--sampleType = Tells the MDE what kind of sample names are in the file passed to --sampleNames. Valid values: 1 = germplasm_name, 2 = external_code, 3 = dnasample_name.")
