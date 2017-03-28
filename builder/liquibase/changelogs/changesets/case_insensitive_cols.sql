@@ -25,4 +25,4 @@ ALTER TABLE vendor_protocol ALTER COLUMN name TYPE citext;
 ALTER TABLE project ALTER COLUMN name TYPE citext;
 ALTER TABLE experiment ALTER COLUMN name TYPE citext;
 ALTER TABLE dataset ALTER COLUMN name TYPE citext;
-ALTER TABLE mpaset ALTER COLUMN name TYPE citext;
+ALTER TABLE mapset ALTER COLUMN name TYPE citext;
