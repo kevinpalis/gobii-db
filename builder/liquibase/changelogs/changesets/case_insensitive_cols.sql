@@ -19,6 +19,7 @@ ALTER TABLE cv ALTER COLUMN term TYPE citext;
 ALTER TABLE platform ALTER COLUMN name TYPE citext;
 ALTER TABLE contact ALTER COLUMN firstname TYPE citext;
 ALTER TABLE contact ALTER COLUMN lastname TYPE citext;
+ALTER TABLE contact ALTER COLUMN email TYPE citext;
 ALTER TABLE protocol ALTER COLUMN name TYPE citext;
 ALTER TABLE vendor_protocol ALTER COLUMN name TYPE citext;
 ALTER TABLE project ALTER COLUMN name TYPE citext;
