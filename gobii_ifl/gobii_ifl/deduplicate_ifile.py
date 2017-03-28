@@ -1,4 +1,9 @@
 #!/usr/bin/env python
+'''
+	Dedup the preprocessed file ( generated from nmap resource) based on the column entries in dupmap resource.
+	This dedup is against the data within the preprocessed file. The duplicates against the database is checked while loading records into the table.
+	@author venice
+'''
 from __future__ import print_function
 import sys
 import csv
@@ -31,17 +36,24 @@ def main(isVerbose,preprocessedFile,outputPath, tableName):
 	data = pd.read_table(preprocessedFile)
 	for col in dupMapColList:
 		if col in data.columns:
-			print("Column %s in preprocessed file." % col)
+			if IS_VERBOSE:
+				print("Column %s in preprocessed file." % col)
+			continue
 		else:
                         ## exit if one of cols specified is not in preprocessed file
-                	IFLUtility.printError('\nFailed to preprocess %s. \nColumn %s does not exist in %s.' % (preprocessedFile,col,preprocessedFile))
+                	IFLUtility.printError('\nFailed to deduplicate %s. \nColumn %s does not exist in %s.' % (preprocessedFile,col,preprocessedFile))
                         exitCode = 21
                         traceback.print_exc(file=sys.stderr)
 			return outputFile, exitCode
 
 	data = data.drop_duplicates(subset=dupMapColList, keep='first')	
-	print('Deduplicated %s. Output written to: %s' % (preprocessedFile,outputFile))
 	data.to_csv(outputFile,sep='\t', line_terminator='\n',index=False)	
+	if IS_VERBOSE:
+		print('Preprocessed file %s with %i rows.' % (preprocessedFile,IFLUtility.getFileLineCount(preprocessedFile)))
+		print('Deduplicated output written to: %s with %i rows.' % (outputFile,IFLUtility.getFileLineCount(outputFile)) ) 
+
+
+	return outputFile, exitCode
 
 if __name__ == "__main__":
 	#if len(sys.argv) < 3:
