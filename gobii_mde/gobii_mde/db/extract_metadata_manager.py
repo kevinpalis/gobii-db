@@ -128,8 +128,9 @@ class ExtractMetadataManager:
 			self.cur.copy_expert(sql, outputFile, 20480)
 		outputFile.close()
 
-	def createSampleQCMetadataByMarkerList(self, outputFilePath, markerList):
-		sql = "copy (select * from getSampleQCMetadataByMarkerList('{"+(','.join(markerList))+"}')) to STDOUT with delimiter E'\\t'"+" csv header;"
+	def createSampleQCMetadataByMarkerList(self, outputFilePath, markerList, datasetType):
+		#print(self.cur.mogrify("copy (select * from getSampleQCMetadataByMarkerList('{"+(','.join(markerList))+"}',"+datasetType+")) to STDOUT with delimiter E'\\t'"+" csv header;"))
+		sql = "copy (select * from getSampleQCMetadataByMarkerList('{"+(','.join(markerList))+"}',"+datasetType+")) to STDOUT with delimiter E'\\t'"+" csv header;"
 		with open(outputFilePath, 'w') as outputFile:
 			self.cur.copy_expert(sql, outputFile, 20480)
 		outputFile.close()
@@ -144,27 +145,42 @@ class ExtractMetadataManager:
 			self.cur.copy_expert(sql, outputFile, 20480)
 		outputFile.close()
 
-	def createMapsetFile(self, outputFilePath, datasetId, mapId, markerList, sampleList):
+	def createMapsetFile(self, outputFilePath, datasetId, mapId, markerList, sampleList, extractionType):
 		#outputFilePath = outputFilePath+".mapset"
 		sql = ""
-		if markerList:
+		if extractionType == 2:
 			sql = "copy (select * from getMarkerMapsetInfoByMarkerList('{"+(','.join(markerList))+"}')) to STDOUT with delimiter E'\\t'"+" csv header;"
-		elif sampleList:
+		elif extractionType == 3:
 			print("Not yet implemented")
 			return
-			#sql = ""
-		else:
+		elif extractionType == 1:
 			sql = "copy (select * from getMarkerAllMapsetInfoByDataset("+datasetId+","+mapId+")) to STDOUT with delimiter E'\\t'"+" csv header;"
 		with open(outputFilePath, 'w') as outputFile:
 			self.cur.copy_expert(sql, outputFile, 20480)
 		outputFile.close()
 
-	def createMarkerPositionsFileByMarkerList(self, outputFilePath, markerList):
+	def createMarkerPositionsFile(self, outputFilePath, markerList, datasetType):
 		outputFilePath = outputFilePath+".pos"
-		sql = "copy (select * from getMatrixPosOfMarkers('{"+(','.join(markerList))+"}')) to STDOUT with delimiter E'\\t'"+" csv header;"
+		sql = "copy (select * from getMatrixPosOfMarkers('{"+(','.join(markerList))+"}',"+datasetType+")) to STDOUT with delimiter E'\\t'"+" csv header;"
 		with open(outputFilePath, 'w') as outputFile:
 			self.cur.copy_expert(sql, outputFile, 20480)
 		outputFile.close()
+
+	def getMarkerIds(self, markerNames, platformList):
+		#print("Generating marker ids...")
+		if markerNames and platformList:
+			#print(self.cur.mogrify("select marker_id from getMarkerIdsByMarkerNamesAndPlatformList(%s, %s)", ("{"+(','.join(markerNames))+"}", "{"+(','.join(platformList))+"}")))
+			self.cur.execute("select marker_id from getMarkerIdsByMarkerNamesAndPlatformList(%s, %s)", ("{"+(','.join(markerNames))+"}", "{"+(','.join(platformList))+"}"))
+		elif markerNames and not platformList:
+			#print(self.cur.mogrify("select marker_id from getMarkerIdsByMarkerNames(%s)", ("{"+(','.join(markerNames))+"}",)))
+			self.cur.execute("select marker_id from getMarkerIdsByMarkerNames(%s)", ("{"+(','.join(markerNames))+"}",))
+		elif platformList and not markerNames:
+			#print(self.cur.mogrify("select marker_id from getMarkerIdsByPlatformList(%s)", ("{"+(','.join(platformList))+"}",)))
+			self.cur.execute("select marker_id from getMarkerIdsByPlatformList(%s)", ("{"+(','.join(platformList))+"}",))
+		else:  # both params are null
+			return None
+		res = self.cur.fetchall()
+		return res
 
 	def commitTransaction(self):
 		self.conn.commit()
