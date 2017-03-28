@@ -10,6 +10,7 @@ CREATE EXTENSION IF NOT EXISTS citext;
 
 --drop the offensive view
 DROP VIEW IF EXISTS v_all_projects_full_details;
+DROP VIEW IF EXISTS v_marker_linkage_physical;
 --convert the columns
 ALTER TABLE germplasm ALTER COLUMN name TYPE citext;
 ALTER TABLE dnasample ALTER COLUMN name TYPE citext;
@@ -26,3 +27,20 @@ ALTER TABLE project ALTER COLUMN name TYPE citext;
 ALTER TABLE experiment ALTER COLUMN name TYPE citext;
 ALTER TABLE dataset ALTER COLUMN name TYPE citext;
 ALTER TABLE mapset ALTER COLUMN name TYPE citext;
+
+
+--put the offensive view back
+CREATE VIEW v_marker_linkage_physical as
+	SELECT mlg.marker_id,
+	lg.linkage_group_id,
+	lg.name AS linkage_group_name,
+	lg.start AS linkage_group_start,
+	lg.stop AS linkage_group_stop,
+	mlg.start,
+	mlg.stop,
+	ms.name AS mapset_name,
+	lg.map_id
+	FROM marker_linkage_group mlg,
+	linkage_group lg,
+	mapset ms
+	WHERE mlg.linkage_group_id = lg.linkage_group_id AND lg.map_id = ms.mapset_id;
