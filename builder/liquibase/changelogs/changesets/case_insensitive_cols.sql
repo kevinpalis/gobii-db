@@ -11,6 +11,7 @@ CREATE EXTENSION IF NOT EXISTS citext;
 --drop the offensive view
 DROP VIEW IF EXISTS v_all_projects_full_details;
 DROP VIEW IF EXISTS v_marker_linkage_physical;
+DROP VIEW IF EXISTS v_marker_linkage_genetic;
 --convert the columns
 ALTER TABLE germplasm ALTER COLUMN name TYPE citext;
 ALTER TABLE dnasample ALTER COLUMN name TYPE citext;
@@ -40,6 +41,17 @@ CREATE VIEW v_marker_linkage_physical as
 	mlg.stop,
 	ms.name AS mapset_name,
 	lg.map_id
+	FROM marker_linkage_group mlg,
+	linkage_group lg,
+	mapset ms
+	WHERE mlg.linkage_group_id = lg.linkage_group_id AND lg.map_id = ms.mapset_id;
+
+CREATE VIEW v_marker_linkage_genetic as
+SELECT mlg.marker_id,
+	lg.name AS linkage_group_name,
+	mlg.start::integer AS start,
+	mlg.stop::integer AS stop,
+	ms.name AS mapset_name
 	FROM marker_linkage_group mlg,
 	linkage_group lg,
 	mapset ms
