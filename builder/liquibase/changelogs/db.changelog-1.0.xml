@@ -34,4 +34,5 @@
 	<include file="changelogs/changesets/add_username_to_contact.sql"/>
 	<include file="changelogs/changesets/mde_derive_marker_ids.sql"/>
 	<include file="changelogs/changesets/mde_filter_by_dataset_typeid.sql"/>
+	<include file="changelogs/changesets/case_insensitive_cols.sql"/>
 </databaseChangeLog>
