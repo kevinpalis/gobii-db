@@ -35,4 +35,5 @@
 	<include file="changelogs/changesets/mde_derive_marker_ids.sql"/>
 	<include file="changelogs/changesets/mde_filter_by_dataset_typeid.sql"/>
 	<include file="changelogs/changesets/case_insensitive_cols.sql"/>
+	<include file="changelogs/changesets/default_contact_user_data.sql"/>
 </databaseChangeLog>
