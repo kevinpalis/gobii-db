@@ -29,7 +29,7 @@ def main(isVerbose,preprocessedFile,outputPath, tableName):
 	dupMapFile = resource_stream('res.map',tableName+'.dupmap')
 	## get columns from dupmap
 	dreader = csv.reader(dupMapFile,delimiter='\t')
-	dupMapColList = [i[0].split(",")[0] for i[0] in dreader if not i.startswith("#")]
+	dupMapColList = [i[0].split(",")[0] for i in dreader if not i[0].startswith("#")]
 	
 	## read preprocessed file 
 	## create pandas Data Frame
