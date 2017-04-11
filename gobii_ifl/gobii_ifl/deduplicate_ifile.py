@@ -29,11 +29,12 @@ def main(isVerbose,preprocessedFile,outputPath, tableName):
 	dupMapFile = resource_stream('res.map',tableName+'.dupmap')
 	## get columns from dupmap
 	dreader = csv.reader(dupMapFile,delimiter='\t')
-	dupMapColList = [i[0].split(",")[0] for i in dreader]
+	dupMapColList = [i[0].split(",")[0] for i in dreader if not i.startswith("#")]
 	
 	## read preprocessed file 
 	## create pandas Data Frame
 	data = pd.read_table(preprocessedFile)
+
 	for col in dupMapColList:
 		if col in data.columns:
 			if IS_VERBOSE:
