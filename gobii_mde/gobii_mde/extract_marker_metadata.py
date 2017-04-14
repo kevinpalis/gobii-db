@@ -84,6 +84,10 @@ def main(isVerbose, connectionStr, datasetId, outputFile, allMeta, namesOnly, ma
 						markerWriter.writerow(headerRow)
 						mapsetRowNum = 0
 						mapsetRow = None
+						mapsetRowsList = list(mapsetReader)
+						totalMapsetRows = len(mapsetRowsList) - 1  # subtract the header
+						if isVerbose:
+							print("Total mapset rows: %s" % totalMapsetRows)
 						for mapsetRow in mapsetReader:
 								mapsetRowNum += 1
 								if mapsetRow[MAPID_COL_POS] == displayMapId:
@@ -96,6 +100,8 @@ def main(isVerbose, connectionStr, datasetId, outputFile, allMeta, namesOnly, ma
 							print('Mapset Row currently at marker_name=%s' % mapsetRow[MARKERNAME_COL_POS_1])
 							print('Total number of columns to append: %s' % columnsCount)
 						eomReached = False
+						if mapsetRowNum >= totalMapsetRows:
+							eomReached = True
 						for markerRow in markerReader:
 							if eomReached:
 								newRow = markerRow + fillerList
