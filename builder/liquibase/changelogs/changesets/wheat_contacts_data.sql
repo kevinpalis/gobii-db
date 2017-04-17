@@ -1,6 +1,6 @@
 --liquibase formatted sql
 
---changeset raza:wheat_contact context:seed_wheat splitStatements:false runOnChange:true
+--changeset raza:wheat_contact context:seed_wheat splitStatements:false
 select * from createContact('Shrestha','Rosemary','contact_1','rs968@cornell.edu',( select array_agg(role_id) from role where role_name in ('Admin','PI','User','Curator')),1,current_date,NULL,NULL,(select organization_id from organization where name = 'CIMMYT'),'USER_READER' );
 select * from createContact('Ulat','Victor','contact_2','vmu4@cornell.edu',( select array_agg(role_id) from role where role_name in ('Admin')),1,current_date,NULL,NULL,(select organization_id from organization where name = 'CIMMYT') ,'USER_READER');
 select * from createContact('Rutkoski','Jessica','contact_3','j.rutkoski@cgiar.org',( select array_agg(role_id) from role where role_name in ('PI')),1,current_date,NULL,NULL,(select organization_id from organization where name = 'CIMMYT') ,'USER_READER');
