@@ -30,7 +30,7 @@ Select * from createorganization('TraitGenetics   ','Gatersleben, Germany' ,'
 Select * from createorganization('University of Bristol','' ,'',1,current_date,NULL,NULL,1);
 Select * from createorganization('International Rice Research Institute','Pili Dr, College, Los Banos, Laguna 4031, Philippines' ,'http://www.irri.org',1,current_date,NULL,NULL,1);
 Select * from createorganization('IRRI Genotyping Services Laboratory','Klaus J. Lampe Bldg, Pili Dr, College, Los Banos, Laguna 4031, Philippines' ,'http://gsl.irri.org',1,current_date,NULL,NULL,1);
-Select * from createorganization(' Iowa State University','' ,'',1,current_date,NULL,NULL,1);
+Select * from createorganization('Iowa State University','' ,'',1,current_date,NULL,NULL,1);
 
 
 
