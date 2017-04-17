@@ -1,7 +1,7 @@
 
 --liquibase formatted sql
 
---changeset raza:wheat_contact context:seed_wheat splitStatements:false
+--changeset raza:wheat_contact context:seed_wheat splitStatements:false runOnChange:true
 
 select * from createContact('Shrestha','Rosemary','contact_1','rs968@cornell.edu',( select array_agg(role_id) from role where role_name in ('Admin','PI','User','Curator')),1,current_date,NULL,NULL,(select organization_id from organization where name = 'CIMMYT'),'USER_READER' );
 select * from createContact('Ulat','Victor','contact_2','vmu4@cornell.edu',( select array_agg(role_id) from role where role_name in ('Admin')),1,current_date,NULL,NULL,(select organization_id from organization where name = 'CIMMYT') ,'USER_READER');
@@ -38,7 +38,7 @@ select * from createContact('Olsen','Michael','contact_33','m.olsen@cgiar.org',(
 select * from createContact('Puebla','Luis','contact_34','l.puebla@cgiar.org',( select array_agg(role_id) from role where role_name in ('User')),1,current_date,NULL,NULL,(select organization_id from organization where name = 'CIMMYT') ,'USER_READER');
 select * from createContact('Riis','Jens','contact_35','j.riis@cgiar.org',( select array_agg(role_id) from role where role_name in ('User')),1,current_date,NULL,NULL,(select organization_id from organization where name = 'CIMMYT') ,'USER_READER');
 select * from createContact('Pixley','Kevin','contact_36','k.pixley@cgiar.org',( select array_agg(role_id) from role where role_name in ('User')),1,current_date,NULL,NULL,(select organization_id from organization where name = 'CIMMYT') ,'USER_READER');
-select * from createContact('Dreher','Kate','contact_37','k.dreher@cgiar.org',( select array_agg(role_id) from role where role_name in ('Admin','Curator','PI','User')),1,current_date,NULL,NULL,(select organization_id from organization where name = 'CIMMYT'),'USER_READER' );
+select * from createContact('Dreher','Kate','contact_37','kad275@cornell.edu',( select array_agg(role_id) from role where role_name in ('Admin','Curator','PI','User')),1,current_date,NULL,NULL,(select organization_id from organization where name = 'CIMMYT'),'USER_READER' );
 
 select * from createContact('Robbins','Kelly','contact_38','krr73@cornell.edu',( select array_agg(role_id) from role where role_name in ('Curator','User')),1,current_date,NULL,NULL,(select organization_id from organization where name = 'GOBII Cornell Team') ,'USER_READER');
 select * from createContact('Gao','Star','contact_39','yg28@cornell.edu',( select array_agg(role_id) from role where role_name in ('Curator','User')),1,current_date,NULL,NULL,(select organization_id from organization where name = 'GOBII Cornell Team') ,'USER_READER');
