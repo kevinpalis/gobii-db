@@ -1,6 +1,6 @@
 --liquibase formatted sql
 
---changeset raza:maize_contact context:seed_rice splitStatements:false
+--changeset raza:rice_contact context:seed_rice splitStatements:false
 
 select * from createContact('Kretzschmar','Tobias','contact_3','t.kretzschmar@irri.org',( select array_agg(role_id) from role where role_name in ('PI','User')),1,current_date,NULL,NULL,(select organization_id from organization where name = 'International Rice Research Institute' ),'USER_READER');
 select * from createContact('Cobb','Joshua Nathaniel','contact_4','j.cobb@irri.org',( select array_agg(role_id) from role where role_name in ('PI','User')),1,current_date,NULL,NULL,(select organization_id from organization where name = 'International Rice Research Institute' ), 'USER_READER');

@@ -1,6 +1,6 @@
 --liquibase formatted sql
 
---changeset raza:maize_contact context:seed_sorghum splitStatements:false
+--changeset raza:sorghum_contact context:seed_sorghum splitStatements:false
 
 select * from createContact('Bajaj','Prasad','contact_3','pb539@cornell.edu',( select array_agg(role_id) from role where role_name in ('User')),1,current_date,NULL,NULL,(select organization_id from organization where name = 'International Crops Research Institute for the Semi-Arid Tropics (ICRISAT)'),'USER_READER'  );
 select * from createContact('Das','Roma','contact_4','rrd47@cornell.edu',( select array_agg(role_id) from role where role_name in ('Curator')),1,current_date,NULL,NULL,(select organization_id from organization where name = 'International Crops Research Institute for the Semi-Arid Tropics (ICRISAT)') ,'USER_READER' );
