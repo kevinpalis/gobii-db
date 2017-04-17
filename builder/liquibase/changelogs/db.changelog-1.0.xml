@@ -42,4 +42,5 @@
 	<include file="changelogs/changesets/rice_contacts_data.sql"/>
 	<include file="changelogs/changesets/sorghum_contacts_data.sql"/>
 	<include file="changelogs/changesets/chickpea_contacts_data.sql"/>
+	<include file="changelogs/changesets/cornell_contacts_data.sql"/>
 </databaseChangeLog>
