@@ -74,10 +74,12 @@ def main(argv):
 								IFLUtility.printError("File length mismatch detected on %s. You either have duplicate entries in the table where the NMAP file maps to OR you're trying to load data to entities that do not exist, please fix it first. Loading will abort." % f)
 								exitCode = 5
 								sys.exit(exitCode)
-						
-						dedupFile, exitCode = deduplicate_ifile.main(verbose, preprocessedFile,outputPath,tableName)
-						#load the deduplicated file here
-						loadFile, exitCode = load_ifile.main(verbose, connectionStr,dedupFile, outputPath)
+
+						if not isProp:
+							dedupFile, exitCode = deduplicate_ifile.main(verbose, preprocessedFile, outputPath, tableName)
+							loadFile, exitCode = load_ifile.main(verbose, connectionStr, dedupFile, outputPath)
+						else:  # DO NOT DEDUPLICATE PROPERTY FILES AS YOU'LL REMOVE GOOD DATA, NO NEED FOR IT ANYWAY SINCE THIS WILL BE AN UPSERT OPERATION
+							loadFile, exitCode = load_ifile.main(verbose, connectionStr, preprocessedFile, outputPath)
 						if exitCode != 0:
 							sys.exit(exitCode)
 						'''
@@ -118,8 +120,12 @@ def main(argv):
 						IFLUtility.printError("File length mismatch detected on %s. You either have duplicate entries in the table where the NMAP file maps to OR you're trying to load data to entities that do not exist, please fix it first. Loading will abort." % iFile)
 						exitCode = 5
 						sys.exit(exitCode)
-				dedupFile, exitCode = deduplicate_ifile.main(verbose, preprocessedFile,outputPath,tableName)
-				loadFile, exitCode = load_ifile.main(verbose, connectionStr, dedupFile, outputPath)
+				if not isProp:
+					dedupFile, exitCode = deduplicate_ifile.main(verbose, preprocessedFile, outputPath, tableName)
+					loadFile, exitCode = load_ifile.main(verbose, connectionStr, dedupFile, outputPath)
+				else:  # DO NOT DEDUPLICATE PROPERTY FILES AS YOU'LL REMOVE GOOD DATA, NO NEED FOR IT ANYWAY SINCE THIS WILL BE AN UPSERT OPERATION
+					loadFile, exitCode = load_ifile.main(verbose, connectionStr, preprocessedFile, outputPath)
+
 				if exitCode != 0:
 						sys.exit(exitCode)
 				'''
