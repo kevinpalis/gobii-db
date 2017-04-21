@@ -1,16 +1,11 @@
 #!/usr/bin/env python
 '''
-	PRECEDENCE:
+	This module offers the following functionalities:
 		1. Extraction by Dataset
 		2. Extraction by Markers
 		3. Extraction by Samples
 
 	Exit Codes: 2-9
-	2 -- Missing a required field
-	3 -- Failed to extract marker meta
-	4 -- Failed to extract sample meta
-	5 -- Failed to extract project meta
-	6 -- Validation Failure
 '''
 from __future__ import print_function
 import sys
@@ -21,6 +16,10 @@ import extract_project_metadata
 from util.mde_utility import MDEUtility
 
 def main(argv):
+		#TODO: Create a constant class when there's time, probably post-V1
+		EXTRACTION_TYPES = [1, 2, 3]
+		SAMPLE_TYPES = [1, 2, 3]
+
 		verbose = False
 		connectionStr = ""
 		markerOutputFile = ""
@@ -36,14 +35,19 @@ def main(argv):
 		sampleListFile = ""
 		mapsetOutputFile = ""
 		markerNamesFile = ""
+		sampleNamesFile = ""
 		datasetType = -1
 		platformList = []
+		piId = -1
+		projectId = -1
 		#1 = By dataset, 2 = By Markers, 3 = By Samples
-		extractionType = 1
+		extractionType = -1
+		#1 = Germplasm Names, 2 = External Codes, 3 = DnaSample Names
+		sampleType = -1
 		exitCode = 0
 		#PARSE PARAMETERS/ARGUMENTS
 		try:
-			opts, args = getopt.getopt(argv, "hc:m:s:d:p:avnM:lD:x:y:b:X:P:t:", ["connectionString=", "markerOutputFile=", "sampleOutputFile=", "datasetId=", "projectOutputFile=", "all", "verbose", "namesOnly", "map=", "includeChrLen", "displayMap=", "markerList=", "sampleList=", "mapsetOutputFile=", "extractByMarkers", "markerNames=", "platformList=", "datasetType=", "extractByDataset"])
+			opts, args = getopt.getopt(argv, "hc:m:s:d:p:avnM:lD:x:y:b:X:P:t:Y:", ["connectionString=", "markerOutputFile=", "sampleOutputFile=", "datasetId=", "projectOutputFile=", "all", "verbose", "namesOnly", "map=", "includeChrLen", "displayMap=", "markerList=", "sampleList=", "mapsetOutputFile=", "extractByMarkers", "markerNames=", "platformList=", "datasetType=", "extractByDataset", "piId=", "projectId=", "sampleType=", "sampleNames=", "extractBySamples"])
 			#print (opts, args)
 			if len(args) < 2 and len(opts) < 2:
 				printUsageHelp(2)
@@ -81,6 +85,8 @@ def main(argv):
 				sampleListFile = arg
 			elif opt in ("-b", "--mapsetOutputFile"):
 				mapsetOutputFile = arg
+			elif opt in ("--extractBySamples"):
+				extractionType = 3
 			elif opt in ("--extractByMarkers"):
 				extractionType = 2
 			elif opt in ("--extractByDataset"):
@@ -96,26 +102,46 @@ def main(argv):
 					sys.exit(exitCode)
 			elif opt in ("t", "--datasetType"):
 				datasetType = arg
+			elif opt in ("--piId"):
+				piId = arg
+			elif opt in ("--projectId"):
+				projectId = arg
+			elif opt in ("--sampleType"):
+				sampleType = int(arg)
+			elif opt in ("-Y", "--sampleNames"):
+				sampleNamesFile = arg
 
 		#VALIDATIONS
 		if connectionStr == "" or markerOutputFile == "" or sampleOutputFile == "":
 			MDEUtility.printError("Invalid usage. All of the following parameters are required: connectionStr, markerOutputFile, and sampleOutputFile.")
 			printUsageHelp(2)
+		if extractionType not in EXTRACTION_TYPES:
+			MDEUtility.printError("Invalid usage. Invalid extraction type.")
+			printUsageHelp(2)
 		if extractionType == 1:
-			if datasetId == -1 or not datasetId.isdigit:
+			if datasetId < 1:
 				MDEUtility.printError("Invalid usage. Extraction by dataset requires a dataset ID.")
 				printUsageHelp(6)
 		elif extractionType == 2:
-			if datasetType == -1 or (markerNamesFile == "" and platformList == ""):
+			if datasetType < 1 or (markerNamesFile == "" and platformList == ""):
 				MDEUtility.printError("Invalid usage. Extraction by marker list requires a dataset type and at least one of: markerNamesFile and platformList.")
 				printUsageHelp(6)
-
+		elif extractionType == 3:
+			if datasetType < 1:
+				MDEUtility.printError("Invalid usage. Extraction by samples list requires a dataset type.")
+				printUsageHelp(8)
+			if piId < 1 and projectId < 1 and sampleNamesFile == "":
+				MDEUtility.printError("Invalid usage. Extraction by samples list requires at least one of the following: PI, Project, Samples List.")
+				printUsageHelp(8)
+			if sampleNamesFile != "" and sampleType not in SAMPLE_TYPES:
+				MDEUtility.printError("Invalid usage. Providing a sample names list requires a sample type: 1 = Germplasm Names, 2 = External Codes, 3 = DnaSample Names.")
+				printUsageHelp(8)
 		if verbose:
 			print("Opts: ", opts)
 		markerList = []
 		sampleList = []
 		markerNames = []
-
+		sampleNames = []
 		#PREPARE PARAMETERS
 		#convert file contents to lists
 		if markerListFile != "":
@@ -124,6 +150,8 @@ def main(argv):
 				sampleList = [line.strip() for line in open(sampleListFile, 'r')]
 		if markerNamesFile != "":
 				markerNames = [line.strip() for line in open(markerNamesFile, 'r')]
+		if sampleNamesFile != "":
+				sampleNames = [line.strip() for line in open(sampleNamesFile, 'r')]
 
 		#Do the Dew
 		#rn = False
@@ -131,7 +159,7 @@ def main(argv):
 		try:
 			#if verbose:
 			#	print("Generating marker metadata file...")
-			mFile, markerList = extract_marker_metadata.main(verbose, connectionStr, datasetId, markerOutputFile, allMeta, namesOnly, mapId, includeChrLen, displayMap, markerList, sampleList, mapsetOutputFile, extractionType, datasetType, markerNames, platformList)
+			mFile, markerList, sampleList = extract_marker_metadata.main(verbose, connectionStr, datasetId, markerOutputFile, allMeta, namesOnly, mapId, includeChrLen, displayMap, markerList, sampleList, mapsetOutputFile, extractionType, datasetType, markerNames, platformList, piId, projectId, sampleType, sampleNames)
 			if extractionType == 2 and not markerList:
 				MDEUtility.printError("Resulting list of marker IDs is empty. Nothing to extract.")
 				sys.exit(7)
@@ -184,10 +212,12 @@ def printUsageHelp(eCode):
 	print ("\t-x or --markerList = Supplies the file containing a list of marker_ids, newline-delimited.")
 	print ("\t-y or --sampleList = Supplies the file containing a list of dnarun_ids, newline-delimited.")
 	print ("\t-X or --markerNames = Supplies the file containing a list of marker names, newline-delimited.")
-	print ("\t-Y or --sampleNames = Supplies the file containing a list of sample names, newline-delimited. Sample names can be any of the following: germplasm_name, external_code, or dnasample_name. The type is set by --samplesType")
+	print ("\t-Y or --sampleNames = Supplies the file containing a list of sample names, newline-delimited. Sample names can be any of the following: germplasm_name, external_code, or dnasample_name. The type is set by --sampleType")
 	print ("\t--datasetType = Filters the data by the type of dataset. This should be a valid dataset type ID, otherwise no results will be returned. This is only used for --extractionByMarkers and --extractionBySamples")
 	print ("\t--platformList = Comma-delimited string of platform IDs to filter --extractionByMarkers.")
-	print ("\t--samplesType = Tells the MDE what kind of sample names are in the file passed to --sampleNames. Valid values: 1 = germplasm_name, 2 = external_code, 3 = dnasample_name.")
+	print ("\t--sampleType = Tells the MDE what kind of sample names are in the file passed to --sampleNames. Valid values: 1 = germplasm_name, 2 = external_code, 3 = dnasample_name.")
+	print ("\t--projectId = Filters by project for extraction by samples. This can also be used independently to pull all samples in a given project.")
+	print ("\t--piId = Filters by PI contact for extraction by samples. This can also be used independently to pull all samples under a given PI.")
 	print ("\t-v or --verbose = Print the status of the MDE in more detail.")
 	#---------------------------
 	print ("\nDEPRECATED:")
