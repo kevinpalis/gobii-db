@@ -227,7 +227,7 @@ class ExtractMetadataManager:
 		if sampleList and platformList:
 			self.cur.execute("select marker_id from getMarkerIdsBySamplesPlatformsAndDatasetType(%s, %s, %s)", ("{"+(','.join(sampleList))+"}", "{"+(','.join(platformList))+"}", datasetType))
 		elif sampleList and not platformList:
-			self.cur.execute("select marker_id from getMarkerIdsBySamplesAndDatasetType(%s)", ("{"+(','.join(sampleList))+"}",))
+			self.cur.execute("select marker_id from getMarkerIdsBySamplesAndDatasetType(%s, %s)", ("{"+(','.join(sampleList))+"}", "{"+(','.join(platformList))+"}"))
 		else:  # invalid usage
 			return None
 		res = self.cur.fetchall()
