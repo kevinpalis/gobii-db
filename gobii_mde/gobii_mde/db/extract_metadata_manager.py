@@ -198,15 +198,36 @@ class ExtractMetadataManager:
 		if sampleNames and sampleType > 0:
 			#1 = Germplasm Names, 2 = External Codes, 3 = DnaSample Names
 			if sampleType == 1:
-				print("...based on Germplasm Names")
-				self.cur.execute("select dnarun_id from getDnarunIdsByGermplasmNames(%s)", ("{"+(','.join(sampleNames))+"}",))
+				if projectId > 0:
+					print("...based on Germplasm Names AND projectID")
+					self.cur.execute("select dnarun_id from getDnarunIdsByGermplasmNamesAndProject(%s, %s)", ("{"+(','.join(sampleNames))+"}", projectId))
+				elif piId > 0:
+					print("...based on Germplasm Names AND piId")
+					self.cur.execute("select dnarun_id from getDnarunIdsByGermplasmNamesAndPI(%s, %s)", ("{"+(','.join(sampleNames))+"}", piId))
+				else:
+					print("...based on Germplasm Names")
+					self.cur.execute("select dnarun_id from getDnarunIdsByGermplasmNames(%s)", ("{"+(','.join(sampleNames))+"}",))
 			elif sampleType == 2:
-				print("...based on External Codes")
-				self.cur.execute("select dnarun_id from getDnarunIdsByExternalCodes(%s)", ("{"+(','.join(sampleNames))+"}",))
+				if projectId > 0:
+					print("...based on External Codes AND projectID")
+					self.cur.execute("select dnarun_id from getDnarunIdsByExternalCodesAndProject(%s, %s)", ("{"+(','.join(sampleNames))+"}", projectId))
+				elif piId > 0:
+					print("...based on External Codes AND piId")
+					self.cur.execute("select dnarun_id from getDnarunIdsByExternalCodesAndPI(%s, %s)", ("{"+(','.join(sampleNames))+"}", piId))
+				else:
+					print("...based on External Codes")
+					self.cur.execute("select dnarun_id from getDnarunIdsByExternalCodes(%s)", ("{"+(','.join(sampleNames))+"}",))
 			elif sampleType == 3:
-				print("...based on Dnasample Names")
-				#print(self.cur.mogrify("select dnarun_id from getDnarunIdsByDnasampleNames(%s)", ("{"+(','.join(sampleNames))+"}",)))
-				self.cur.execute("select dnarun_id from getDnarunIdsByDnasampleNames(%s)", ("{"+(','.join(sampleNames))+"}",))
+				if projectId > 0:
+					print("...based on Dnasample Names AND projectID")
+					self.cur.execute("select dnarun_id from getDnarunIdsByDnasampleNamesAndProject(%s, %s)", ("{"+(','.join(sampleNames))+"}", projectId))
+				elif piId > 0:
+					print("...based on Dnasample Names AND piId")
+					self.cur.execute("select dnarun_id from getDnarunIdsByDnasampleNamesAndPI(%s, %s)", ("{"+(','.join(sampleNames))+"}", piId))
+				else:
+					print("...based on Dnasample Names")
+					#print(self.cur.mogrify("select dnarun_id from getDnarunIdsByDnasampleNames(%s)", ("{"+(','.join(sampleNames))+"}",)))
+					self.cur.execute("select dnarun_id from getDnarunIdsByDnasampleNames(%s)", ("{"+(','.join(sampleNames))+"}",))
 			else:
 				print("Invalid usage.")
 				return None
