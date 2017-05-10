@@ -13,14 +13,14 @@ java -jar gobiiconfig.jar -a -wfqpn $CONFIG_XML -auT $AUTH_TYPE -ldUDN "$LDAP_DN
 #Configure email server (global)
 java -jar gobiiconfig.jar -a -wfqpn $CONFIG_XML -stE -soH $MAIL_HOST -soN $MAIL_PORT -soU $MAIL_USERNAME -soP $MAIL_PASSWORD -stT $MAIL_TYPE -stH $MAIL_HASH;
 
-#Configure web server for crop1 - the following config lines should already be configured, only kept here for reference
-#java -jar gobiiconfig.jar -a -wfqpn $CONFIG_XML -c  ${bamboo.sys_int.crop1.name}  -stW  -soH ${bamboo.sys_int.web.host} -soN ${bamboo.sys_int.web.port} -soR ${bamboo.sys_int.crop1.context_path};
+#Configure web server for crop1
+java -jar gobiiconfig.jar -a -wfqpn $CONFIG_XML -c  $CROP1  -stW  -soH $WEB_HOST -soN $WEB_PORT -soR $CROP1_CONTEXT_PATH;
 #Configure PostGRES server for crop1
-#java -jar gobiiconfig.jar -a -wfqpn $CONFIG_XML -c  ${bamboo.sys_int.crop1.name}  -stP -soH ${bamboo.sys_int.db.host} -soN ${bamboo.sys_int.db.port} -soU ${bamboo.gobii.db.appuser.name} -soP ${bamboo.gobii.db.appuser.password} -soR ${bamboo.sys_int.db.crop1.name};
+java -jar gobiiconfig.jar -a -wfqpn $CONFIG_XML -c  $CROP1  -stP -soH $DB_HOST -soN $DB_PORT -soU $DB_USERNAME -soP $DB_PASS -soR $DB_NAME_CROP1;
 #Configure MonetDB server for crop1
 #java -jar gobiiconfig.jar -a -wfqpn $CONFIG_XML -c  ${bamboo.sys_int.crop1.name} -stM  -soH ${bamboo.sys_int.monetdb.host} -soN ${bamboo.sys_int.monetdb.port} -soU ${bamboo.sys_int.monetdb.appuser.name} -soP ${bamboo.sys_int.monetdb.appuser.password} -soR ${bamboo.sys_int.db.crop1.name};
 #Set default crop to crop1 (global)
-#java -jar gobiiconfig.jar -a -wfqpn $CONFIG_XML -gD ${bamboo.sys_int.crop1.name};
+java -jar gobiiconfig.jar -a -wfqpn $CONFIG_XML -gD $CROP1;
 
 #Set log file directory (global)
 java -jar gobiiconfig.jar -a -wfqpn $CONFIG_XML -gL  $BUNDLE_PATH/logs;
