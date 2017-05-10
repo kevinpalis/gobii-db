@@ -3,7 +3,6 @@
 \i gobii_pg.sql
 \i views.sql
 \i functions.sql
-\i cvs.sql
 \i roles.sql
 \i displays.sql
 
