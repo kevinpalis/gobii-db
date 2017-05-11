@@ -26,7 +26,7 @@ echo "The GOBII Ship is sailing..."
 ### ANY NODE ###
 #--------------------------------------------------#
 #create a symlink for the loader UI to work
-ln -sfn $BUNDLE_PARENT_PATH /data
+sudo ln -sfn $BUNDLE_PARENT_PATH /data
 
 #--------------------------------------------------#
 ### DB NODE ###
