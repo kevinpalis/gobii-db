@@ -53,8 +53,8 @@ find / -user 1000 -exec chown -h $GOBII_UID {} \;
 find / -group 1001 -exec chgrp -h $GOBII_GID {} \;
 '";
 #echo "Expanded variables: " $DOCKER_CMD
-DOCKER_CMD1 = "usermod -u $GOBII_UID gadm;"
-eval docker exec $DOCKER_DB_NAME bash -c \"$DOCKER_CMD1\";
+DOCKER_CMD1 = "docker exec $DOCKER_DB_NAME bash -c \"usermod -u $GOBII_UID gadm;\""
+eval $DOCKER_CMD1;
 #eval $DOCKER_CMD
 exit 1;
 #eval docker exec $DOCKER_DB_NAME bash -c \"${DOCKER_CMD}\";
