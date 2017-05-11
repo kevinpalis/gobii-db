@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-#usage: sh config_wrapper.sh <path-of-gobii_install.properties>
+#usage: bash config_wrapper.sh <path-of-gobii_install.params>
 #run this from the directory where gobiiconfig.jar is
 
 source $1
