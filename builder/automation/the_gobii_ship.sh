@@ -43,8 +43,10 @@ docker run -i --detach --name $DOCKER_DB_NAME -e "gobiiuid=$GOBII_UID" -e "gobii
 docker start $DOCKER_DB_NAME;
 
 #set the proper UID and GID and chown the hell out of everything (within the docker, of course)
-echo "Matching the docker gadm account to that of the host's and changing file ownerships..."
-eval docker exec $DOCKER_DB_NAME bash -c \'usermod -u "$GOBII_UID" gadm; groupmod -g "$GOBII_GID" gobii; find / -user 1000 -exec chown -h "$GOBII_UID" {} \; find / -group 1001 -exec chgrp -h "$GOBII_GID" {} \;\';
+echo "Matching the docker gadm account to that of the host and changing file ownerships..."
+DOCKER_CMD="usermod -u $GOBII_UID gadm; groupmod -g $GOBII_GID gobii; find / -user 1000 -exec chown -h $GOBII_UID {} \; find / -group 1001 -exec chgrp -h $GOBII_GID {} \;"
+echo "DOCKER_CMD: " $DOCKER_CMD
+docker exec $DOCKER_DB_NAME bash -c $DOCKER_CMD;
 
 #clear the target directory of any old gobii_bundle
 echo "Copying the GOBII_BUNDLE to the shared directory/volume..."
