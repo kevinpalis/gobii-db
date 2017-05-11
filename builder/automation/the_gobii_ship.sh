@@ -15,6 +15,7 @@
 #--------------------------------------------------#
 set -u
 set -e
+set -x
 #load parameters
 source $1
 DOCKER_HUB_PASSWORD=$2
