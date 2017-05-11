@@ -62,7 +62,7 @@ eval docker exec $DOCKER_DB_NAME bash -c \"${DOCKER_CMD}\";
 echo "Copying the GOBII_BUNDLE to the shared directory/volume..."
 DOCKER_CMD="rm -rf /data/$DOCKER_BUNDLE_NAME";
 eval docker exec $DOCKER_DB_NAME bash -c \"${DOCKER_CMD}\";
-DOCKER_CMD="cd /var; cp -R ${bamboo.docker.bundle.name} /data/$DOCKER_BUNDLE_NAME";
+DOCKER_CMD="cd /var; cp -R $DOCKER_BUNDLE_NAME /data/$DOCKER_BUNDLE_NAME";
 eval docker exec $DOCKER_DB_NAME bash -c \"${DOCKER_CMD}\";
 DOCKER_CMD="chown -R gadm:gobii /data/$DOCKER_BUNDLE_NAME";
 eval docker exec $DOCKER_DB_NAME bash -c \"${DOCKER_CMD}\";
