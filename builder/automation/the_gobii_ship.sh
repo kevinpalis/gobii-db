@@ -46,7 +46,12 @@ docker start $DOCKER_DB_NAME;
 echo "Matching the docker gadm account to that of the host and changing file ownerships..."
 #echo "Expanded variables: " $DOCKER_CMD
 DOCKER_CMD="usermod -u $GOBII_UID gadm;";
-echo $DOCKER_CMD;
+eval docker exec $DOCKER_DB_NAME bash -c \"${DOCKER_CMD}\";
+DOCKER_CMD="groupmod -g $GOBII_GID gobii;";
+eval docker exec $DOCKER_DB_NAME bash -c \"${DOCKER_CMD}\";
+DOCKER_CMD="find / -user 1000 -exec chown -h $GOBII_UID {} \;";
+eval docker exec $DOCKER_DB_NAME bash -c \"${DOCKER_CMD}\";
+DOCKER_CMD="find / -group 1001 -exec chgrp -h $GOBII_GID {} \;";
 eval docker exec $DOCKER_DB_NAME bash -c \"${DOCKER_CMD}\";
 #eval docker exec $DOCKER_DB_NAME bash -c \"${DOCKER_CMD}\";
 exit 1;
