@@ -13,6 +13,8 @@
 #--------------------------------------------------#
 ### ALL NODES ###
 #--------------------------------------------------#
+set -u
+set -e
 #load parameters
 source $1
 DOCKER_HUB_PASSWORD=$2
@@ -25,8 +27,6 @@ echo "The GOBII Ship is sailing..."
 #--------------------------------------------------#
 #create a symlink for the loader UI to work
 ln -sfn $BUNDLE_PARENT_PATH /data
-
-
 
 #--------------------------------------------------#
 ### DB NODE ###
