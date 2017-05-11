@@ -49,7 +49,7 @@ usermod -u "$GOBII_UID" gadm;
 groupmod -g "$GOBII_GID" gobii;
 find / -user 1000 -exec chown -h "$GOBII_UID" {} \;
 find / -group 1001 -exec chgrp -h "$GOBII_GID" {} \;
-EOF;
+EOF
 
 #clear the target directory of any old gobii_bundle
 echo "Copying the GOBII_BUNDLE to the shared directory/volume..."
