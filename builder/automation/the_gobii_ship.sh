@@ -8,6 +8,8 @@
 #3. Run this on a server that has access on all 3 nodes, if this is not possible, break up the script into the 3 main nodes and run individually
 #NOTE: In case you need to break up this script in 3 nodes, you may need to restart Tomcat again at the end of the installation process.
 #NOTE2: The order of execution is important.
+#NOTE3: If weird things start happening on your dockers, try removing the images as well by running 'docker rmi' on each of the 3 nodes.
+# If you want a delete-all-images command, run this: sudo docker stop $(sudo docker ps -qa) || true && sudo docker rm $(sudo docker ps -aq) || true && sudo docker rmi $(sudo docker images -aq) || true
 #@author: (palace) kdp44@cornell.edu
 
 if [[ $EUID -eq 0 ]]; then
