@@ -103,7 +103,6 @@ eval docker exec $DOCKER_WEB_NAME bash -c \"${DOCKER_CMD}\";
 DOCKER_CMD="cd /usr/local/tomcat/bin/; sh startup.sh;";
 eval docker exec --user gadm $DOCKER_WEB_NAME bash -c \"${DOCKER_CMD}\";
 
-exit 1;
 #--------------------------------------------------#
 ### COMPUTE NODE ###
 #--------------------------------------------------#
@@ -117,12 +116,15 @@ docker start $DOCKER_COMPUTE_NAME;
 
 #set the proper UID and GID and chown the hell out of everything (within the docker, of course)
 echo "Matching the docker gadm account to that of the host's and changing file ownerships..."
-docker exec $DOCKER_COMPUTE_NAME bash -c '
-usermod -u $GOBII_UID gadm;
-groupmod -g $GOBII_GID gobii;
-find / -user 1000 -exec chown -h $GOBII_UID {} \;
-find / -group 1001 -exec chgrp -h $GOBII_GID {} \;
-';
+DOCKER_CMD="usermod -u $GOBII_UID gadm;";
+eval docker exec $DOCKER_COMPUTE_NAME bash -c \"${DOCKER_CMD}\";
+DOCKER_CMD="groupmod -g $GOBII_GID gobii;";
+eval docker exec $DOCKER_COMPUTE_NAME bash -c \"${DOCKER_CMD}\";
+DOCKER_CMD="find / -user 1000 -exec chown -h $GOBII_UID {} \; || :";
+eval docker exec $DOCKER_COMPUTE_NAME bash -c \"${DOCKER_CMD}\";
+DOCKER_CMD="find / -group 1001 -exec chgrp -h $GOBII_GID {} \; || :";
+eval docker exec $DOCKER_COMPUTE_NAME bash -c \"${DOCKER_CMD}\";
+
 
 #Grant permissions and set cronjobs
 echo "Granting permissions and setting cronjobs..."
