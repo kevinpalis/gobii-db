@@ -38,7 +38,7 @@ echo "Installing the DB node..."
 docker stop $DOCKER_DB_NAME || true && docker rm $DOCKER_DB_NAME || true
 #Pull and start the DB docker image
 docker login -u $DOCKER_HUB_USERNAME -p $DOCKER_HUB_PASSWORD;
-docker pull $DOCKER_HUB_USERNAME/$DOCKER_HUB_DB_NAME:$GOBII_RELEASE_VERSION;
+docker pull $DOCKER_HUB_USERNAME"/"$DOCKER_HUB_DB_NAME":"$GOBII_RELEASE_VERSION;
 docker run -i --detach --name $DOCKER_DB_NAME -e "gobiiuid=$GOBII_UID" -e "gobiigid=$GOBII_GID" -e "gobiiuserpassword=${DOCKER_GOBII_ADMIN_PASSWORD}"  -v ${BUNDLE_PARENT_PATH}:/data -v gobiipostgresetcubuntu:/etc/postgresql -v gobiipostgreslogubuntu:/var/log/postgresql -v gobiipostgreslibubuntu:/var/lib/postgresql -p $DOCKER_DB_PORT:5432 $DOCKER_HUB_USERNAME/$DOCKER_HUB_DB_NAME:$GOBII_RELEASE_VERSION;
 docker start $DOCKER_DB_NAME;
 
