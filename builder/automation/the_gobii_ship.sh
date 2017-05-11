@@ -67,7 +67,6 @@ eval docker exec $DOCKER_DB_NAME bash -c \"${DOCKER_CMD}\";
 DOCKER_CMD="chown -R gadm:gobii /data/$DOCKER_BUNDLE_NAME";
 eval docker exec $DOCKER_DB_NAME bash -c \"${DOCKER_CMD}\";
 
-exit 1;
 #--------------------------------------------------#
 ### WEB NODE ###
 #--------------------------------------------------#
@@ -81,19 +80,22 @@ docker start $DOCKER_WEB_NAME;
 
 #set the proper UID and GID and chown the hell out of everything (within the docker, of course)
 echo "Matching the docker gadm account to that of the host's and changing file ownerships..."
-docker exec $DOCKER_WEB_NAME bash -c '
-usermod -u $GOBII_UID gadm;
-groupmod -g $GOBII_GID gobii;
-find / -user 1000 -exec chown -h $GOBII_UID {} \;
-find / -group 1001 -exec chgrp -h $GOBII_GID {} \;
-';
+DOCKER_CMD="usermod -u $GOBII_UID gadm;";
+eval docker exec $DOCKER_WEB_NAME bash -c \"${DOCKER_CMD}\";
+DOCKER_CMD="groupmod -g $GOBII_GID gobii;";
+eval docker exec $DOCKER_WEB_NAME bash -c \"${DOCKER_CMD}\";
+DOCKER_CMD="find / -user 1000 -exec chown -h $GOBII_UID {} \; || :";
+eval docker exec $DOCKER_WEB_NAME bash -c \"${DOCKER_CMD}\";
+DOCKER_CMD="find / -group 1001 -exec chgrp -h $GOBII_GID {} \; || :";
+eval docker exec $DOCKER_WEB_NAME bash -c \"${DOCKER_CMD}\";
+
 
 echo "Updating gobii-web.xml..."
 #Update the gobii-web.xml file with installation params. The (not-so) fun part.
-docker exec $DOCKER_WEB_NAME bash -c '
-cd $DOCKER_BUNDLE_NAME/config; 
-bash gobiiconfig_wrapper.sh $CONFIGURATOR_PARAM_FILE
-';
+DOCKER_CMD="cd $DOCKER_BUNDLE_NAME/config; bash gobiiconfig_wrapper.sh $CONFIGURATOR_PARAM_FILE;";
+eval docker exec $DOCKER_WEB_NAME bash -c \"${DOCKER_CMD}\";
+
+exit 1;
 
 echo "Restarting tomcat under user gadm..."
 #Restart tomcat with the proper ownership
