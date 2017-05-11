@@ -27,7 +27,7 @@ java -jar gobiiconfig.jar -a -wfqpn $CONFIG_XML -gL  $BUNDLE_PATH/logs;
 #Create the crop directory structure, ex. /data/gobii_bundle/crops/rice/*
 #java -jar gobiiconfig.jar -a -wfqpn $CONFIG_XML -wdirs
 #unfortunately, I can't get rid of this now. This is for setting the parameters for integration testing, which we don't need for production
-java -jar gobiiconfig.jar -a -wfqpn $CONFIG_XML -gt  -gtcd $BUNDLE_PATH/test -gtcr  DEV  -gtcs  "java -jar gobiiconfig.jar"  -gtiu http://localhost:8080/gobii-dev -gtsf false -gtsh localhost -gtsp 22 -gtsu localhost -gtldu user2 -gtldp dummypass;
+java -jar gobiiconfig.jar -a -wfqpn $CONFIG_XML -gt  -gtcd $BUNDLE_PATH/test -gtcr  $CROP1  -gtcs  "java -jar gobiiconfig.jar"  -gtiu http://localhost:8080/$CROP1_CONTEXT_PATH -gtsf false -gtsh localhost -gtsp 22 -gtsu localhost -gtldu user2 -gtldp dummypass;
 #validate the new gobii configuration xml
 java -jar gobiiconfig.jar -validate -wfqpn $CONFIG_XML;
 
