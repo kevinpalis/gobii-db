@@ -45,10 +45,11 @@ docker start $DOCKER_DB_NAME;
 #set the proper UID and GID and chown the hell out of everything (within the docker, of course)
 echo "Matching the docker gadm account to that of the host and changing file ownerships..."
 #echo "Expanded variables: " $DOCKER_CMD
-DOCKER_CMD = "usermod -u $GOBII_UID gadm;"
-echo $DOCKER_CMD
+DOCKER_CMD="usermod -u $GOBII_UID gadm;";
+echo $DOCKER_CMD;
+eval docker exec $DOCKER_DB_NAME bash -c \"${DOCKER_CMD}\";
 #eval docker exec $DOCKER_DB_NAME bash -c \"${DOCKER_CMD}\";
-
+exit 1;
 docker exec $DOCKER_DB_NAME bash -c '
 usermod -u $GOBII_UID gadm;
 groupmod -g $GOBII_GID gobii;
