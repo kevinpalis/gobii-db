@@ -89,26 +89,21 @@ eval docker exec $DOCKER_WEB_NAME bash -c \"${DOCKER_CMD}\";
 DOCKER_CMD="find / -group 1001 -exec chgrp -h $GOBII_GID {} \; || :";
 eval docker exec $DOCKER_WEB_NAME bash -c \"${DOCKER_CMD}\";
 
-
 echo "Updating gobii-web.xml..."
 #Update the gobii-web.xml file with installation params. The (not-so) fun part.
 DOCKER_CMD="cd $DOCKER_BUNDLE_NAME/config; bash gobiiconfig_wrapper.sh $CONFIGURATOR_PARAM_FILE;";
 eval docker exec $DOCKER_WEB_NAME bash -c \"${DOCKER_CMD}\";
 
-exit 1;
-
 echo "Restarting tomcat under user gadm..."
 #Restart tomcat with the proper ownership
 #Stop tomcat and start with the gadm user
-docker exec $DOCKER_WEB_NAME bash -c '
-cd /usr/local/tomcat/bin/;
-sh shutdown.sh;
-';
-docker exec --user gadm $DOCKER_WEB_NAME bash -c '
-cd /usr/local/tomcat/bin/;
-sh startup.sh;
-';
+DOCKER_CMD="cd /usr/local/tomcat/bin/; sh shutdown.sh;";
+eval docker exec $DOCKER_WEB_NAME bash -c \"${DOCKER_CMD}\";
 
+DOCKER_CMD="cd /usr/local/tomcat/bin/; sh startup.sh;";
+eval docker exec --user gadm $DOCKER_WEB_NAME bash -c \"${DOCKER_CMD}\";
+
+exit 1;
 #--------------------------------------------------#
 ### COMPUTE NODE ###
 #--------------------------------------------------#
