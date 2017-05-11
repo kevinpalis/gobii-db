@@ -44,12 +44,25 @@ docker start $DOCKER_DB_NAME;
 
 #set the proper UID and GID and chown the hell out of everything (within the docker, of course)
 echo "Matching the docker gadm account to that of the host and changing file ownerships..."
-DOCKER_CMD="docker exec $DOCKER_DB_NAME bash -c 'usermod -u $GOBII_UID gadm; groupmod -g $GOBII_GID gobii; find / -user 1000 -exec chown -h $GOBII_UID {} \; find / -group 1001 -exec chgrp -h $GOBII_GID {} \;'"
-
+#evaluates to: docker exec gobii_db_irri bash -c 'usermod -u 4641 gadm; groupmod -g 80828 gobii; find / -user 1000 -exec chown -h 4641 {} \; find / -group 1001 -exec chgrp -h 80828 {} \;'
+#DOCKER_CMD="docker exec $DOCKER_DB_NAME bash -c 'usermod -u $GOBII_UID gadm; groupmod -g $GOBII_GID gobii; find / -user 1000 -exec chown -h $GOBII_UID {} \; find / -group 1001 -exec chgrp -h $GOBII_GID {} \;'"
+DOCKER_CMD="docker exec $DOCKER_DB_NAME bash -c '
+usermod -u $GOBII_UID gadm;
+groupmod -g $GOBII_GID gobii;
+find / -user 1000 -exec chown -h $GOBII_UID {} \;
+find / -group 1001 -exec chgrp -h $GOBII_GID {} \;
+'";
 echo "Expanded variables: " $DOCKER_CMD
 eval $DOCKER_CMD
 #eval docker exec $DOCKER_DB_NAME bash -c \"${DOCKER_CMD}\";
 
+#set the proper UID and GID and chown the hell out of everything
+docker exec ${bamboo.docker.db.name} bash -c '
+usermod -u ${bamboo.gobii.uid} gadm;
+groupmod -g ${bamboo.gobii.gid} gobii;
+find / -user 1000 -exec chown -h ${bamboo.gobii.uid} {} \;
+find / -group 1001 -exec chgrp -h ${bamboo.gobii.gid} {} \;
+';
 
 #clear the target directory of any old gobii_bundle
 echo "Copying the GOBII_BUNDLE to the shared directory/volume..."
