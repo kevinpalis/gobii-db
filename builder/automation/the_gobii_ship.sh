@@ -52,17 +52,11 @@ groupmod -g $GOBII_GID gobii;
 find / -user 1000 -exec chown -h $GOBII_UID {} \;
 find / -group 1001 -exec chgrp -h $GOBII_GID {} \;
 '";
-echo "Expanded variables: " $DOCKER_CMD
+#echo "Expanded variables: " $DOCKER_CMD
+
+docker exec $DOCKER_WEB_NAME bash -c 'usermod -u $GOBII_UID gadm;';
 eval $DOCKER_CMD
 #eval docker exec $DOCKER_DB_NAME bash -c \"${DOCKER_CMD}\";
-
-#set the proper UID and GID and chown the hell out of everything
-docker exec ${bamboo.docker.db.name} bash -c '
-usermod -u ${bamboo.gobii.uid} gadm;
-groupmod -g ${bamboo.gobii.gid} gobii;
-find / -user 1000 -exec chown -h ${bamboo.gobii.uid} {} \;
-find / -group 1001 -exec chgrp -h ${bamboo.gobii.gid} {} \;
-';
 
 #clear the target directory of any old gobii_bundle
 echo "Copying the GOBII_BUNDLE to the shared directory/volume..."
