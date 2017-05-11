@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+#WARNING: Do not run this script as SUDO! There are explicit sudo commands which will prompt you for password. But not everything should run as sudo.
 #usage: bash.sh <path-of-parms-file> <dockerhubpassw> <gobii_release_version>
 #This a stand-alone equivalent of my THE_GOBII_SHIP Bamboo plan
 #Requirements:
@@ -9,6 +10,10 @@
 #NOTE2: The order of execution is important.
 #@author: (palace) kdp44@cornell.edu
 
+if [[ $EUID -eq 0 ]]; then
+    error "This script should not be run using sudo or as the root user. Dangerous times, my friend."
+    exit 1
+fi
 
 #--------------------------------------------------#
 ### ALL NODES ###
@@ -44,7 +49,6 @@ docker start $DOCKER_DB_NAME;
 
 #set the proper UID and GID and chown the hell out of everything (within the docker, of course)
 echo "Matching the docker gadm account to that of the host and changing file ownerships..."
-#echo "Expanded variables: " $DOCKER_CMD
 DOCKER_CMD="usermod -u $GOBII_UID gadm;";
 eval docker exec $DOCKER_DB_NAME bash -c \"${DOCKER_CMD}\";
 DOCKER_CMD="groupmod -g $GOBII_GID gobii;";
@@ -56,11 +60,14 @@ eval docker exec $DOCKER_DB_NAME bash -c \"${DOCKER_CMD}\";
 
 #clear the target directory of any old gobii_bundle
 echo "Copying the GOBII_BUNDLE to the shared directory/volume..."
-docker exec $DOCKER_DB_NAME bash -c 'rm -rf /data/$DOCKER_BUNDLE_NAME';
-docker exec $DOCKER_DB_NAME bash -c 'cd /var; cp -R ${bamboo.docker.bundle.name} /data/$DOCKER_BUNDLE_NAME';
-docker exec $DOCKER_DB_NAME bash -c 'chown -R gadm:gobii /data/$DOCKER_BUNDLE_NAME';
+DOCKER_CMD="rm -rf /data/$DOCKER_BUNDLE_NAME";
+eval docker exec $DOCKER_DB_NAME bash -c \"${DOCKER_CMD}\";
+DOCKER_CMD="cd /var; cp -R ${bamboo.docker.bundle.name} /data/$DOCKER_BUNDLE_NAME";
+eval docker exec $DOCKER_DB_NAME bash -c \"${DOCKER_CMD}\";
+DOCKER_CMD="chown -R gadm:gobii /data/$DOCKER_BUNDLE_NAME";
+eval docker exec $DOCKER_DB_NAME bash -c \"${DOCKER_CMD}\";
 
-
+exit 1;
 #--------------------------------------------------#
 ### WEB NODE ###
 #--------------------------------------------------#
