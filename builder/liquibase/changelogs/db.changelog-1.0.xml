@@ -51,4 +51,5 @@
 	<include file="changelogs/changesets/mde_missing_extractbysample_cases.sql"/>
 	<include file="changelogs/changesets/cv_seed_data.sql"/>
 	<include file="changelogs/changesets/cv_germplasm_species_seed_data.sql"/>
+	<include file="changelogs/changesets/rice_contacts_rel_data.sql"/>
 </databaseChangeLog>
