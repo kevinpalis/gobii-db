@@ -44,13 +44,10 @@ docker start $DOCKER_DB_NAME;
 
 #set the proper UID and GID and chown the hell out of everything (within the docker, of course)
 echo "Matching the docker gadm account to that of the host and changing file ownerships..."
-#evaluates to: docker exec gobii_db_irri bash -c 'usermod -u 4641 gadm; groupmod -g 80828 gobii; find / -user 1000 -exec chown -h 4641 {} \; find / -group 1001 -exec chgrp -h 80828 {} \;'
-#DOCKER_CMD="docker exec $DOCKER_DB_NAME bash -c 'usermod -u $GOBII_UID gadm; groupmod -g $GOBII_GID gobii; find / -user 1000 -exec chown -h $GOBII_UID {} \; find / -group 1001 -exec chgrp -h $GOBII_GID {} \;'"
-
 #echo "Expanded variables: " $DOCKER_CMD
 DOCKER_CMD = "usermod -u $GOBII_UID gadm;"
 echo $DOCKER_CMD
-eval docker exec $DOCKER_DB_NAME bash -c $DOCKER_CMD;
+eval echo $DOCKER_CMD;
 #eval $DOCKER_CMD
 exit 1;
 #eval docker exec $DOCKER_DB_NAME bash -c \"${DOCKER_CMD}\";
