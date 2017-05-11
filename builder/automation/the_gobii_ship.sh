@@ -54,8 +54,9 @@ find / -group 1001 -exec chgrp -h $GOBII_GID {} \;
 '";
 #echo "Expanded variables: " $DOCKER_CMD
 
-docker exec $DOCKER_WEB_NAME bash -c 'usermod -u $GOBII_UID gadm;';
-eval $DOCKER_CMD
+docker exec $DOCKER_DB_NAME bash -c 'usermod -u $GOBII_UID gadm;';
+#eval $DOCKER_CMD
+exit 1;
 #eval docker exec $DOCKER_DB_NAME bash -c \"${DOCKER_CMD}\";
 
 #clear the target directory of any old gobii_bundle
