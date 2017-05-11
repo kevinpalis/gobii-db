@@ -127,25 +127,21 @@ eval docker exec $DOCKER_COMPUTE_NAME bash -c \"${DOCKER_CMD}\";
 
 
 #Grant permissions and set cronjobs
-echo "Granting permissions and setting cronjobs..."
-docker exec $DOCKER_COMPUTE_NAME bash -c '
-chmod -R +rx /data/$DOCKER_BUNDLE_NAME/loaders/;
-chmod -R +rx /data/$DOCKER_BUNDLE_NAME/extractors/;
-chmod -R g+rwx /data/$DOCKER_BUNDLE_NAME/crops/*/files;
-';
+echo "Granting permissions..."
+DOCKER_CMD="chmod -R +rx /data/$DOCKER_BUNDLE_NAME/loaders/;";
+eval docker exec $DOCKER_COMPUTE_NAME bash -c \"${DOCKER_CMD}\";
+DOCKER_CMD="chmod -R +rx /data/$DOCKER_BUNDLE_NAME/extractors/;";
+eval docker exec $DOCKER_COMPUTE_NAME bash -c \"${DOCKER_CMD}\";
+DOCKER_CMD="chmod -R g+rwx /data/$DOCKER_BUNDLE_NAME/crops/*/files;";
+eval docker exec $DOCKER_COMPUTE_NAME bash -c \"${DOCKER_CMD}\";
+
 
 #Sets the cron jobs for 2 crops, if there is no 2nd crop, no error will be thrown. This allows the script to be useful for CGs with 2 crops too, without any modifications.
-docker exec --user gadm $DOCKER_COMPUTE_NAME bash -c '
-cd /data/$DOCKER_BUNDLE_NAME/loaders/etc;
-crontab -r;
-sh addCron.sh /data/$DOCKER_BUNDLE_NAME $DOCKER_CROP1_NAME $DOCKER_CRON_INTERVAL $DOCKER_CRON_FILE_AGE;
-sh addCron.sh /data/$DOCKER_BUNDLE_NAME $DOCKER_CROP2_NAME $DOCKER_CRON_INTERVAL $DOCKER_CRON_FILE_AGE || true; 
-' || true;
-
-
-
-
-
-
-
+echo "Setting cron jobs..."
+DOCKER_CMD="cd /data/$DOCKER_BUNDLE_NAME/loaders/etc; crontab -r;";
+eval docker exec --user gadm $DOCKER_COMPUTE_NAME bash -c \"${DOCKER_CMD}\";
+DOCKER_CMD="cd /data/$DOCKER_BUNDLE_NAME/loaders/etc; sh addCron.sh /data/$DOCKER_BUNDLE_NAME $DOCKER_CROP1_NAME $DOCKER_CRON_INTERVAL $DOCKER_CRON_FILE_AGE;";
+eval docker exec --user gadm $DOCKER_COMPUTE_NAME bash -c \"${DOCKER_CMD}\";
+DOCKER_CMD="cd /data/$DOCKER_BUNDLE_NAME/loaders/etc; sh addCron.sh /data/$DOCKER_BUNDLE_NAME $DOCKER_CROP2_NAME $DOCKER_CRON_INTERVAL $DOCKER_CRON_FILE_AGE || true;";
+eval docker exec --user gadm $DOCKER_COMPUTE_NAME bash -c \"${DOCKER_CMD}\";
 
