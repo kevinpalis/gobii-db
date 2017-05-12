@@ -93,6 +93,9 @@ eval docker exec $DOCKER_WEB_NAME bash -c \"${DOCKER_CMD}\";
 
 echo "Updating gobii-web.xml..."
 #Update the gobii-web.xml file with installation params. The (not-so) fun part.
+#TODO: COPY THE PARAM FILE PASSED TO THIS DIRECTORY FIRST!
+echo "Copying the param file first..."
+docker cp $CONFIGURATOR_PARAM_FILE $DOCKER_WEB_NAME:/data/$DOCKER_BUNDLE_NAME/config/$CONFIGURATOR_PARAM_FILE;
 DOCKER_CMD="cd $DOCKER_BUNDLE_NAME/config; bash gobiiconfig_wrapper.sh $CONFIGURATOR_PARAM_FILE;";
 eval docker exec $DOCKER_WEB_NAME bash -c \"${DOCKER_CMD}\";
 
