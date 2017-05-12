@@ -9,7 +9,7 @@
 #NOTE: In case you need to break up this script in 3 nodes, you may need to restart Tomcat again at the end of the installation process.
 #NOTE2: The order of execution is important.
 #NOTE3: If weird things start happening on your dockers, try removing the images as well by running 'docker rmi' on each of the 3 nodes.
-# If you want a delete-all-images command, run this: sudo docker stop $(sudo docker ps -qa) || true && sudo docker rm $(sudo docker ps -aq) || true && sudo docker rmi $(sudo docker images -aq) || true
+# If you want a delete-all-images command, run this: sudo docker stop $(sudo docker ps -qa) || true && sudo docker rm $(sudo docker ps -aq) || true && sudo docker rmi $(sudo docker images -aq) || true || docker volume rm $(docker volume list -q) || true
 #@author: (palace) kdp44@cornell.edu
 
 if [[ $EUID -eq 0 ]]; then
@@ -80,6 +80,9 @@ docker pull $DOCKER_HUB_USERNAME/$DOCKER_HUB_WEB_NAME:$GOBII_RELEASE_VERSION;
 docker run -i --detach --name $DOCKER_WEB_NAME  -v $BUNDLE_PARENT_PATH:/data -p $DOCKER_WEB_PORT:8080 $DOCKER_HUB_USERNAME/$DOCKER_HUB_WEB_NAME:$GOBII_RELEASE_VERSION;
 docker start $DOCKER_WEB_NAME;
 
+echo "Copying the param file first..."
+docker cp $CONFIGURATOR_PARAM_FILE $DOCKER_WEB_NAME:/data/$DOCKER_BUNDLE_NAME/config/$CONFIGURATOR_PARAM_FILE;
+
 #set the proper UID and GID and chown the hell out of everything (within the docker, of course)
 echo "Matching the docker gadm account to that of the host's and changing file ownerships..."
 DOCKER_CMD="usermod -u $GOBII_UID gadm;";
@@ -94,8 +97,6 @@ eval docker exec $DOCKER_WEB_NAME bash -c \"${DOCKER_CMD}\";
 echo "Updating gobii-web.xml..."
 #Update the gobii-web.xml file with installation params. The (not-so) fun part.
 #TODO: COPY THE PARAM FILE PASSED TO THIS DIRECTORY FIRST!
-echo "Copying the param file first..."
-docker cp $CONFIGURATOR_PARAM_FILE $DOCKER_WEB_NAME:/data/$DOCKER_BUNDLE_NAME/config/$CONFIGURATOR_PARAM_FILE;
 DOCKER_CMD="cd $DOCKER_BUNDLE_NAME/config; bash gobiiconfig_wrapper.sh $CONFIGURATOR_PARAM_FILE;";
 eval docker exec $DOCKER_WEB_NAME bash -c \"${DOCKER_CMD}\";
 

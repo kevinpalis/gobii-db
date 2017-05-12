@@ -4,7 +4,7 @@
 
 source $1
 echo "Path to bundle: " $BUNDLE_PATH/config
-echo "Updating $CONFIG_XML..."
+echo "Updating $CONFIG_XML via $1..."
 cd $BUNDLE_PATH/config;
 #Set root gobii directory (global)
 java -jar gobiiconfig.jar -a -wfqpn $CONFIG_XML -gR "$BUNDLE_PATH";
@@ -22,12 +22,20 @@ java -jar gobiiconfig.jar -a -wfqpn $CONFIG_XML -c  $CROP1  -stP -soH $DB_HOST -
 #Set default crop to crop1 (global)
 java -jar gobiiconfig.jar -a -wfqpn $CONFIG_XML -gD $CROP1;
 
+#Configure web server for crop2
+java -jar gobiiconfig.jar -a -wfqpn $CONFIG_XML -c  $CROP2  -stW  -soH $WEB_HOST -soN $WEB_PORT -soR $CROP2_CONTEXT_PATH;
+#Configure PostGRES server for crop2
+java -jar gobiiconfig.jar -a -wfqpn $CONFIG_XML -c  $CROP2  -stP -soH $DB_HOST -soN $DB_PORT -soU $DB_USERNAME -soP $DB_PASS -soR $DB_NAME_CROP2;
+#Set default crop to crop2 (global)
+java -jar gobiiconfig.jar -a -wfqpn $CONFIG_XML -gD $CROP2;
+
 #Set log file directory (global)
 java -jar gobiiconfig.jar -a -wfqpn $CONFIG_XML -gL  $BUNDLE_PATH/logs;
 #Create the crop directory structure, ex. /data/gobii_bundle/crops/rice/*
 #java -jar gobiiconfig.jar -a -wfqpn $CONFIG_XML -wdirs
 #unfortunately, I can't get rid of this now. This is for setting the parameters for integration testing, which we don't need for production
 java -jar gobiiconfig.jar -a -wfqpn $CONFIG_XML -gt  -gtcd $BUNDLE_PATH/test -gtcr  $CROP1  -gtcs  "java -jar gobiiconfig.jar"  -gtiu http://localhost:8080/$CROP1_CONTEXT_PATH -gtsf false -gtsh localhost -gtsp 22 -gtsu localhost -gtldu user2 -gtldp dummypass;
+java -jar gobiiconfig.jar -a -wfqpn $CONFIG_XML -gt  -gtcd $BUNDLE_PATH/test -gtcr  $CROP2  -gtcs  "java -jar gobiiconfig.jar"  -gtiu http://localhost:8080/$CROP2_CONTEXT_PATH -gtsf false -gtsh localhost -gtsp 22 -gtsu localhost -gtldu user2 -gtldp dummypass;
 #validate the new gobii configuration xml
 java -jar gobiiconfig.jar -validate -wfqpn $CONFIG_XML;
 
