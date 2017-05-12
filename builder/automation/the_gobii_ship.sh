@@ -82,7 +82,7 @@ docker start $DOCKER_WEB_NAME;
 
 echo "Copying the param file and the config wrapper first..."
 docker cp $CONFIGURATOR_PARAM_FILE $DOCKER_WEB_NAME:/data/$DOCKER_BUNDLE_NAME/config/$CONFIGURATOR_PARAM_FILE;
-docker cp gobiiconfig_wrapper.sh $DOCKER_WEB_NAME:/data/$DOCKER_BUNDLE_NAME/config/gobiiconfig_wrapper;
+docker cp gobiiconfig_wrapper.sh $DOCKER_WEB_NAME:/data/$DOCKER_BUNDLE_NAME/config/gobiiconfig_wrapper.sh;
 
 #set the proper UID and GID and chown the hell out of everything (within the docker, of course)
 echo "Matching the docker gadm account to that of the host's and changing file ownerships..."
