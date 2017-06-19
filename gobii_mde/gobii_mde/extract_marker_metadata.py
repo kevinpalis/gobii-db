@@ -110,23 +110,35 @@ def main(isVerbose, connectionStr, datasetId, outputFile, allMeta, namesOnly, ma
 						markerWriter.writerow(headerRow)
 						mapsetRowNum = 0
 						mapsetRow = None
-						mapsetRowsList = list(mapsetReader)
-						totalMapsetRows = len(mapsetRowsList) - 1  # subtract the header
+						mapsetRowsList = list(mapsetReader)  # this line unfortunately moves the file pointer to the end of the file
+						mapsetMeta.seek(0)  # hence the need for this
+						next(mapsetReader)  # skip the header, again
+						totalMapsetRows = len(mapsetRowsList)
 						foundMapId = False
 						if isVerbose:
 							print("Total mapset rows: %s" % totalMapsetRows)
+							print("Looking for mapId=%s in %s" % (displayMapId, mapsetOutputFile))
+							print ("MapsetReader: %s \n MapsetMeta: %s" % (mapsetReader, mapsetMeta))
 						for mapsetRow in mapsetReader:
-								mapsetRowNum += 1
-								if mapsetRow[MAPID_COL_POS] == displayMapId:
-									foundMapId = True
-									if isVerbose:
-										print ('Integrating map data to marker meta file. Found mapId at row %s.' % mapsetRowNum)
-									break
-						columnsCount = len(mapsetRow[MAPID_COL_POS+1:])
-						fillerList = ['' for x in range(columnsCount)]
-						if isVerbose:
-							print('Mapset Row currently at marker_name=%s' % mapsetRow[MARKERNAME_COL_POS_1])
-							print('Total number of columns to append: %s' % columnsCount)
+							mapsetRowNum += 1
+							if mapsetRow[MAPID_COL_POS] == displayMapId:
+								foundMapId = True
+								if isVerbose:
+									print ('Integrating map data to marker meta file. Found mapId at row %s.' % mapsetRowNum)
+								break
+						if mapsetRow is None:
+							MDEUtility.printError('Failed to read the mapset file. Mapset row fetched is null. Please check if %s exists and contains correct data' % mapsetOutputFile)
+							sys.exit(16)
+						fillerList = []
+						try:
+							columnsCount = len(mapsetRow[MAPID_COL_POS+1:])
+							fillerList = ['' for x in range(columnsCount)]
+							if isVerbose:
+								print('Mapset Row currently at marker_name=%s' % mapsetRow[MARKERNAME_COL_POS_1])
+								print('Total number of columns to append: %s' % columnsCount)
+						except Exception as ce:
+							MDEUtility.printError('Failed to build the mapset column filler. Error: %s' % ce)
+							sys.exit(16)
 						eomReached = False
 						if mapsetRowNum >= totalMapsetRows and not foundMapId:
 							eomReached = True

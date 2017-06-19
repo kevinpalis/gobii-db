@@ -46,4 +46,14 @@
 	<include file="changelogs/changesets/chickpea_contacts_data.sql"/>
 	<include file="changelogs/changesets/cornell_contacts_data.sql"/>
 	<include file="changelogs/changesets/cbsu_gobii_contacts_data.sql"/>
+	<include file="changelogs/changesets/fix_missing_lg_stop.sql"/>
+	<include file="changelogs/changesets/mde_fix_extract_property_fields.sql"/>
+	<include file="changelogs/changesets/mde_missing_extractbysample_cases.sql"/>
+	<include file="changelogs/changesets/cv_seed_data.sql"/>
+	<include file="changelogs/changesets/cv_germplasm_species_seed_data.sql"/>
+	<include file="changelogs/changesets/rice_contacts_rel_data.sql"/>
+	<include file="changelogs/changesets/chickpea_contacts_rel_data.sql"/>
+	<include file="changelogs/changesets/sorghum_contacts_rel_data.sql"/>
+	<include file="changelogs/changesets/wheat_contacts_rel_data.sql"/>
+	<include file="changelogs/changesets/maize_contacts_rel_data.sql"/>
 </databaseChangeLog>
