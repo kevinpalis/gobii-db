@@ -56,4 +56,6 @@
 	<include file="changelogs/changesets/sorghum_contacts_rel_data.sql"/>
 	<include file="changelogs/changesets/wheat_contacts_rel_data.sql"/>
 	<include file="changelogs/changesets/maize_contacts_rel_data.sql"/>
+	<include file="changelogs/changesets/cv_germplasm_par_type_seed_data.sql"/>
+	<include file="changelogs/changesets/mde_add_par_type_for_sample.sql"/>
 </databaseChangeLog>
