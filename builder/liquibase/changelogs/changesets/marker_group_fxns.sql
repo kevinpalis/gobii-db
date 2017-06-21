@@ -34,10 +34,28 @@ CREATE OR REPLACE FUNCTION upsertMarkerGroup(_name text, _code text, _markers te
 --select jsonb_array_elements_text(value) from (select (jsonb_each(markers)).* from marker_group where name='MGroup1') fa where key='1';
 
 --changeset kpalis:deleteMarkerGroupByName context:general splitStatements:false
+DROP FUNCTION IF EXISTS deleteMarkerGroupByName(_name text);
 CREATE OR REPLACE FUNCTION deleteMarkerGroupByName(_name text)
 RETURNS integer AS $$
+	DECLARE
+        i integer;
     BEGIN
-    delete from marker_group where name = _name;
-    return id;
+    	delete from marker_group where name = _name;
+    	GET DIAGNOSTICS i = ROW_COUNT;
+      	return i;
+    END;
+$$ LANGUAGE plpgsql;
+
+--changeset kpalis:updateMarkerGroupName context:general splitStatements:false
+DROP FUNCTION IF EXISTS updateMarkerGroupName(_id integer, _name text);
+CREATE OR REPLACE FUNCTION updateMarkerGroupName(_id integer, _name text)
+RETURNS integer AS $$
+	DECLARE
+        i integer;
+    BEGIN
+    	update marker_group set name=_name
+     	where marker_group_id = _id;
+     	GET DIAGNOSTICS i = ROW_COUNT;
+      	return i;
     END;
 $$ LANGUAGE plpgsql;
