@@ -6,7 +6,7 @@
 
 --changeset kpalis:upsertMarkerGroup context:general splitStatements:false
 
---NOTE: Since JDBC still doesn't support jsonb as of the time I'm writing this, the markers parameter is of type text and is casted to jsonb in the function body. The expected format is your typical json (doh) of maker_id:[favorable_allele,...], ie. {1:[A,C], 4:[G]}
+--NOTE: Since JDBC still doesn't support jsonb as of the time I'm writing this, the markers parameter is of type text and is casted to jsonb in the function body. The expected format is your typical json (doh) of maker_id:[favorable_allele,...], ie. {"1":["A","C"], "4":["G"]}
 --this is a prerequisite for the 'on conflict' clause
 ALTER TABLE marker_group DROP CONSTRAINT IF EXISTS unq_markergrp_name;
 ALTER TABLE marker_group ADD CONSTRAINT unq_markergrp_name UNIQUE (name);
@@ -32,3 +32,12 @@ CREATE OR REPLACE FUNCTION upsertMarkerGroup(_name text, _code text, _markers te
 --Reference queries:
 --select jsonb_array_elements(value) from (select (jsonb_each(markers)).* from marker_group where name='MGroup1') fa where key='1';
 --select jsonb_array_elements_text(value) from (select (jsonb_each(markers)).* from marker_group where name='MGroup1') fa where key='1';
+
+--changeset kpalis:deleteMarkerGroupByName context:general splitStatements:false
+CREATE OR REPLACE FUNCTION deleteMarkerGroupByName(_name text)
+RETURNS integer AS $$
+    BEGIN
+    delete from marker_group where name = _name;
+    return id;
+    END;
+$$ LANGUAGE plpgsql;
