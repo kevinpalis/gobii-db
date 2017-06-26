@@ -1,5 +1,3 @@
-
-
 --liquibase formatted sql
 
 --changeset raza:cv_seed_data context:seed_general splitStatements:false

@@ -34,10 +34,41 @@ CREATE OR REPLACE FUNCTION upsertMarkerGroup(_name text, _code text, _markers te
 --select jsonb_array_elements_text(value) from (select (jsonb_each(markers)).* from marker_group where name='MGroup1') fa where key='1';
 
 --changeset kpalis:deleteMarkerGroupByName context:general splitStatements:false
+DROP FUNCTION IF EXISTS deleteMarkerGroupByName(_name text);
 CREATE OR REPLACE FUNCTION deleteMarkerGroupByName(_name text)
 RETURNS integer AS $$
+	DECLARE
+        i integer;
     BEGIN
-    delete from marker_group where name = _name;
-    return id;
+    	delete from marker_group where name = _name;
+    	GET DIAGNOSTICS i = ROW_COUNT;
+      	return i;
     END;
 $$ LANGUAGE plpgsql;
+
+--changeset kpalis:updateMarkerGroupName context:general splitStatements:false
+DROP FUNCTION IF EXISTS updateMarkerGroupName(_id integer, _name text);
+CREATE OR REPLACE FUNCTION updateMarkerGroupName(_id integer, _name text)
+RETURNS integer AS $$
+	DECLARE
+        i integer;
+    BEGIN
+    	update marker_group set name=_name
+     	where marker_group_id = _id;
+     	GET DIAGNOSTICS i = ROW_COUNT;
+      	return i;
+    END;
+$$ LANGUAGE plpgsql;
+
+--changeset kpalis:getAllMarkersInMarkerGroups context:general splitStatements:false
+DROP FUNCTION IF EXISTS getAllMarkersInMarkerGroups(_nameList text);
+CREATE OR REPLACE FUNCTION  getAllMarkersInMarkerGroups(_nameList text)
+RETURNS table (marker_group_name text, marker_id text, favorable_alleles text) AS $$
+  BEGIN
+    return query
+    select mgl.group_name, (jsonb_each_text(mg.markers)).*
+    from unnest(_nameList::text[]) mgl(group_name) --implicit lateral join
+    left join marker_group mg on mgl.group_name = mg.name;
+  END;
+$$ LANGUAGE plpgsql;
+-- Sample usage: select * from getallmarkersinmarkergroups('{MGroup1, MGroup2}');
