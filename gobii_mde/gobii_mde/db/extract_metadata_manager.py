@@ -193,6 +193,11 @@ class ExtractMetadataManager:
 		res = self.cur.fetchall()
 		return res
 
+	def getMarkerIdsFromGroups(self, markerGroupList):
+		self.cur.execute("select distinct marker_id from getAllMarkersInMarkerGroupsById(%s)", ("{"+(','.join(markerGroupList))+"}",))
+		res = self.cur.fetchall()
+		return res
+
 	def getDnarunIds(self, piId, projectId, sampleType, sampleNames):
 		print("Deriving Dnarun IDs...")
 		if sampleNames and sampleType > 0:

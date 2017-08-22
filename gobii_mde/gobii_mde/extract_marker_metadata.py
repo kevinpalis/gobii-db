@@ -30,6 +30,8 @@ def main(isVerbose, connectionStr, datasetId, outputFile, allMeta, namesOnly, ma
 		elif namesOnly:  # deprecated
 			exMgr.createMarkerNamesFile(outputFile, datasetId, mapId)
 		else:
+			markerListFromGrp = []
+			markerListFromNames = []
 			if extractionType == 1:  # by dataset
 				if isVerbose:
 					print("Generating marker metadata by dataset.")
@@ -40,11 +42,11 @@ def main(isVerbose, connectionStr, datasetId, outputFile, allMeta, namesOnly, ma
 				if markerGroupList:
 					if isVerbose:
 						print("Deriving marker IDs from a list of marker groups.")
-					res = exMgr.getMarkerIdsFromGroups(markerGroupList)
+					res = exMgr.getMarkerIdsInGroups(markerGroupList)
 					if res is None:
 						MDEUtility.printError('Invalid marker group passed.')
 						sys.exit(13)
-					markerList = [str(i[0]) for i in res]
+					markerListFromGrp = [str(i[0]) for i in res]
 					if not markerList:
 						MDEUtility.printError("Marker groups passed don't have any markers.")
 						#sys.exit(15)
@@ -57,10 +59,17 @@ def main(isVerbose, connectionStr, datasetId, outputFile, allMeta, namesOnly, ma
 					if res is None:
 						MDEUtility.printError('MarkerNames and PlatformList cannot be both empty.')
 						sys.exit(13)
-					markerList = [str(i[0]) for i in res]
-					if not markerList:
+					markerListFromNames = [str(i[0]) for i in res]
+					if not markerListFromNames:
 						MDEUtility.printError("Resulting list of marker IDs is empty. Nothing to extract.")
 						sys.exit(15)
+
+				if markerListFromGrp and markerListFromNames:
+					markerList = list(set(markerListFromGrp + markerListFromNames + markerList))
+				elif markerListFromGrp:
+					markerList = list(set(markerListFromGrp + markerList))
+				elif markerListFromNames:
+					markerList = list(set(markerListFromNames + markerList))
 				exMgr.createQCMarkerMetadataByMarkerList(outputFile, markerList)
 				if datasetType is None:
 					MDEUtility.printError('Dataset type is required for extraction by marker list.')

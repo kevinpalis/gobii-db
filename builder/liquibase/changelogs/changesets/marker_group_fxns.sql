@@ -72,3 +72,17 @@ RETURNS table (marker_group_name text, marker_id text, favorable_alleles text) A
   END;
 $$ LANGUAGE plpgsql;
 -- Sample usage: select * from getallmarkersinmarkergroups('{MGroup1, MGroup2}');
+
+--changeset kpalis:getAllMarkersInMarkerGroups context:general splitStatements:false
+DROP FUNCTION IF EXISTS getAllMarkersInMarkerGroupsById(_idList text);
+CREATE OR REPLACE FUNCTION  getAllMarkersInMarkerGroupsById(_idList text)
+RETURNS table (marker_group_id integer, marker_group_name text, marker_id text, favorable_alleles text) AS $$
+  BEGIN
+    return query
+    select mg.marker_group_id, mg.name, (jsonb_each_text(mg.markers)).*
+    from unnest(_idList::text[]) mgl(marker_group_id)
+    left join marker_group mg on mgl.marker_group_id::integer = mg.marker_group_id;
+  END;
+$$ LANGUAGE plpgsql;
+
+
