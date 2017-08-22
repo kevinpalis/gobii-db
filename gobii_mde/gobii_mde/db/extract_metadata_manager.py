@@ -193,7 +193,7 @@ class ExtractMetadataManager:
 		res = self.cur.fetchall()
 		return res
 
-	def getMarkerIdsFromGroups(self, markerGroupList):
+	def getMarkerIdsInGroups(self, markerGroupList):
 		self.cur.execute("select distinct marker_id from getAllMarkersInMarkerGroupsById(%s)", ("{"+(','.join(markerGroupList))+"}",))
 		res = self.cur.fetchall()
 		return res

@@ -32,14 +32,7 @@ def main(isVerbose, connectionStr, datasetId, outputFile, allMeta, namesOnly, ma
 		else:
 			markerListFromGrp = []
 			markerListFromNames = []
-			if extractionType == 1:  # by dataset
-				if isVerbose:
-					print("Generating marker metadata by dataset.")
-				exMgr.createQCMarkerMetadataFile(outputFile, datasetId, mapId)
-			elif extractionType == 2:  # by markers
-				if isVerbose:
-					print("Generating marker metadata by marker list.")
-				if markerGroupList:
+			if markerGroupList:
 					if isVerbose:
 						print("Deriving marker IDs from a list of marker groups.")
 					res = exMgr.getMarkerIdsInGroups(markerGroupList)
@@ -50,7 +43,13 @@ def main(isVerbose, connectionStr, datasetId, outputFile, allMeta, namesOnly, ma
 					if not markerList:
 						MDEUtility.printError("Marker groups passed don't have any markers.")
 						#sys.exit(15)
-				######### TODO: APPEND TO MARKERLIST
+			if extractionType == 1:  # by dataset
+				if isVerbose:
+					print("Generating marker metadata by dataset.")
+				exMgr.createQCMarkerMetadataFile(outputFile, datasetId, mapId)
+			elif extractionType == 2:  # by markers
+				if isVerbose:
+					print("Generating marker metadata by marker list.")
 				if not markerList:
 					if isVerbose:
 						print("Deriving marker IDs based on the given parameters: markerNames, platformList.")
@@ -64,12 +63,17 @@ def main(isVerbose, connectionStr, datasetId, outputFile, allMeta, namesOnly, ma
 						MDEUtility.printError("Resulting list of marker IDs is empty. Nothing to extract.")
 						sys.exit(15)
 
+				'''
 				if markerListFromGrp and markerListFromNames:
 					markerList = list(set(markerListFromGrp + markerListFromNames + markerList))
 				elif markerListFromGrp:
 					markerList = list(set(markerListFromGrp + markerList))
 				elif markerListFromNames:
 					markerList = list(set(markerListFromNames + markerList))
+				'''
+				markerList = list(set(markerListFromGrp + markerListFromNames + markerList))
+				if isVerbose:
+					print("markerList = ", markerList)
 				exMgr.createQCMarkerMetadataByMarkerList(outputFile, markerList)
 				if datasetType is None:
 					MDEUtility.printError('Dataset type is required for extraction by marker list.')
@@ -97,6 +101,7 @@ def main(isVerbose, connectionStr, datasetId, outputFile, allMeta, namesOnly, ma
 					if res2 is None:
 						MDEUtility.printError('No Marker IDs fetched. Possible invalid usage. Check your criteria.')
 						sys.exit(13)
+					#Concatenate markers from markergroup and markerlist IF we are going to allow that capability
 					markerList = [str(i[0]) for i in res2]
 					if not markerList:
 						MDEUtility.printError("Resulting list of marker IDs is empty. Nothing to extract.")
