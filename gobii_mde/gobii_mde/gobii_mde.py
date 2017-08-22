@@ -40,6 +40,7 @@ def main(argv):
 		platformList = []
 		piId = -1
 		projectId = -1
+		markerGroupList = ""
 		#1 = By dataset, 2 = By Markers, 3 = By Samples
 		extractionType = -1
 		#1 = Germplasm Names, 2 = External Codes, 3 = DnaSample Names
@@ -47,7 +48,7 @@ def main(argv):
 		exitCode = 0
 		#PARSE PARAMETERS/ARGUMENTS
 		try:
-			opts, args = getopt.getopt(argv, "hc:m:s:d:p:avnM:lD:x:y:b:X:P:t:Y:", ["connectionString=", "markerOutputFile=", "sampleOutputFile=", "datasetId=", "projectOutputFile=", "all", "verbose", "namesOnly", "map=", "includeChrLen", "displayMap=", "markerList=", "sampleList=", "mapsetOutputFile=", "extractByMarkers", "markerNames=", "platformList=", "datasetType=", "extractByDataset", "piId=", "projectId=", "sampleType=", "sampleNames=", "extractBySamples"])
+			opts, args = getopt.getopt(argv, "hc:m:s:d:p:avnM:lD:x:y:b:X:P:t:Y:G:", ["connectionString=", "markerOutputFile=", "sampleOutputFile=", "datasetId=", "projectOutputFile=", "all", "verbose", "namesOnly", "map=", "includeChrLen", "displayMap=", "markerList=", "sampleList=", "mapsetOutputFile=", "extractByMarkers", "markerNames=", "platformList=", "datasetType=", "extractByDataset", "piId=", "projectId=", "sampleType=", "sampleNames=", "extractBySamples", "markerGroupList="])
 			#print (opts, args)
 			if len(args) < 2 and len(opts) < 2:
 				printUsageHelp(2)
@@ -97,7 +98,7 @@ def main(argv):
 				try:
 					platformList = arg.split(",")
 				except Exception as e:
-					MDEUtility.printError("Invalid platformList format. Only comma-delimited ID list is accepted. Error: %s" % str(e))
+					MDEUtility.printError("Invalid platform list format. Only comma-delimited ID list is accepted. Error: %s" % str(e))
 					exitCode = 6
 					sys.exit(exitCode)
 			elif opt in ("t", "--datasetType"):
@@ -110,6 +111,13 @@ def main(argv):
 				sampleType = int(arg)
 			elif opt in ("-Y", "--sampleNames"):
 				sampleNamesFile = arg
+			elif opt in ("-G", "--markerGroupList"):
+				try:
+					markerGroupList = arg.split(",")
+				except Exception as e:
+					MDEUtility.printError("Invalid marker group format. Only comma-delimited ID list is accepted. Error: %s" % str(e))
+					exitCode = 6
+					sys.exit(exitCode)
 
 		#VALIDATIONS
 		if connectionStr == "" or markerOutputFile == "" or sampleOutputFile == "":
@@ -159,7 +167,7 @@ def main(argv):
 		try:
 			#if verbose:
 			#	print("Generating marker metadata file...")
-			mFile, markerList, sampleList = extract_marker_metadata.main(verbose, connectionStr, datasetId, markerOutputFile, allMeta, namesOnly, mapId, includeChrLen, displayMap, markerList, sampleList, mapsetOutputFile, extractionType, datasetType, markerNames, platformList, piId, projectId, sampleType, sampleNames)
+			mFile, markerList, sampleList = extract_marker_metadata.main(verbose, connectionStr, datasetId, markerOutputFile, allMeta, namesOnly, mapId, includeChrLen, displayMap, markerList, sampleList, mapsetOutputFile, extractionType, datasetType, markerNames, platformList, piId, projectId, sampleType, sampleNames, markerGroupList)
 			if extractionType == 2 and not markerList:
 				MDEUtility.printError("Resulting list of marker IDs is empty. Nothing to extract.")
 				sys.exit(7)

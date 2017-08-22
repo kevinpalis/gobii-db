@@ -17,7 +17,7 @@ import traceback
 from util.mde_utility import MDEUtility
 from db.extract_metadata_manager import ExtractMetadataManager
 
-def main(isVerbose, connectionStr, datasetId, outputFile, allMeta, namesOnly, mapId, includeChrLen, displayMapId, markerList, sampleList, mapsetOutputFile, extractionType, datasetType, markerNames, platformList, piId, projectId, sampleType, sampleNames):
+def main(isVerbose, connectionStr, datasetId, outputFile, allMeta, namesOnly, mapId, includeChrLen, displayMapId, markerList, sampleList, mapsetOutputFile, extractionType, datasetType, markerNames, platformList, piId, projectId, sampleType, sampleNames, markerGroupList):
 	MAPID_COL_POS = 2
 	MARKERNAME_COL_POS_1 = 0
 	MARKERNAME_COL_POS_2 = 0
@@ -37,6 +37,18 @@ def main(isVerbose, connectionStr, datasetId, outputFile, allMeta, namesOnly, ma
 			elif extractionType == 2:  # by markers
 				if isVerbose:
 					print("Generating marker metadata by marker list.")
+				if markerGroupList:
+					if isVerbose:
+						print("Deriving marker IDs from a list of marker groups.")
+					res = exMgr.getMarkerIdsFromGroups(markerGroupList)
+					if res is None:
+						MDEUtility.printError('Invalid marker group passed.')
+						sys.exit(13)
+					markerList = [str(i[0]) for i in res]
+					if not markerList:
+						MDEUtility.printError("Marker groups passed don't have any markers.")
+						#sys.exit(15)
+				######### TODO: APPEND TO MARKERLIST
 				if not markerList:
 					if isVerbose:
 						print("Deriving marker IDs based on the given parameters: markerNames, platformList.")
@@ -188,6 +200,6 @@ def main(isVerbose, connectionStr, datasetId, outputFile, allMeta, namesOnly, ma
 #extractionType, datasetType, markerNames, platformList
 if __name__ == "__main__":
 	if len(sys.argv) < 15:
-		print("Please supply the parameters. \nUsage: extract_marker_metadata <db_connection_string> <dataset_id> <output_file_abs_path> <all_meta> <names_only:boolean> <map_id> <includeChrLen:boolean> <displayMapId> <markerList> <sampleList> <mapsetOutputFile> <extractionType> <datasetType> <markerNames> <platformList> <piId> <projectId> <sampleType> <sampleNames>")
+		print("Please supply the parameters. \nUsage: extract_marker_metadata <db_connection_string> <dataset_id> <output_file_abs_path> <all_meta> <names_only:boolean> <map_id> <includeChrLen:boolean> <displayMapId> <markerList> <sampleList> <mapsetOutputFile> <extractionType> <datasetType> <markerNames> <platformList> <piId> <projectId> <sampleType> <sampleNames> <markerGroupList>")
 		sys.exit(1)
-	main(True, str(sys.argv[1]), str(sys.argv[2]), str(sys.argv[3]), str(sys.argv[4]), str(sys.argv[5]), str(sys.argv[6]), str(sys.argv[7]), str(sys.argv[8]), str(sys.argv[9]), str(sys.argv[10]), str(sys.argv[11]), str(sys.argv[12]), str(sys.argv[13]), str(sys.argv[14]), str(sys.argv[15]), str(sys.argv[16]), str(sys.argv[17]), str(sys.argv[18]), str(sys.argv[19]))
+	main(True, str(sys.argv[1]), str(sys.argv[2]), str(sys.argv[3]), str(sys.argv[4]), str(sys.argv[5]), str(sys.argv[6]), str(sys.argv[7]), str(sys.argv[8]), str(sys.argv[9]), str(sys.argv[10]), str(sys.argv[11]), str(sys.argv[12]), str(sys.argv[13]), str(sys.argv[14]), str(sys.argv[15]), str(sys.argv[16]), str(sys.argv[17]), str(sys.argv[18]), str(sys.argv[19], str(sys.argv[20]))
