@@ -177,7 +177,7 @@ class ExtractMetadataManager:
 			self.cur.copy_expert(sql, outputFile, 20480)
 		outputFile.close()
 
-	def getMarkerIds(self, markerNames, platformList):
+	def getMarkerIds(self, markerNames, platformList, markerGroupList):
 		#print("Generating marker ids...")
 		if markerNames and platformList:
 			#print(self.cur.mogrify("select marker_id from getMarkerIdsByMarkerNamesAndPlatformList(%s, %s)", ("{"+(','.join(markerNames))+"}", "{"+(','.join(platformList))+"}")))
@@ -185,7 +185,7 @@ class ExtractMetadataManager:
 		elif markerNames and not platformList:
 			#print(self.cur.mogrify("select marker_id from getMarkerIdsByMarkerNames(%s)", ("{"+(','.join(markerNames))+"}",)))
 			self.cur.execute("select marker_id from getMarkerIdsByMarkerNames(%s)", ("{"+(','.join(markerNames))+"}",))
-		elif platformList and not markerNames:
+		elif platformList and not markerNames and not markerGroupList:  # only get all markers from given platform list IF there were no marker groups given
 			#print(self.cur.mogrify("select marker_id from getMarkerIdsByPlatformList(%s)", ("{"+(','.join(platformList))+"}",)))
 			self.cur.execute("select marker_id from getMarkerIdsByPlatformList(%s)", ("{"+(','.join(platformList))+"}",))
 		else:  # both params are null
@@ -193,8 +193,12 @@ class ExtractMetadataManager:
 		res = self.cur.fetchall()
 		return res
 
-	def getMarkerIdsInGroups(self, markerGroupList):
-		self.cur.execute("select distinct marker_id from getAllMarkersInMarkerGroupsById(%s)", ("{"+(','.join(markerGroupList))+"}",))
+	def getMarkerIdsInGroups(self, markerGroupList, platformList):
+		if not platformList:
+			platformList = None
+		else:
+			platformList = "{"+(','.join(platformList))+"}"
+		self.cur.execute("select distinct marker_id from getAllMarkersInMarkerGroups(%s, %s)", ("{"+(','.join(markerGroupList))+"}", platformList))
 		res = self.cur.fetchall()
 		return res
 

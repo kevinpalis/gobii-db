@@ -131,8 +131,8 @@ def main(argv):
 				MDEUtility.printError("Invalid usage. Extraction by dataset requires a dataset ID.")
 				printUsageHelp(6)
 		elif extractionType == 2:
-			if datasetType < 1 or (markerNamesFile == "" and platformList == ""):
-				MDEUtility.printError("Invalid usage. Extraction by marker list requires a dataset type and at least one of: markerNamesFile and platformList.")
+			if markerNamesFile == "" and not platformList and not markerGroupList:
+				MDEUtility.printError("Invalid usage. Extraction by marker list requires at least one of: markerNamesFile, platformList, or markerGroupList.")
 				printUsageHelp(6)
 		elif extractionType == 3:
 			if datasetType < 1:
@@ -226,7 +226,7 @@ def printUsageHelp(eCode):
 	print ("\t--sampleType = Tells the MDE what kind of sample names are in the file passed to --sampleNames. Valid values: 1 = germplasm_name, 2 = external_code, 3 = dnasample_name.")
 	print ("\t--projectId = Filters by project for extraction by samples. This can also be used independently to pull all samples in a given project.")
 	print ("\t--piId = Filters by PI contact for extraction by samples. This can also be used independently to pull all samples under a given PI.")
-	print ("\t-G or --markerGroupList = Supplies the file containing a list of marker_ids, newline-delimited.")
+	print ("\t-G or --markerGroupList = Comma-delimited string of markerGroup IDs to filter --extractionByMarkers.")
 	print ("\t-v or --verbose = Print the status of the MDE in more detail.")
 	#---------------------------
 	print ("\nDEPRECATED:")
