@@ -72,3 +72,35 @@ RETURNS table (marker_group_name text, marker_id text, favorable_alleles text) A
   END;
 $$ LANGUAGE plpgsql;
 -- Sample usage: select * from getallmarkersinmarkergroups('{MGroup1, MGroup2}');
+
+--changeset kpalis:getAllMarkersInMarkerGroupsById context:general splitStatements:false
+DROP FUNCTION IF EXISTS getAllMarkersInMarkerGroupsById(_idList text);
+CREATE OR REPLACE FUNCTION  getAllMarkersInMarkerGroupsById(_idList text)
+RETURNS table (marker_group_id integer, marker_group_name text, marker_id text, favorable_alleles text) AS $$
+  BEGIN
+    return query
+    select mg.marker_group_id, mg.name, (jsonb_each_text(mg.markers)).*
+    from unnest(_idList::text[]) mgl(marker_group_id)
+    left join marker_group mg on mgl.marker_group_id::integer = mg.marker_group_id;
+  END;
+$$ LANGUAGE plpgsql;
+-- Sample usage: select * from getAllMarkersInMarkerGroupsById('{1, 3}')
+
+--changeset kpalis:getAllMarkersInMarkerGroupsByIdAndPlatform context:general splitStatements:false
+DROP FUNCTION IF EXISTS getAllMarkersInMarkerGroups(_idList text, _platformList text);
+CREATE OR REPLACE FUNCTION  getAllMarkersInMarkerGroups(_idList text, _platformList text)
+RETURNS table (marker_group_id integer, marker_group_name text, marker_id text, favorable_alleles text) AS $$
+  BEGIN
+    return query
+    select t1.* from 
+    (select mg.marker_group_id, mg.name, (jsonb_each_text(mg.markers)).*
+    from unnest(_idList::text[]) mgl(marker_group_id)
+    left join marker_group mg on mgl.marker_group_id::integer = mg.marker_group_id) as t1
+    inner join marker m on m.marker_id = t1.key::integer
+    where (_platformList is null OR m.platform_id in (select * from unnest(_platformList::integer[])));
+  END;
+$$ LANGUAGE plpgsql;
+--select * from getAllMarkersInMarkerGroups('{1, 3}', '{2}')
+
+
+
