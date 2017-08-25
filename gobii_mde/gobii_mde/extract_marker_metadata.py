@@ -103,6 +103,7 @@ def main(isVerbose, connectionStr, datasetId, outputFile, allMeta, namesOnly, ma
 						sys.exit(13)
 					#Concatenate markers from markergroup and markerlist IF we are going to allow that capability
 					markerList = [str(i[0]) for i in res2]
+					markerList = list(set(markerList))  # remove duplicates - for some reasons I cannot comprehend yet, joining a jsonb column key using ? is producing duplicates, while ?| array does not
 					if not markerList:
 						MDEUtility.printError("Resulting list of marker IDs is empty. Nothing to extract.")
 						sys.exit(15)
