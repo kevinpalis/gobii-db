@@ -86,3 +86,35 @@ AS $function$
      where dataset_id = id;
    END;
 $function$;
+
+
+/*
+CVs to seed for the job table:
+type_id
+	load
+	extract
+	analysis
+payload_type_id
+	samples
+	markers
+	matrix
+	marker_sample
+	all_meta
+status
+	pending
+	in_progress
+	failed
+	completed
+*/
+--changeset kpalis:job_module_seed_data context:general splitStatements:false
+select * from createcvgroup('job_type', 'Types of jobs that will be tracked in the job table', 1);
+select * from createCVinGroup('job_type',1,'load','A data loading job',1,null,null,1);
+select * from createCVinGroup('job_type',1,'extract','A data extraction job',1,null,null,1);
+select * from createCVinGroup('job_type',1,'analysis','A data analysis job',1,null,null,1);
+
+select * from createcvgroup('payload_type', 'Types of payloads that will be tracked in the job table', 1);
+select * from createCVinGroup('payload_type',1,'samples','Sample data',1,null,null,1);
+select * from createCVinGroup('payload_type',1,'markers','Marker data',1,null,null,1);
+select * from createCVinGroup('payload_type',1,'matrix','Matrix/genotype data',1,null,null,1);
+select * from createCVinGroup('payload_type',1,'marker_samples','Sample data',1,null,null,1);
+select * from createCVinGroup('payload_type',1,'all_meta','All meta data',1,null,null,1);
