@@ -118,3 +118,9 @@ select * from createCVinGroup('payload_type',1,'markers','Marker data',1,null,nu
 select * from createCVinGroup('payload_type',1,'matrix','Matrix/genotype data',1,null,null,1);
 select * from createCVinGroup('payload_type',1,'marker_samples','Sample data',1,null,null,1);
 select * from createCVinGroup('payload_type',1,'all_meta','All meta data',1,null,null,1);
+
+select * from createcvgroup('job_status', 'Status of jobs', 1);
+select * from createCVinGroup('job_status',1,'pending','The job is pending.',1,null,null,1);
+select * from createCVinGroup('job_status',1,'in_progress','The job is in progress.',1,null,null,1);
+select * from createCVinGroup('job_status',1,'failed','The job has failed.',1,null,null,1);
+select * from createCVinGroup('job_status',1,'completed','The job successfully finished.',1,null,null,1);
