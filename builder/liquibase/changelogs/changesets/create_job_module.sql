@@ -162,3 +162,31 @@ AS $function$
     	update job set type_id=_type_id, payload_type_id=_payload_type_id, status=_status_id, message=_message, submitted_by=_submitted_by where job_id = id;
     END;
 $function$;
+
+--changeset kpalis:add_job_status_per_Josh context:general splitStatements:false
+--digest
+select * from createCVinGroup('job_status',1,'validation','Instruction file validation.',1,null,null,1);
+select * from createCVinGroup('job_status',1,'digest','Creating and storing digester files.',1,null,null,1);
+select * from createCVinGroup('job_status',1,'transformation','Transforming the matrix files.',1,null,null,1);
+select * from createCVinGroup('job_status',1,'metadata_load','Loading metadata files into postgres.',1,null,null,1);
+select * from createCVinGroup('job_status',1,'matrix_load','Loading into HDF5 files.',1,null,null,1);
+
+--failure
+select * from createCVinGroup('job_status',1,'aborted','The file processing aborted before metadata load.',1,null,null,1);
+
+--extract
+select * from createCVinGroup('job_status',1,'metadata_extract','Pulling metadata information.',1,null,null,1);
+select * from createCVinGroup('job_status',1,'matrix_extract','Pulling matrix data.',1,null,null,1);
+select * from createCVinGroup('job_status',1,'final_assembly','Creating the output files.',1,null,null,1);
+select * from createCVinGroup('job_status',1,'qc_processing','Processing a QC job.',1,null,null,1);
+
+--select * from updatejob(1, 'load', 'markers', 'in_progress', 'Hello running world!', 1);
+
+--changeset123 kpalis:utility_fxns_for_job_2 context:general splitStatements:false
+--getJobStatus
+
+--getAllJobsByStatus
+
+--getDatasetJobStatus
+
+--
