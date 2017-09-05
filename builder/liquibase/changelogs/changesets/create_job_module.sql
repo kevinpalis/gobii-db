@@ -162,7 +162,8 @@ AS $function$
     	update job set type_id=_type_id, payload_type_id=_payload_type_id, status=_status_id, message=_message, submitted_by=_submitted_by where job_id = id;
     END;
 $function$;
-
+--select * from updatejob(1, 'load', 'markers', 'in_progress', 'Hello running world!', 1);
+---========================================================09052017=================================================================================
 --changeset kpalis:add_job_status_per_Josh context:general splitStatements:false
 --digest
 select * from createCVinGroup('job_status',1,'validation','Instruction file validation.',1,null,null,1);
@@ -180,13 +181,99 @@ select * from createCVinGroup('job_status',1,'matrix_extract','Pulling matrix da
 select * from createCVinGroup('job_status',1,'final_assembly','Creating the output files.',1,null,null,1);
 select * from createCVinGroup('job_status',1,'qc_processing','Processing a QC job.',1,null,null,1);
 
---select * from updatejob(1, 'load', 'markers', 'in_progress', 'Hello running world!', 1);
+--changeset kpalis:streamlining_getting_cv_id context:general splitStatements:false
+CREATE OR REPLACE FUNCTION getCvId(_term text, _groupname text, _grouptype integer, OUT cvid integer)
+ RETURNS integer
+ LANGUAGE plpgsql
+AS $function$
+    BEGIN
+    	select cv.cv_id into cvid 
+    	from cv inner join cvgroup cg on cv.cvgroup_id = cg.cvgroup_id
+    	where cg.type=_grouptype
+    	and cg.name=_groupname
+    	and cv.term=_term;
+    END;
+$function$;
+--usage: select * from getCvId('digest', 'job_status', 1);
 
---changeset123 kpalis:utility_fxns_for_job_2 context:general splitStatements:false
---getJobStatus
+----changeset kpalis:adding_job_name_col context:general splitStatements:false
+ALTER TABLE job ADD COLUMN name text;
+ALTER TABLE job ADD CONSTRAINT unique_job_name UNIQUE ( name );
+CREATE INDEX IF NOT EXISTS idx_job_name ON job ( name );
+
+--cleanup. It's a grand PITA to be maintaining more functions than I need to.
+DROP FUNCTION IF EXISTS createjob(_type_id integer, _payload_type_id integer, _status integer, _message text, _submitted_by integer, OUT id integer);
+DROP FUNCTION IF EXISTS updatejob(id integer, _type_id integer, _payload_type_id integer, _status integer, _message text, _submitted_by integer);
+
+--changeset kpalis:updates_on_job_fxns_for_addedcol_cvids context:general splitStatements:false
+DROP FUNCTION IF EXISTS createjob(_type text, _payload_type text, _status text, _message text, _submitted_by integer, OUT id integer);
+CREATE OR REPLACE FUNCTION createjob(_name text, _type text, _payload_type text, _status text, _message text, _submitted_by integer, OUT id integer)
+ RETURNS integer
+ LANGUAGE plpgsql
+AS $function$
+	DECLARE
+        _type_id integer;
+        _payload_type_id integer;
+        _status_id integer;
+    BEGIN
+    	select cvid into _type_id from getCvId(_type, 'job_type', 1);
+    	select cvid into _payload_type_id from getCvId(_payload_type, 'payload_type', 1);
+    	select cvid into _status_id from getCvId(_status, 'job_status', 1);
+        insert into job (type_id, payload_type_id, status, message, submitted_by, name)
+          values (_type_id, _payload_type_id, _status_id, _message, _submitted_by, _name);
+        select lastval() into id;
+    END;
+$function$;
+--select * from createjob('job_with_a_name_1', 'load', 'samples', 'pending', 'Hello samples1!', 1);
+
+DROP FUNCTION IF EXISTS updatejob(id integer, _type text, _payload_type text, _status text, _message text, _submitted_by integer);
+CREATE OR REPLACE FUNCTION updatejob(id integer, _name text, _type text, _payload_type text, _status text, _message text, _submitted_by integer)
+ RETURNS void
+ LANGUAGE plpgsql
+AS $function$
+	DECLARE
+        _type_id integer;
+        _payload_type_id integer;
+        _status_id integer;
+    BEGIN
+    	select cvid into _type_id from getCvId(_type, 'job_type', 1);
+    	select cvid into _payload_type_id from getCvId(_payload_type, 'payload_type', 1);
+    	select cvid into _status_id from getCvId(_status, 'job_status', 1);
+    	update job set type_id=_type_id, name=_name, payload_type_id=_payload_type_id, status=_status_id, message=_message, submitted_by=_submitted_by where job_id = id;
+    END;
+$function$;
+--select * from updatejob(3, 'job_with_added_name_2','load', 'samples', 'completed', 'Hello samples updated!', 1);
+
+--changeset kpalis:utility_fxns_for_job_2 context:general splitStatements:false
+--utility fxn for usage of the below fxns
+CREATE OR REPLACE FUNCTION getCvTerm(_cv_id integer, OUT cvterm text)
+ RETURNS text
+ LANGUAGE plpgsql
+AS $function$
+    BEGIN
+    	select cv.term into cvterm 
+    	from cv
+    	where cv.cv_id=_cv_id;
+    END;
+$function$;
 
 --getAllJobsByStatus
+CREATE OR REPLACE FUNCTION getAllJobsByStatus(_status text)
+  RETURNS table (job_id integer, name text, type text, payload_type text, message text, submitted_by text, submitted_date timestamp with time zone)
+  LANGUAGE plpgsql
+AS $function$
+	DECLARE
+        _status_id integer;
+	BEGIN
+		select cvid into _status_id from getCvId(_status, 'job_status', 1);
+		RETURN QUERY 
+		select j.job_id, j.name, getCvTerm(j.type_id), getCvTerm(j.payload_type_id), j.message, (select username from contact where contact_id=j.submitted_by), j.submitted_date
+		from job j 
+		where j.status = _status_id;
+	END;
+$function$;
+--select * from getAllJobsByStatus('pending');
 
+--possible TODOs
+--getJobStatus
 --getDatasetJobStatus
-
---
