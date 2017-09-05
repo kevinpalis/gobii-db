@@ -124,3 +124,41 @@ select * from createCVinGroup('job_status',1,'pending','The job is pending.',1,n
 select * from createCVinGroup('job_status',1,'in_progress','The job is in progress.',1,null,null,1);
 select * from createCVinGroup('job_status',1,'failed','The job has failed.',1,null,null,1);
 select * from createCVinGroup('job_status',1,'completed','The job successfully finished.',1,null,null,1);
+
+
+--changeset kpalis:utility_fxns_for_job_1 context:general splitStatements:false
+
+CREATE OR REPLACE FUNCTION createjob(_type text, _payload_type text, _status text, _message text, _submitted_by integer, OUT id integer)
+ RETURNS integer
+ LANGUAGE plpgsql
+AS $function$
+	DECLARE
+        _type_id integer;
+        _payload_type_id integer;
+        _status_id integer;
+    BEGIN
+    	select cv_id into _type_id from cv where status=1 and term=_type;
+    	select cv_id into _payload_type_id from cv where status=1 and term=_payload_type;
+    	select cv_id into _status_id from cv where status=1 and term=_status;
+        insert into job (type_id, payload_type_id, status, message, submitted_by)
+          values (_type_id, _payload_type_id, _status_id, _message, _submitted_by);
+        select lastval() into id;
+    END;
+$function$;
+--select * from createjob('load', 'markers', 'pending', 'Hello world!', 1);
+
+CREATE OR REPLACE FUNCTION updatejob(id integer, _type text, _payload_type text, _status text, _message text, _submitted_by integer)
+ RETURNS void
+ LANGUAGE plpgsql
+AS $function$
+	DECLARE
+        _type_id integer;
+        _payload_type_id integer;
+        _status_id integer;
+    BEGIN
+    	select cv_id into _type_id from cv where status=1 and term=_type;
+    	select cv_id into _payload_type_id from cv where status=1 and term=_payload_type;
+    	select cv_id into _status_id from cv where status=1 and term=_status;
+    	update job set type_id=_type_id, payload_type_id=_payload_type_id, status=_status_id, message=_message, submitted_by=_submitted_by where job_id = id;
+    END;
+$function$;
