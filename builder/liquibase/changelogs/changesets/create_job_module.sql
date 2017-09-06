@@ -258,6 +258,7 @@ AS $function$
 $function$;
 
 --getAllJobsByStatus
+DROP FUNCTION IF EXISTS getAllJobsByStatus(_status text);
 CREATE OR REPLACE FUNCTION getAllJobsByStatus(_status text)
   RETURNS table (job_id integer, name text, type text, payload_type text, message text, submitted_by text, submitted_date timestamp with time zone)
   LANGUAGE plpgsql
