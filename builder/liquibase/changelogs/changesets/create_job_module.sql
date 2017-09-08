@@ -278,3 +278,25 @@ $function$;
 --possible TODOs
 --getJobStatus
 --getDatasetJobStatus
+
+--changeset kpalis:crud_fxns_for_job_by_ids context:general splitStatements:false
+CREATE OR REPLACE FUNCTION createjob(_name text, _type_id integer, _payload_type_id integer, _status integer, _message text, _submitted_by integer, OUT id integer)
+ RETURNS integer
+ LANGUAGE plpgsql
+AS $function$
+    BEGIN
+        insert into job (type_id, payload_type_id, status, message, submitted_by, name)
+          values (_type_id, _payload_type_id, _status, _message, _submitted_by, _name);
+        select lastval() into id;
+    END;
+$function$;
+
+CREATE OR REPLACE FUNCTION updatejob(id integer, _name text, _type_id integer, _payload_type_id integer, _status integer, _message text, _submitted_by integer)
+ RETURNS void
+ LANGUAGE plpgsql
+AS $function$
+    BEGIN
+    update job set type_id=_type_id, payload_type_id=_payload_type_id, status=_status, message=_message, submitted_by=_submitted_by, name=_name where job_id = id;
+    END;
+$function$;
+
