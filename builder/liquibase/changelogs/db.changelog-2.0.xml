@@ -2,4 +2,5 @@
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
 	<include file="changelogs/changesets/marker_group_fxns.sql"/>
 	<include file="changelogs/changesets/create_job_module.sql"/>
+	<include file="changelogs/changesets/fix_samplemetadata_wrongdatasets.sql"/>
 </databaseChangeLog>
