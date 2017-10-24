@@ -18,7 +18,7 @@ select * from createProtocol('Illumina_Infinium','Illumina_Infinium',NULL,(selec
 select * from createProtocol('Illumina_Goldengate','Illumina_Goldengate',NULL,(select platform_id from platform where name ='Illumina_Goldengate' ),null,null,null,null,1);
 select * from createProtocol('Illumina_TSCA','Illumina_TSCA',NULL,(select platform_id from platform where name ='Illumina_TSCA' ),null,null,null,null,1);
 select * from createProtocol('KASP','KASP',NULL,(select platform_id from platform where name ='KASP' ),null,null,null,null,1);
-select * from createProtocol('WGRS','WGRS',NULL,(select platform_id from platform where name ='Illumina_Goldengate' ),null,null,null,null,1);
+select * from createProtocol('WGRS','WGRS',NULL,(select platform_id from platform where name ='Sequencing' ),null,null,null,null,1);
 select * from createProtocol('GbS_Pst','GbS_Pst',NULL,(select platform_id from platform where name ='Sequencing' ),null,null,null,null,1);
 select * from createProtocol('GbS_Apek','GbS_Apek',NULL,(select platform_id from platform where name ='Sequencing' ),null,null,null,null,1);
 select * from createProtocol('rAmpSeq','Repeat Amplicon Sequencing',NULL,(select platform_id from platform where name ='Sequencing' ),null,null,null,null,1);
