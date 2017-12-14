@@ -1,5 +1,5 @@
 ### This is the Postgresql Data Warehouse Repository 
-#TODO: Update this readme!
+#TODO: Update this readme
 What you'll find here:
 1. Intermediate File Loader scripts
 2. Database Design
