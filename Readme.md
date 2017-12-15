@@ -1,5 +1,4 @@
 ### This is the Postgresql Data Warehouse Repository 
-#This is a test for the new branch-based trigger.
 What you'll find here:
 1. Intermediate File Loader scripts
 2. Database Design
