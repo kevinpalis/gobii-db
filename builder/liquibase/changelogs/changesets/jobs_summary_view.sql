@@ -73,7 +73,8 @@ CREATE OR REPLACE VIEW v_jobs_summary AS
 		left join job j on (ds.job_id = j.job_id) 
 		left join vendor_protocol vp on (e.vendor_protocol_id = vp.vendor_protocol_id) 
 		left join protocol pr on (vp.protocol_id = pr.protocol_id) 
-		left join platform pl on (pr.platform_id = pl.platform_id) join analysis a on (ds.callinganalysis_id = a.analysis_id)
+		left join platform pl on (pr.platform_id = pl.platform_id) 
+		left join analysis a on (ds.callinganalysis_id = a.analysis_id)
 	order by
 		j.submitted_date desc,
 		lower(ds.name) asc;
