@@ -5,4 +5,5 @@
 	<include file="changelogs/changesets/fix_samplemetadata_wrongdatasets.sql"/>
 	<include file="changelogs/changesets/fix_wgrs_protocol_seed_data.sql"/>
 	<include file="changelogs/changesets/jobs_summary_view.sql"/>
+	<include file="changelogs/changesets/functions_cleanup.sql"/>
 </databaseChangeLog>
