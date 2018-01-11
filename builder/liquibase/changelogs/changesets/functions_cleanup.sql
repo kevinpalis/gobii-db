@@ -12,3 +12,6 @@ DROP FUNCTION IF EXISTS getcontactnamesbyrole(character varying);
 DROP FUNCTION IF EXISTS getcontactsbyrole(character varying);
 
 DROP FUNCTION IF EXISTS updatemarkerlinkagegroup(integer, integer, integer, integer, integer);
+
+--changeset kpalis:drop_useless_functions context:general splitStatements:false
+DROP FUNCTION IF EXISTS getallcontacts();
