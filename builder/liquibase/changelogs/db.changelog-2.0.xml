@@ -6,4 +6,12 @@
 	<include file="changelogs/changesets/fix_wgrs_protocol_seed_data.sql"/>
 	<include file="changelogs/changesets/jobs_summary_view.sql"/>
 	<include file="changelogs/changesets/functions_cleanup.sql"/>
+	<include file="changelogs/changesets/run_on_change/append_functions.sql"/>
+	<include file="changelogs/changesets/run_on_change/create_functions.sql"/>
+	<include file="changelogs/changesets/run_on_change/delete_functions.sql"/>
+	<include file="changelogs/changesets/run_on_change/get_functions.sql"/>
+	<include file="changelogs/changesets/run_on_change/remove_functions.sql"/>
+	<include file="changelogs/changesets/run_on_change/update_functions.sql"/>
+	<include file="changelogs/changesets/run_on_change/update_gobiidb_version.sql"/>
+	<include file="changelogs/changesets/run_on_change/upsert_functions.sql"/>
 </databaseChangeLog>
