@@ -2,7 +2,7 @@
 
 --### GET/READ FUNCTIONS ###---
 
---changeset kpalis:get_functions context:general splitStatements:false runOnChange:true
+--changeset kpalis:get_functions_part1 context:general splitStatements:false runOnChange:true
 
 CREATE OR REPLACE FUNCTION getallanalysisparameters(id integer) RETURNS TABLE(property_name text, property_value text)
     LANGUAGE plpgsql
@@ -514,6 +514,8 @@ CREATE OR REPLACE FUNCTION getdnarunpropertybyname(id integer, propertyname text
   END;
 $$;
 
+--changeset kpalis:get_functions_part2 context:general splitStatements:false runOnChange:true
+
 CREATE OR REPLACE FUNCTION getdnasamplepropertybyid(id integer, propertyid integer) RETURNS text
     LANGUAGE plpgsql
     AS $$
@@ -999,6 +1001,7 @@ CREATE OR REPLACE FUNCTION getmatrixposofsamples(samplelist text, datasettypeid 
   END;
 $$;
 
+--changeset kpalis:get_functions_part3 context:general splitStatements:false runOnChange:true
 CREATE OR REPLACE FUNCTION getminimalmarkermetadatabydataset(datasetid integer) RETURNS TABLE(marker_name text, alleles text, chrom character varying, pos numeric, strand text)
     LANGUAGE plpgsql
     AS $$
@@ -1511,6 +1514,7 @@ CREATE OR REPLACE FUNCTION getsampleqcmetadatabymarkerlistx(markerlist text, dat
   END;
 $$;
 
+--changeset kpalis:get_functions_part4 context:general splitStatements:false runOnChange:true
 CREATE OR REPLACE FUNCTION getsampleqcmetadatabysamplelist(samplelist text, datasettypeid integer) RETURNS TABLE(dnarun_name text, germplasm_name text, germplasm_pedigree text, germplasm_type text, dnarun_barcode text, project_name text, project_pi_contact text, project_genotyping_purpose text, project_date_sampled text, project_division text, project_study_name text, experiment_name text, vendor_protocol_name text, vendor_name text, protocol_name text, dataset_name text, germplasm_external_code text, germplasm_species text, germplasm_id text, germplasm_seed_source_id text, germplasm_subsp text, germplasm_heterotic_group text, germplasm_par1 text, germplasm_par1_type text, germplasm_par2 text, germplasm_par2_type text, germplasm_par3 text, germplasm_par3_type text, germplasm_par4 text, germplasm_par4_type text, dnasample_name text, dnasample_platename text, dnasample_num text, dnasample_well_row text, dnasample_well_col text, dnasample_trial_name text, dnasample_sample_group text, dnasample_sample_group_cycle text, dnasample_sample_type text, dnasample_sample_parent text, dnasample_ref_sample text)
     LANGUAGE plpgsql
     AS $$
