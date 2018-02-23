@@ -15,4 +15,5 @@
 	<include file="changelogs/changesets/run_on_change/update_gobiidb_version.sql"/>
 	<include file="changelogs/changesets/run_on_change/upsert_functions.sql"/>
 	<include file="changelogs/changesets/create_timescoper_module.sql"/>
+	<include file="changelogs/changesets/fix_old_datasets_job_ids.sql"/>
 </databaseChangeLog>
