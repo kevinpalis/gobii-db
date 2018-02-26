@@ -7,4 +7,7 @@
 update dataset 
 set job_id = old_job.id
 from (select id from createjob('Pre-1.2 Job'::text, 'load', 'matrix', 'completed', 'Placeholder job record to give to datasets loaded pre-1.2.'::text, 1)) as old_job
-where job_id is null;
+where job_id is null 
+and data_file is not null 
+and data_file!='';
+
