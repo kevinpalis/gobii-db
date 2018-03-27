@@ -16,4 +16,5 @@
 	<include file="changelogs/changesets/run_on_change/upsert_functions.sql"/>
 	<include file="changelogs/changesets/create_timescoper_module.sql"/>
 	<include file="changelogs/changesets/fix_old_datasets_job_ids.sql"/>
+	<include file="changelogs/changesets/seed/pigeonpea_contacts.sql"/>
 </databaseChangeLog>
