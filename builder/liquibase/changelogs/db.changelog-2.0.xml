@@ -20,4 +20,6 @@
 	<include file="changelogs/changesets/seed/pearlmillet_contacts.sql"/>
 	<include file="changelogs/changesets/seed/groundnut_contacts.sql"/>
 	<include file="changelogs/changesets/seed/fingermillet_contacts.sql"/>
+	<include file="changelogs/changesets/fix_createcontacts_on_conflict.sql"/>
+	<include file="changelogs/changesets/seed/add_gadm_to_contacts.sql"/>
 </databaseChangeLog>

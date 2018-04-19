@@ -1,7 +1,6 @@
 --liquibase formatted sql
 
 --changeset kpalis:add_pigeonpea_contacts context:seed_pigeonpea splitStatements:false
-select * from createcontact('Superuser','GADM','contact_code_gadm','gadm.gobii@cgiar.org',( select array_agg(role_id) from role where role_name in ('Admin', 'PI', 'Curator','User')),1,current_date,NULL,NULL,(select organization_id from organization where name = 'International Crops Research Institute for the Semi-Arid Tropics (ICRISAT)' ),'gadm');
 select * from createcontact('Rathore','Abhishek','contact_code_Rathore','a.rathore@cgiar.org',( select array_agg(role_id) from role where role_name in ('Admin', 'PI', 'Curator')),1,current_date,NULL,NULL,(select organization_id from organization where name = 'International Crops Research Institute for the Semi-Arid Tropics (ICRISAT)' ),'arathore');
 select * from createcontact('Vemula','Anilkumar','contact_code_Vemula','anil.kumar@cgiar.org',( select array_agg(role_id) from role where role_name in ('PI', 'Curator')),1,current_date,NULL,NULL,(select organization_id from organization where name = 'International Crops Research Institute for the Semi-Arid Tropics (ICRISAT)' ),'anilkumar');
 select * from createcontact('Das','Roma','contact_code_Das','r.das@cgiar.org',( select array_agg(role_id) from role where role_name in ('PI', 'Curator')),1,current_date,NULL,NULL,(select organization_id from organization where name = 'International Crops Research Institute for the Semi-Arid Tropics (ICRISAT)' ),'rdas');
