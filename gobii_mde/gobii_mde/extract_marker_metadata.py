@@ -43,6 +43,8 @@ def main(isVerbose, connectionStr, datasetId, outputFile, allMeta, namesOnly, ma
 					if not markerListFromGrp:
 						MDEUtility.printError("Marker groups passed don't have any markers.")
 						#sys.exit(15)
+					#write the generation of marker group summary file here!
+					exMgr.createMarkerGroupSummaryFile(outputFile, markerGroupList)
 			if extractionType == 1:  # by dataset
 				if isVerbose:
 					print("Generating marker metadata by dataset.")
@@ -74,7 +76,6 @@ def main(isVerbose, connectionStr, datasetId, outputFile, allMeta, namesOnly, ma
 						sys.exit(15)
 				#if isVerbose:
 				#	print("markerList = ", markerList)
-				#write the generation of marker group summary file here!
 				exMgr.createQCMarkerMetadataByMarkerList(outputFile, markerList)
 				if datasetType is None or datasetType < 0:
 					MDEUtility.printError('Dataset type is required for extraction by marker list.')
