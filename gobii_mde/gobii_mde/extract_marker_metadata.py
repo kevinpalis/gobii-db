@@ -44,6 +44,8 @@ def main(isVerbose, connectionStr, datasetId, outputFile, allMeta, namesOnly, ma
 						MDEUtility.printError("Marker groups passed don't have any markers.")
 						#sys.exit(15)
 					#write the generation of marker group summary file here!
+					if isVerbose:
+						print("Generating marker group summary file.")
 					exMgr.createMarkerGroupSummaryFile(outputFile, markerGroupList)
 			if extractionType == 1:  # by dataset
 				if isVerbose:
