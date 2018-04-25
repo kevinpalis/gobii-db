@@ -25,15 +25,18 @@ CREATE OR REPLACE FUNCTION createanalysis(analysisname text, analysisdescription
     END;
 $$;
 
-CREATE OR REPLACE FUNCTION createcontact(lastname text, firstname text, contactcode text, contactemail text, contactroles integer[], createdby integer, createddate date, modifiedby integer, modifieddate date, organizationid integer, uname text, OUT id integer) RETURNS integer
-    LANGUAGE plpgsql
-    AS $$
+--add an on conflict clause to the create contact function
+CREATE OR REPLACE FUNCTION createcontact(lastname text, firstname text, contactcode text, contactemail text, contactroles integer[], createdby integer, createddate date, modifiedby integer, modifieddate date, organizationid integer, uname text, OUT id integer)
+ RETURNS integer
+ LANGUAGE plpgsql
+AS $function$
   BEGIN
     insert into contact (lastname, firstname, code, email, roles, created_by, created_date, modified_by, modified_date, organization_id, username)
-      values (lastName, firstName, contactCode, contactEmail, contactRoles, createdBy, createdDate, modifiedBy, modifiedDate, organizationId, uname);
+      values (lastName, firstName, contactCode, contactEmail, contactRoles, createdBy, createdDate, modifiedBy, modifiedDate, organizationId, uname)
+      on conflict (username) DO NOTHING;
     select lastval() into id;
   END;
-$$;
+$function$;
 
 CREATE OR REPLACE FUNCTION createcv(pcvgroupid integer, pcvterm text, pcvdefinition text, pcvrank integer, pabbreviation text, pdbxrefid integer, pstatus integer, OUT id integer) RETURNS integer
     LANGUAGE plpgsql
