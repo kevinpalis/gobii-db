@@ -25,4 +25,5 @@
 	<include file="changelogs/changesets/set_dataset_modifiedcols_null.sql"/>
 	<include file="changelogs/changesets/run_on_change/timescope_functions.sql"/>
 	<include file="changelogs/changesets/seed/add_tadm_to_timescoper.sql"/>
+	<include file="changelogs/changesets/run_on_change/utility_views.sql"/>
 </databaseChangeLog>
