@@ -17,7 +17,7 @@ import traceback
 from util.mde_utility import MDEUtility
 from db.extract_metadata_manager import ExtractMetadataManager
 
-def main(isVerbose, connectionStr, datasetId, outputFile, allMeta, namesOnly, mapId, includeChrLen, displayMapId, markerList, sampleList, mapsetOutputFile, extractionType, datasetType, markerNames, platformList):
+def main(isVerbose, connectionStr, datasetId, outputFile, allMeta, namesOnly, mapId, includeChrLen, displayMapId, markerList, sampleList, mapsetOutputFile, extractionType, datasetType, markerNames, platformList, piId, projectId, sampleType, sampleNames):
 	MAPID_COL_POS = 2
 	MARKERNAME_COL_POS_1 = 0
 	MARKERNAME_COL_POS_2 = 0
@@ -57,8 +57,34 @@ def main(isVerbose, connectionStr, datasetId, outputFile, allMeta, namesOnly, ma
 			elif extractionType == 3:  # by samples
 				if isVerbose:
 					print("Generating marker metadata by sample list.")
-					print("!!!Not yet implemented. Skipping...")
-				return outputFile
+				if not sampleList:
+					if isVerbose:
+						print("Deriving dnarun IDs based on the given parameters: piId, projectId, sampleNames + sampleType.")
+						#piId, projectId, sampleType, sampleNames
+					res = exMgr.getDnarunIds(piId, projectId, sampleType, sampleNames)
+					if res is None:
+						MDEUtility.printError('No Dnarun IDs fetched. Possible invalid usage. Check your criteria.')
+						sys.exit(13)
+					sampleList = [str(i[0]) for i in res]
+					if not sampleList:
+						MDEUtility.printError("Resulting list of Dnarun IDs is empty. Nothing to extract.")
+						sys.exit(15)
+					if isVerbose:
+						print("Deriving marker IDs based on Dnarun IDs (using the dataset_dnarun_idx route).")
+					#get the marker ids list based on the derived samples
+					res2 = exMgr.getMarkerIdsFromSamples(sampleList, datasetType, platformList)
+					if res2 is None:
+						MDEUtility.printError('No Marker IDs fetched. Possible invalid usage. Check your criteria.')
+						sys.exit(13)
+					markerList = [str(i[0]) for i in res2]
+					if not markerList:
+						MDEUtility.printError("Resulting list of marker IDs is empty. Nothing to extract.")
+						sys.exit(15)
+				exMgr.createQCMarkerMetadataByMarkerList(outputFile, markerList)
+				if datasetType is None:
+					MDEUtility.printError('Dataset type is required for extraction by sample list.')
+					sys.exit(14)
+				exMgr.createMarkerPositionsFile(outputFile, markerList, datasetType)  # this generates the marker.pos file
 			else:
 				MDEUtility.printError('ERROR: Extraction type is required.')
 				sys.exit(12)
@@ -69,7 +95,7 @@ def main(isVerbose, connectionStr, datasetId, outputFile, allMeta, namesOnly, ma
 				sys.exit(11)
 			else:
 				exMgr.createMapsetFile(mapsetOutputFile, datasetId, displayMapId, markerList, sampleList, extractionType)
-			#integrating the mapset info with the marker metadata file should be done here
+			#integrating the mapset info with the marker metadata file:
 			#Open marker meta file (markerMeta) and mapset meta file (mapsetMeta) and another file for writing.
 			#Scan mapsetMeta for the displayMapId. Stop at the first instance found. These files are ordered accordingly, which saves the algorithm a lot of processing time.
 			#For the first row found with the displayMapId, look for the row in markerMeta where markerMeta.marker_name=mapsetMeta.marker_name and append all columns of mapsetMeta to that row of markerMeta.
@@ -84,23 +110,35 @@ def main(isVerbose, connectionStr, datasetId, outputFile, allMeta, namesOnly, ma
 						markerWriter.writerow(headerRow)
 						mapsetRowNum = 0
 						mapsetRow = None
-						mapsetRowsList = list(mapsetReader)
-						totalMapsetRows = len(mapsetRowsList) - 1  # subtract the header
+						mapsetRowsList = list(mapsetReader)  # this line unfortunately moves the file pointer to the end of the file
+						mapsetMeta.seek(0)  # hence the need for this
+						next(mapsetReader)  # skip the header, again
+						totalMapsetRows = len(mapsetRowsList)
 						foundMapId = False
 						if isVerbose:
 							print("Total mapset rows: %s" % totalMapsetRows)
+							print("Looking for mapId=%s in %s" % (displayMapId, mapsetOutputFile))
+							print ("MapsetReader: %s \n MapsetMeta: %s" % (mapsetReader, mapsetMeta))
 						for mapsetRow in mapsetReader:
-								mapsetRowNum += 1
-								if mapsetRow[MAPID_COL_POS] == displayMapId:
-									foundMapId = True
-									if isVerbose:
-										print ('Integrating map data to marker meta file. Found mapId at row %s.' % mapsetRowNum)
-									break
-						columnsCount = len(mapsetRow[MAPID_COL_POS+1:])
-						fillerList = ['' for x in range(columnsCount)]
-						if isVerbose:
-							print('Mapset Row currently at marker_name=%s' % mapsetRow[MARKERNAME_COL_POS_1])
-							print('Total number of columns to append: %s' % columnsCount)
+							mapsetRowNum += 1
+							if mapsetRow[MAPID_COL_POS] == displayMapId:
+								foundMapId = True
+								if isVerbose:
+									print ('Integrating map data to marker meta file. Found mapId at row %s.' % mapsetRowNum)
+								break
+						if mapsetRow is None:
+							MDEUtility.printError('Failed to read the mapset file. Mapset row fetched is null. Please check if %s exists and contains correct data' % mapsetOutputFile)
+							sys.exit(16)
+						fillerList = []
+						try:
+							columnsCount = len(mapsetRow[MAPID_COL_POS+1:])
+							fillerList = ['' for x in range(columnsCount)]
+							if isVerbose:
+								print('Mapset Row currently at marker_name=%s' % mapsetRow[MARKERNAME_COL_POS_1])
+								print('Total number of columns to append: %s' % columnsCount)
+						except Exception as ce:
+							MDEUtility.printError('Failed to build the mapset column filler. Error: %s' % ce)
+							sys.exit(16)
 						eomReached = False
 						if mapsetRowNum >= totalMapsetRows and not foundMapId:
 							eomReached = True
@@ -139,7 +177,7 @@ def main(isVerbose, connectionStr, datasetId, outputFile, allMeta, namesOnly, ma
 		'''
 		if isVerbose:
 			print("Created marker metadata file successfully.")
-		return outputFile, markerList
+		return outputFile, markerList, sampleList
 	except Exception as e:
 		MDEUtility.printError('Failed to create marker metadata file. Error: %s' % (str(e)))
 		exMgr.rollbackTransaction()
@@ -150,6 +188,6 @@ def main(isVerbose, connectionStr, datasetId, outputFile, allMeta, namesOnly, ma
 #extractionType, datasetType, markerNames, platformList
 if __name__ == "__main__":
 	if len(sys.argv) < 15:
-		print("Please supply the parameters. \nUsage: extract_marker_metadata <db_connection_string> <dataset_id> <output_file_abs_path> <all_meta> <names_only:boolean> <map_id> <includeChrLen:boolean> <displayMapId> <markerList> <sampleList> <mapsetOutputFile> <extractionType> <datasetType> <markerNames> <platformList>")
+		print("Please supply the parameters. \nUsage: extract_marker_metadata <db_connection_string> <dataset_id> <output_file_abs_path> <all_meta> <names_only:boolean> <map_id> <includeChrLen:boolean> <displayMapId> <markerList> <sampleList> <mapsetOutputFile> <extractionType> <datasetType> <markerNames> <platformList> <piId> <projectId> <sampleType> <sampleNames>")
 		sys.exit(1)
-	main(True, str(sys.argv[1]), str(sys.argv[2]), str(sys.argv[3]), str(sys.argv[4]), str(sys.argv[5]), str(sys.argv[6]), str(sys.argv[7]), str(sys.argv[8]), str(sys.argv[9]), str(sys.argv[10]), str(sys.argv[11]), str(sys.argv[12]), str(sys.argv[13]), str(sys.argv[14]), str(sys.argv[15]))
+	main(True, str(sys.argv[1]), str(sys.argv[2]), str(sys.argv[3]), str(sys.argv[4]), str(sys.argv[5]), str(sys.argv[6]), str(sys.argv[7]), str(sys.argv[8]), str(sys.argv[9]), str(sys.argv[10]), str(sys.argv[11]), str(sys.argv[12]), str(sys.argv[13]), str(sys.argv[14]), str(sys.argv[15]), str(sys.argv[16]), str(sys.argv[17]), str(sys.argv[18]), str(sys.argv[19]))

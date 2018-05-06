@@ -16,9 +16,9 @@ def main(isVerbose, connectionStr, datasetId, outputFile, allMeta, namesOnly, ma
 		print("Sample Metadata Output File: ", outputFile)
 	exMgr = ExtractMetadataManager(connectionStr)
 	try:
-		if allMeta:
+		if allMeta:  # deprecated
 			exMgr.createAllSampleMetadataFile(outputFile, datasetId)
-		elif namesOnly:
+		elif namesOnly:  # deprecated
 			exMgr.createDnarunNamesFile(outputFile, datasetId)
 		else:
 			if extractionType == 2:
@@ -28,7 +28,8 @@ def main(isVerbose, connectionStr, datasetId, outputFile, allMeta, namesOnly, ma
 			elif extractionType == 3:
 				if isVerbose:
 					print("Generating sample metadata by sample list.")
-					print("!!!Not yet implemented. Skipping...")
+				exMgr.createSampleQCMetadataBySampleList(outputFile, sampleList, datasetType)
+				exMgr.createSamplePositionsFile(outputFile, sampleList, datasetType)
 			elif extractionType == 1:
 				if isVerbose:
 					print("Generating sample metadata by datasetID.")
