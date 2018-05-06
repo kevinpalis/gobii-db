@@ -41,6 +41,7 @@ select * from createContact('Dreher','Kate','contact_37','kad275@cornell.edu',( 
 select * from createContact('Robbins','Kelly','contact_38','krr73@cornell.edu',( select array_agg(role_id) from role where role_name in ('Curator','User')),1,current_date,NULL,NULL,(select organization_id from organization where name = 'GOBII Cornell Team') ,'krr73');
 select * from createContact('Gao','Star','contact_39','yg28@cornell.edu',( select array_agg(role_id) from role where role_name in ('Curator','User')),1,current_date,NULL,NULL,(select organization_id from organization where name = 'GOBII Cornell Team') ,'yg28');
 select * from createContact('Jones','Liz','contact_40','ej245@cornell.edu',( select array_agg(role_id) from role where role_name in ('Curator','User')),1,current_date,NULL,NULL,(select organization_id from organization where name = 'GOBII Cornell Team') ,'ej245');
+select * from createContact('Weigand','Deb','contact_41','daw279@cornell.edu',( select array_agg(role_id) from role where role_name in ('PI','Curator','Admin')),1,current_date,NULL,NULL,(select organization_id from organization where name = 'GOBII Cornell Team') ,'daw279' );
 
 
 
