@@ -6,7 +6,9 @@
 CREATE TABLE vertex ( 
 	vertex_id		serial primary key,
 	type_id			integer not null,
-	name			text  not null
+	name			text not null,
+	criterion		text,
+	UNIQUE (name)
 );
 
 CREATE TABLE edge ( 
@@ -14,8 +16,15 @@ CREATE TABLE edge (
 	start_vertex	integer not null references vertex(vertex_id) on update cascade on delete cascade,
 	end_vertex		integer not null references vertex(vertex_id) on update cascade on delete cascade,
 	type_id			integer not null,
-	criterion		text not null
+	criterion		text not null,
+	UNIQUE (start_vertex, end_vertex) --no duplicate edges
 );
+
+create index typeof_vertex_idx on vertex(type_id);
+create index vertex_name_idx on vertex(name);
+create index start_vertex_idx on edge(start_vertex);
+create index end_vertex_idx on edge(end_vertex);
+create index typeof_edge_idx on edge(type_id);
 
 /*
 Updates on Datawarehouse Layer of Flex Query:
