@@ -76,39 +76,66 @@ where e.experiment_id=d.experiment_id
 and m.dataset_marker_idx ? d.dataset_id::string;
 
 
---------------============----------------------
+--------------======A walk through the algorithm======----------------------
+1. Given the set of nodes and edges below, a table transitive_closure (start, end, hops, path) will be computed
+
 Vertex:
-ID	|	Type				Table_name	|	Name		|	Criterion
-1		standard_subset		Contact			PI				roles="PI"
-2		standard			Project			Project			null
-3		kvp					Project			date_sampled	props?"date_sampled"	
-4		standard			Experiment		Experiment		null
+ID	|	Type				Table_name	|	Name		|	Criterion				|	Alias	|	Data_loc
+1		standard_subset		Contact			PI				roles="PI"					c			contact.firstname || contact.lastname
+2		standard			Project			Project			null						p			project.name
+3		kvp					Project			date_sampled	props?"date_sampled"		p			project.props->'date_sampled'
+4		standard			Experiment		Experiment		null						e			experiment.name
 		
 Edge:
-ID	|	Start	|	End		|	Type		|	Criterion
-1		PI			Project		Standard		contact.contact_id=project.pi_contact	
+ID	|	Start	|	End			|	Type		|	Criterion
+1		PI			Project			Standard		contact.contact_id=project.pi_contact	
+2		Project		date_sampled	KVP				null
+3		Project		Experiment		Standard		project.project_id=experiment.project_id
 
+2. A function that 
+
+Walkthrough:
+1.
 Filter 1 (PI):
-select c.name
-from contact
-where c.roles has PI;
+-- the getPath function returns null as this is the starting vertex
+-- the dynamic query is then constructed based on the vertex alone
+
+select c.firstname || c.lastname <-- vertex.data_loc
+from contact as c		<-- vertex.table_name as vertex.alias
+where c.roles has PI;	<-- vertex.criterion
+
+-- the output is what will be displayed in the selector box
+-- the query will run via psycopg2 and the result set will be written in a file
+
+2.
+--assuming user selected PI 1, 4, and 5
+--getPath(1, 2) will hit the TC (transitive_closure) and return with path=1->2, which means there's a direct edge
+--the dynamic query is then constructed based on the 2 vertices (1 and 2) and edge 1.
 
 Filter 2 (PI->Project):
-select p.name
+select p.name 		 <-- edge1.end's data_loc
+from contact c, project p <-- vertex1.table_name as vertex1.alias, vertex2.table_name as vertex2.alias
+where c.roles has PI <-- vertex1.criterion (a standard_subset type)
+and p.pi_contact=c.contact_id <--- edge1.criterion
+and c.contact_id in (1, 4, 5); <--- filter1's selection (passed in as a parameter)
+
+-- same as above: the output is what will be displayed in the selector box
+-- the query will run via psycopg2 and the result set will be written in a file
+
+3.
+--assuming user selected projects 9 and 15
+--getPath({1,2}, 3) will hit the TC (transitive_closure) and return with path=1->2->3, the first parameter to get
+
+Filter 3 (PI->Project->Date_sampled)
+select p.props->'date_sampled'
 from contact c, project p
-where p.pi_contact=c.contact_id
-and c.contact_id in (1, 4, 5);
+where c.roles has PI
+and p.pi_contact=c.contact_id
+and c.contact_id in (1, 4, 5)
+and p.project_id in (9, 15)
+and p.props?'date_sampled';
 
 
-select d.name
-from experiment e, dataset d
-where e.experiment_id=d.experiment_id
-and e.name in ('e1', 'e2');
-
-select d.name
-from experiment e, dataset d
-where e.experiment_id=d.experiment_id
-and e.name in ('e1', 'e2');
 
 1. Standard = The typical relational database representation of data (ie. table.column)
 2. Standard Subset = same as 1, just with a filter (ie. Where clause)
