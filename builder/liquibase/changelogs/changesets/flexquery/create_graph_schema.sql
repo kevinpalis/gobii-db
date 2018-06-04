@@ -5,11 +5,13 @@
 --changeset kpalis:GP1-1598_graph_schema context:general splitStatements:false
 CREATE TABLE vertex ( 
 	vertex_id		serial primary key,
-	type_id			integer not null,
 	name			text not null,
+	type_id			integer not null,
 	table_name		text not null,
 	criterion		text,
-	UNIQUE (name)
+	alias			text,
+	UNIQUE (name),
+	UNIQUE (alias)
 );
 
 CREATE TABLE edge ( 
