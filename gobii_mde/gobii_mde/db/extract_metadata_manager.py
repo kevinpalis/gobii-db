@@ -263,6 +263,14 @@ class ExtractMetadataManager:
 		res = self.cur.fetchall()
 		return res
 
+	def createMarkerGroupSummaryFile(self, outputFilePath, markerGroupList):
+		outputFilePath = outputFilePath+".mg_summary"
+		#sql = "copy (select marker_group_name, germplasm_group, marker_name, platform, favorable_alleles from v_marker_group_summary where marker_group_id in ("+(','.join(markerList))+")) to STDOUT with delimiter E'\\t'"+" csv header;"
+		sql = "copy (select marker_group_name, germplasm_group, marker_name, platform, favorable_alleles from v_marker_group_summary where marker_group_id in ("+(','.join(markerGroupList))+")) to STDOUT with delimiter E'\\t'"+" csv header;"
+		with open(outputFilePath, 'w') as outputFile:
+			self.cur.copy_expert(sql, outputFile, 20480)
+		outputFile.close()
+
 	def commitTransaction(self):
 		self.conn.commit()
 

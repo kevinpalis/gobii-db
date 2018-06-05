@@ -4,4 +4,27 @@
 	<include file="changelogs/changesets/create_job_module.sql"/>
 	<include file="changelogs/changesets/fix_samplemetadata_wrongdatasets.sql"/>
 	<include file="changelogs/changesets/fix_wgrs_protocol_seed_data.sql"/>
+	<include file="changelogs/changesets/jobs_summary_view.sql"/>
+	<include file="changelogs/changesets/functions_cleanup.sql"/>
+	<include file="changelogs/changesets/run_on_change/append_functions.sql"/>
+	<include file="changelogs/changesets/run_on_change/create_functions.sql"/>
+	<include file="changelogs/changesets/run_on_change/delete_functions.sql"/>
+	<include file="changelogs/changesets/run_on_change/get_functions.sql"/>
+	<include file="changelogs/changesets/run_on_change/remove_functions.sql"/>
+	<include file="changelogs/changesets/run_on_change/update_functions.sql"/>
+	<include file="changelogs/changesets/run_on_change/update_gobiidb_version.sql"/>
+	<include file="changelogs/changesets/run_on_change/upsert_functions.sql"/>
+	<include file="changelogs/changesets/create_timescoper_module.sql"/>
+	<include file="changelogs/changesets/fix_old_datasets_job_ids.sql"/>
+	<include file="changelogs/changesets/seed/pigeonpea_contacts.sql"/>
+	<include file="changelogs/changesets/seed/pearlmillet_contacts.sql"/>
+	<include file="changelogs/changesets/seed/groundnut_contacts.sql"/>
+	<include file="changelogs/changesets/seed/fingermillet_contacts.sql"/>
+	<include file="changelogs/changesets/fix_createcontacts_on_conflict.sql"/>
+	<include file="changelogs/changesets/seed/add_gadm_to_contacts.sql"/>
+	<include file="changelogs/changesets/set_dataset_modifiedcols_null.sql"/>
+	<include file="changelogs/changesets/seed/add_pgcrypto.sql"/>
+	<include file="changelogs/changesets/run_on_change/timescope_functions.sql"/>
+	<include file="changelogs/changesets/seed/add_tadm_to_timescoper.sql"/>
+	<include file="changelogs/changesets/run_on_change/utility_views.sql"/>
 </databaseChangeLog>
