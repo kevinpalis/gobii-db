@@ -2,7 +2,7 @@
 
 --GP1-1598: Representing graphs on our schema
 
---changeset kpalis:GP1-1598_graph_schema context:general splitStatements:false
+--changeset kpalis:GP1-1598_vertex_and_edge context:general splitStatements:false
 CREATE TABLE vertex ( 
 	vertex_id		serial primary key,
 	name			text not null,
@@ -32,12 +32,37 @@ create index typeof_edge_idx on edge(type_id);
 alter table edge add constraint self_loops_check check (start_vertex <> end_vertex);
 
 
---changeset kpalis:create_cvs_for_flex_query context:general splitStatements:false
+--changeset kpalis:GP1-1598_create_graph_data context:general splitStatements:false
+--CV data
 select * from createcvgroup('vertex_type', 'Types of entity (vertex) representations that we have in this schema.', 1);
 select * from createCVinGroup('vertex_type',1,'standard','The typical relational database representation of entities (ie. table.column)',1,null,null,<get cv where term=new>);
 select * from createCVinGroup('vertex_type',1,'standard_subset','The entity being represented is a sub-category of the table, ie. with a filter. ex. PI is a Contact where role=PI',1,null,null,1);
 select * from createCVinGroup('vertex_type',1,'cv_subset','The entity is represented by a CV group. For example, a dataset type or a mapset type.',1,null,null,1);
 select * from createCVinGroup('vertex_type',1,'key_value_pair','The representation of property values as key-value pairs in JSONB. Ex {trial_name:"Trial 1"}.',1,null,null,1);
+
+--vertex data
+
+--edge data
+
+--changeset kpalis:GP1-1598_transitive_closure context:general splitStatements:false
+with recursive transitive_closure (start_vertex, end_vertex, distance, path_string) as
+(
+	select start_vertex, end_vertex, 1 as distance, '.' || start_vertex || '.' || end_vertex || '.' as path_string
+	from edge
+	union all
+	select tc.start_vertex, e.end_vertex, tc.distance + 1, tc.path_string || e.end_vertex || '.' as path_string
+	from edge as e
+		join transitive_closure as tc
+		on e.start_vertex = tc.end_vertex
+	where tc.path_string not like '%.' || edge.end_vertex || '.%'
+)
+select * from transitive_closure
+order by start_vertex, end_vertex, distance;
+
+
+--transitive_closure (start, end, hops, path)
+
+
 /*
 create or replace function createVertex(type)
 --add an on conflict clause to the create contact function
