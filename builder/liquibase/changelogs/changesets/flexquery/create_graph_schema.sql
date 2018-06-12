@@ -45,19 +45,20 @@ select * from createCVinGroup('vertex_type',1,'key_value_pair','The representati
 --edge data
 
 --changeset kpalis:GP1-1598_transitive_closure context:general splitStatements:false
-with recursive transitive_closure (start_vertex, end_vertex, distance, path_string) as
-(
-	select start_vertex, end_vertex, 1 as distance, '.' || start_vertex || '.' || end_vertex || '.' as path_string
-	from edge
-	union all
-	select tc.start_vertex, e.end_vertex, tc.distance + 1, tc.path_string || e.end_vertex || '.' as path_string
-	from edge as e
-		join transitive_closure as tc
-		on e.start_vertex = tc.end_vertex
-	where tc.path_string not like '%.' || edge.end_vertex || '.%'
-)
-select * from transitive_closure
-order by start_vertex, end_vertex, distance;
+create table transitive_closure as
+	with recursive r_transitive_closure (start_vertex, end_vertex, distance, path_string) as
+	(
+		select start_vertex, end_vertex, 1 as distance, '.' || start_vertex || '.' || end_vertex || '.' as path_string
+		from edge
+		union all
+		select tc.start_vertex, e.end_vertex, tc.distance + 1, tc.path_string || e.end_vertex || '.' as path_string
+		from edge as e
+			join r_transitive_closure as tc
+			on e.start_vertex = tc.end_vertex
+		where tc.path_string not like '%.' || edge.end_vertex || '.%'
+	)
+	select * from r_transitive_closure
+	order by start_vertex, end_vertex, distance;
 
 
 --transitive_closure (start, end, hops, path)
