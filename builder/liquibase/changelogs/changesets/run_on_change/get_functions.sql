@@ -1624,3 +1624,15 @@ CREATE OR REPLACE FUNCTION gettotalprojects() RETURNS integer
     return total;
   END;
 $$;
+
+--helper functions required by flexQuery
+CREATE OR REPLACE FUNCTION getCvGroupId(_groupname text, _grouptype integer, OUT id integer) RETURNS integer
+    LANGUAGE plpgsql
+    AS $$
+    BEGIN
+      select cvgroup_id into id 
+      from cvgroup
+      where type=_grouptype
+      and name=_groupname;
+    END;
+$$;
