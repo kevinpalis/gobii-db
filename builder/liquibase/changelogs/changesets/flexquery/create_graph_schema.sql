@@ -150,3 +150,4 @@ create table transitive_closure as
 	select * from r_transitive_closure
 	order by start_vertex, end_vertex, distance;
 
+--86 rows. Created successfully in 31 msec.
