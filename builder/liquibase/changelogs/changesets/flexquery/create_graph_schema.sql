@@ -44,7 +44,7 @@ AS $function$
     insert into vertex (name, type_id, table_name, data_loc, criterion, alias, relevance, is_entry)
       values (_name, _type_id, _table_name, _data_loc, _criterion, _alias, _relevance, _is_entry)
       on conflict (name) DO NOTHING;
-    select lastval() intselect * from createVertex('project',(select cvid from getCvId('standard','vertex_type', 1)),'project','name',NULL,'p',3,'true');o id;
+    select lastval() into id;
   END;
 $function$;
 
