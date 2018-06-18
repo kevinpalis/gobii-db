@@ -1636,3 +1636,12 @@ CREATE OR REPLACE FUNCTION getCvGroupId(_groupname text, _grouptype integer, OUT
       and name=_groupname;
     END;
 $$;
+
+CREATE OR REPLACE FUNCTION getAllEntryVertices() RETURNS SETOF vertex
+    LANGUAGE plpgsql
+    AS $$
+  BEGIN
+    return query
+    select v.* from vertex v where v.is_entry;
+  END;
+$$;
