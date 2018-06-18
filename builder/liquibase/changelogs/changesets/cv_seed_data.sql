@@ -1,5 +1,20 @@
 --liquibase formatted sql
 
+--changeset kpalis:on_conflict_createcvingroup context:seed_general splitStatements:false
+CREATE OR REPLACE FUNCTION createcvingroup(pgroupname text, pgrouptype integer, pcvterm text, pcvdefinition text, pcvrank integer, pabbreviation text, pdbxrefid integer, pstatus integer, OUT id integer) RETURNS integer
+    LANGUAGE plpgsql
+    AS $$
+   DECLARE
+    groupId integer;
+   BEGIN
+     select cvgroup_id into groupId from cvgroup where name=pgroupname and type=pgrouptype;
+     insert into cv (cvgroup_id, term, definition, rank, abbreviation, dbxref_id, status)
+       values (groupId, pcvterm, pcvdefinition, pcvrank, pabbreviation, pdbxrefid, pstatus)
+       on conflict (term, cvgroup_id) DO NOTHING;
+     select lastval() into id;
+   END;
+ $$;
+
 --changeset raza:cv_seed_data context:seed_general splitStatements:false
 Select * from createCVinGroup('platform_type',1,'GBS','Genotyping by Sequencing',0,NUll,NULL,1);
 Select * from createCVinGroup('project_prop',1,'genotyping_purpose','The purpose of genotyping such as MABC, MARS, Diversity etc',1,NUll,NULL,1);
