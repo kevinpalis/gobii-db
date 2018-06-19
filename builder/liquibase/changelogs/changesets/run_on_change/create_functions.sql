@@ -75,7 +75,8 @@ CREATE OR REPLACE FUNCTION createcvingroup(pgroupname text, pgrouptype integer, 
    BEGIN
      select cvgroup_id into groupId from cvgroup where name=pgroupname and type=pgrouptype;
      insert into cv (cvgroup_id, term, definition, rank, abbreviation, dbxref_id, status)
-       values (groupId, pcvterm, pcvdefinition, pcvrank, pabbreviation, pdbxrefid, pstatus);
+       values (groupId, pcvterm, pcvdefinition, pcvrank, pabbreviation, pdbxrefid, pstatus)
+       on conflict (term, cvgroup_id) DO NOTHING;
      select lastval() into id;
    END;
  $$;
