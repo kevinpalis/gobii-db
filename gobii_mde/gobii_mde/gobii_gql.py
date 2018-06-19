@@ -213,8 +213,8 @@ def printUsageHelp(eCode):
 	print ("\t-o or --outputFilePath = The absolute path of the file where the result of the query will be written to.")
 	print ("\t-g or --subGraphPath = This is a JSON string of key-value-pairs of this format: {vertex_name1:[value_id1, value_id2], vertex_name2:[value_id1], ...}. This is basically just a list of vertices to visit but filtered with the listed vertices values (which affects the target vertex' values as well).")
 	print ("\t-t or --targetVertexName = The vertex to get the values of. In the context of flexQuery, this is the currently selected filter option.")
-	print ("\t-f or --vertexColumnsToFetch = The list of columns of the target vertex to get values of. This is optional. If it is not set, the library will just use target vertex.data_loc. For example, if the target vertex is 'project', then this will be just the column 'name', while for vertex 'marker', this will be 'name, dataset_marker_idx'. The columns that will appear on the output file is dependent on this. Just note that the list of columns will always be prepended with 'id'.")
-	print ("\tNOTE: If vertex_type=KVP, targetVertexColumns is irrelevant as there is only one column returnable which will always be called 'value'.")
+	print ("\t-f or --vertexColumnsToFetch = The list of columns of the target vertex to get values of. This is OPTIONAL. If it is not set, the library will just use target vertex.data_loc. For example, if the target vertex is 'project', then this will be just the column 'name', while for vertex 'marker', this will be 'name, dataset_marker_idx'. The columns that will appear on the output file is dependent on this. Just note that the list of columns will always be prepended with 'id' and will come out in the order you specify.")
+	print ("\tNOTE: If vertex_type=KVP, vertexColumnsToFetch is irrelevant (and hence, ignored) as there is only one column returnable which will always be called 'value'.")
 
 	sys.exit(eCode)
 
