@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 '''
-	This module will support the UI's FlexQuery functionality. It also functions independently if needed.
+	This module will support GDM's FlexQuery functionality. It also functions independently if needed.
 	This is basically an abstraction library to support graph queries on our relational database -- a unique
-	requirement since we are storing entities on varying storage formats: ie. standard table.column representation,
-	key-value-pairs on jsonb, categories or types as a subset of the CV table, HDF5 indices as jsonb, etc.
+	requirement since we are storing entities on varying storage formats than a typical relational database:
+	ie. standard table.column representation, key-value-pairs on jsonb, categories or types as a subset of the
+	CV table, HDF5 indices as jsonb, etc.
 	The following features are supported:
 		1. Extraction by Markers
 		2. Extraction by Samples
@@ -14,10 +15,13 @@
 from __future__ import print_function
 import sys
 import getopt
+import traceback
 import extract_marker_metadata
 import extract_sample_metadata
 import extract_project_metadata
 from util.mde_utility import MDEUtility
+from util.gql_utility import ReturnCodes
+from util.gql_utility import GQLException
 
 def main(argv):
 		#TODO: Create a constant class when there's time, probably post-V1
@@ -52,10 +56,10 @@ def main(argv):
 		exitCode = 0
 		#PARSE PARAMETERS/ARGUMENTS
 		try:
-			opts, args = getopt.getopt(argv, "hc:m:s:d:p:avnM:lD:x:y:b:X:P:t:Y:G:", ["connectionString=", "markerOutputFile=", "sampleOutputFile=", "datasetId=", "projectOutputFile=", "all", "verbose", "namesOnly", "map=", "includeChrLen", "displayMap=", "markerList=", "sampleList=", "mapsetOutputFile=", "extractByMarkers", "markerNames=", "platformList=", "datasetType=", "extractByDataset", "piId=", "projectId=", "sampleType=", "sampleNames=", "extractBySamples", "markerGroupList="])
+			opts, args = getopt.getopt(argv, "hc:o:g:t:f:v", ["connectionString=", "outputFilePath=", "subGraphPath=", "targetVertexName=", "vertexColumnsToFetch=", "verbose"])
 			#print (opts, args)
 			if len(args) < 2 and len(opts) < 2:
-				printUsageHelp(2)
+				printUsageHelp(ReturnCodes.INCOMPLETE_PARAMETERS)
 		except getopt.GetoptError as e:
 			MDEUtility.printError("Error parsing parameters: %s" % str(e))
 			printUsageHelp(9)
@@ -214,9 +218,14 @@ def printUsageHelp(eCode):
 	print ("\t-g or --subGraphPath = This is a JSON string of key-value-pairs of this format: {vertex_name1:[value_id1, value_id2], vertex_name2:[value_id1], ...}. This is basically just a list of vertices to visit but filtered with the listed vertices values (which affects the target vertex' values as well).")
 	print ("\t-t or --targetVertexName = The vertex to get the values of. In the context of flexQuery, this is the currently selected filter option.")
 	print ("\t-f or --vertexColumnsToFetch = The list of columns of the target vertex to get values of. This is OPTIONAL. If it is not set, the library will just use target vertex.data_loc. For example, if the target vertex is 'project', then this will be just the column 'name', while for vertex 'marker', this will be 'name, dataset_marker_idx'. The columns that will appear on the output file is dependent on this. Just note that the list of columns will always be prepended with 'id' and will come out in the order you specify.")
+	print ("\t-v or --verbose = Print the status of GQL execution in more detail. Use only for debugging as this will slow down most of the library's queries.")
 	print ("\tNOTE: If vertex_type=KVP, vertexColumnsToFetch is irrelevant (and hence, ignored) as there is only one column returnable which will always be called 'value'.")
-
-	sys.exit(eCode)
+	try:
+		raise GQLException(eCode)
+	except GQLException as e1:
+		print (e1.message)
+		traceback.print_exc()
+		sys.exit(eCode)
 
 
 if __name__ == "__main__":
