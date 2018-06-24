@@ -13,8 +13,7 @@
 	Exit Codes:TBD
 
 	Sample Usage:
-	> python gobii_gql.py -o /temp/filter3.out -g '{"principal_investigator":[67,69,70], "project":[3,25,30]}' -t experiment -f '["name
-	"]' -v
+	> python gobii_gql.py -o /temp/filter3.out -g '{"principal_investigator":[67,69,70], "project":[3,25,30]}' -t experiment -f '["name"]' -v
 '''
 from __future__ import print_function
 import sys
@@ -75,10 +74,28 @@ def main(argv):
 				exitWithException(ReturnCodes.INCOMPLETE_PARAMETERS)
 		if verbose:
 			print ("Opts: ", opts)
-		subGraphPathJson = json.loads(subGraphPath)
-		if verbose:
-			for key in subGraphPathJson:
-				print ("Visiting vertex %s with filter IDs %s" % (key, subGraphPathJson[key]))
+
+		try:
+			subGraphPathJson = json.loads(subGraphPath)
+			if verbose:
+				for key, value in subGraphPathJson.iteritems():
+					print ("Visiting vertex %s with filter IDs %s" % (key, value))
+					for filterId in value:
+						print ("Filtering by ID=%d" % filterId)
+		except Exception as e:
+			print ("Exception occured while parsing subGraphPath: %s" % e.message)
+			exitWithException(ReturnCodes.ERROR_PARSING_JSON)
+
+		try:
+			vertexColumnsToFetchJson = json.loads(vertexColumnsToFetch)
+			if verbose:
+				for col in vertexColumnsToFetchJson:
+					print ("Fetching columns %s" % col)
+		except Exception as e:
+			traceback.print_exc()
+			print ("Exception occured while parsing vertexColumnsToFetch: %s" % e.message)
+			exitWithException(ReturnCodes.ERROR_PARSING_JSON)
+
 		# markerList = []
 		# sampleList = []
 		# markerNames = []

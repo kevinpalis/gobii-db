@@ -10,11 +10,13 @@ class ReturnCodes:
 	INCOMPLETE_PARAMETERS = 1
 	ERROR_PARSING_PARAMETERS = 2
 	INVALID_OPTIONS = 3
+	ERROR_PARSING_JSON = 4
 	MESSAGES = {
 		SUCCESS: "Operation completed successfully.",
 		INCOMPLETE_PARAMETERS: "There were fewer parameters passed than what is required. Please check the usage help (-h).",
 		ERROR_PARSING_PARAMETERS: "The parameters given cannot be parsed. Please check your syntax.",
-		INVALID_OPTIONS: "A given option/flag is invalid. Please check."
+		INVALID_OPTIONS: "A given option/flag is invalid. Please check.",
+		ERROR_PARSING_JSON: "An error occured while parsing a json parameter. Make sure it is of the proper format."
 	}
 
 
