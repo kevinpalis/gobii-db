@@ -11,14 +11,16 @@
 		3. Extraction by Markers AND Samples
 
 	Exit Codes:TBD
+
+	Sample Usage:
+	> python gobii_gql.py -o /temp/filter3.out -g '{"principal_investigator":[67,69,70], "project":[3,25,30]}' -t experiment -f '["name
+	"]' -v
 '''
 from __future__ import print_function
 import sys
 import getopt
 import traceback
-import extract_marker_metadata
-import extract_sample_metadata
-import extract_project_metadata
+import json
 from util.mde_utility import MDEUtility
 from util.gql_utility import ReturnCodes
 from util.gql_utility import GQLException
@@ -34,36 +36,15 @@ def main(argv):
 		subGraphPath = ""
 		targetVertexName = ""
 		vertexColumnsToFetch = ""
-		# sampleOutputFile = ""
-		# datasetId = -1
-		# projectOutputFile = ""
-		# allMeta = False
-		# namesOnly = False
-		# mapId = -1
-		# includeChrLen = False
-		# displayMap = -1
-		# markerListFile = ""
-		# sampleListFile = ""
-		# mapsetOutputFile = ""
-		# markerNamesFile = ""
-		# sampleNamesFile = ""
-		# datasetType = -1
-		# platformList = []
-		# piId = -1
-		# projectId = -1
-		# markerGroupList = ""
-		#1 = By dataset, 2 = By Markers, 3 = By Samples
-		# extractionType = -1
-		#1 = Germplasm Names, 2 = External Codes, 3 = DnaSample Names
-		# sampleType = -1
 		exitCode = ReturnCodes.SUCCESS
+
 		#PARSE PARAMETERS/ARGUMENTS
 		try:
 			opts, args = getopt.getopt(argv, "hc:o:g:t:f:v", ["connectionString=", "outputFilePath=", "subGraphPath=", "targetVertexName=", "vertexColumnsToFetch=", "verbose"])
 			#print (opts, args)
 			if len(args) < 1 and len(opts) < 1:
 				printUsageHelp(ReturnCodes.SUCCESS)
-		except getopt.GetoptError as e:
+		except getopt.GetoptError:
 			# print ("OptError: %s" % (str(e1)))
 			exitWithException(ReturnCodes.INVALID_OPTIONS)
 		for opt, arg in opts:
@@ -93,7 +74,11 @@ def main(argv):
 		if len(args) < 4 and len(opts) < 4:
 				exitWithException(ReturnCodes.INCOMPLETE_PARAMETERS)
 		if verbose:
-			print("Opts: ", opts)
+			print ("Opts: ", opts)
+		subGraphPathJson = json.loads(subGraphPath)
+		if verbose:
+			for key in subGraphPathJson:
+				print ("Visiting vertex %s with filter IDs %s" % (key, subGraphPathJson[key]))
 		# markerList = []
 		# sampleList = []
 		# markerNames = []

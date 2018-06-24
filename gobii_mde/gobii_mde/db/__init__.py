@@ -2,4 +2,4 @@
 
 __author__ = 'Kevin Palis'
 __email__ = 'kdp44@cornell.edu'
-__version__ = '0.1.0'
+__version__ = '1.0'
