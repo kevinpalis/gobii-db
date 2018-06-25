@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 from __future__ import print_function
-
+import psycopg2.extras
 from connection_manager import ConnectionManager
 # from foreign_data_manager import ForeignDataManager
 
@@ -9,7 +9,7 @@ class GraphQueryManager:
 	def __init__(self, connectionStr):
 		self.connMgr = ConnectionManager()
 		self.conn = self.connMgr.connectToDatabase(connectionStr)
-		self.cur = self.conn.cursor()
+		self.cur = self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 		# self.fdm = ForeignDataManager()
 
 	def getMarkerIdsInGroups(self, markerGroupList, platformList):
@@ -32,3 +32,8 @@ class GraphQueryManager:
 			self.connMgr.disconnectFromDatabase()
 		except Exception as e:
 			print ("Failed to close database session. Database connection may not have been established.\n Exception: %s" % e.message)
+
+	def getVertex(self, vertexName):
+			self.cur.execute("select * from vertex where name=%s", (vertexName,))
+			res = self.cur.fetchone()
+			return res

@@ -17,6 +17,7 @@
 	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /temp/filter2.out -g '{"principal_investigator":[67,69,70]}' -t project -f '["name"]' -v
 	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /temp/filter3.out -g '{"principal_investigator":[67,69,70], "project":[3,25,30]}' -t division -v -d
 	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /temp/filter3b.out -g '{"principal_investigator":[67,69,70], "project":[3,25,30]}' -t experiment -f '["name"]' -v
+	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /temp/filter4.out -g '{"principal_investigator":[67,69,70], "project":[3,25,30], "division":[25,30]}' -t experiment -f '["name"]' -v
 '''
 from __future__ import print_function
 import sys
@@ -39,11 +40,12 @@ def main(argv):
 		subGraphPath = ""
 		targetVertexName = ""
 		vertexColumnsToFetch = ""
+		limit = None
 		exitCode = ReturnCodes.SUCCESS
 
 		#PARSE PARAMETERS/ARGUMENTS
 		try:
-			opts, args = getopt.getopt(argv, "hc:o:g:t:f:vd", ["connectionString=", "outputFilePath=", "subGraphPath=", "targetVertexName=", "vertexColumnsToFetch=", "verbose", "debug"])
+			opts, args = getopt.getopt(argv, "hc:o:g:t:f:l:vd", ["connectionString=", "outputFilePath=", "subGraphPath=", "targetVertexName=", "vertexColumnsToFetch=", "verbose", "debug"])
 			#print (opts, args)
 			# No arguments supplied, show help
 			if len(args) < 2 and len(opts) < 2:
@@ -64,6 +66,8 @@ def main(argv):
 				targetVertexName = arg
 			elif opt in ("-f", "--vertexColumnsToFetch"):
 				vertexColumnsToFetch = arg
+			elif opt in ("-l", "--limit"):
+				limit = arg
 			elif opt in ("-v", "--verbose"):
 				verbose = True
 			elif opt in ("-d", "--debug"):
@@ -119,6 +123,14 @@ def main(argv):
 		# sampleNames = []
 
 		#PREPARE PARAMETERS
+		targetVertexInfo = gqlMgr.getVertex(targetVertexName)
+		print ("targetVertexInfo: %s" % targetVertexInfo)
+		print ("type: %s" % type(targetVertexInfo))
+		print ("ID=%s,name=%s,type_id=%s, table_name=%s" % (targetVertexInfo['vertex_id'], targetVertexInfo['name'], targetVertexInfo['type_id'], targetVertexInfo['table_name']))
+		# if res is None:
+		# 	MDEUtility.printError('Invalid marker group passed.')
+		# 	sys.exit(13)
+		# markerListFromGrp = [str(i[0]) for i in res]
 		#convert file contents to lists
 		# if markerListFile != "":
 		# 		markerList = [line.strip() for line in open(markerListFile, 'r')]
@@ -177,6 +189,7 @@ def printUsageHelp(eCode):
 	print ("\t-g or --subGraphPath = (OPTIONAL) This is a JSON string of key-value-pairs of this format: {vertex_name1:[value_id1, value_id2], vertex_name2:[value_id1], ...}. This is basically just a list of vertices to visit but filtered with the listed vertices values (which affects the target vertex' values as well). To fetch the values for an entry vertex, simply don't set this parameter.")
 	print ("\t-t or --targetVertexName = The vertex to get the values of. In the context of flexQuery, this is the currently selected filter option.")
 	print ("\t-f or --vertexColumnsToFetch = (OPTIONAL) The list of columns of the target vertex to get values of. If it is not set, the library will just use target vertex.data_loc. For example, if the target vertex is 'project', then this will be just the column 'name', while for vertex 'marker', this will be 'name, dataset_marker_idx'. The columns that will appear on the output file is dependent on this. Just note that the list of columns will always be prepended with 'id' and will come out in the order you specify.")
+	print ("\t-l or --limit = (OPTIONAL) This will effectively apply a row limit to all query results. Hence, the output files will have at most limit+1 number of rows.")
 	print ("\t-v or --verbose = (OPTIONAL) Print the status of GQL execution in more detail. Use only for debugging as this will slow down most of the library's queries.")
 	print ("\t-d or --debug = (OPTIONAL) Turns the debug mode on. The script will run significantly slower but will allow for very fine-tuned debugging.")
 	print ("\tNOTE: If vertex_type=KVP, vertexColumnsToFetch is irrelevant (and hence, ignored) as there is only one column returnable which will always be called 'value'.")
