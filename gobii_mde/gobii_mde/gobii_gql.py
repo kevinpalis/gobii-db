@@ -14,7 +14,9 @@
 
 	Sample Usage:
 	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /temp/filter1.out -t principal_investigator -f '["firstname","lastname"]' -v
-	> python gobii_gql.py -o /temp/filter3.out -g '{"principal_investigator":[67,69,70], "project":[3,25,30]}' -t experiment -f '["name"]' -v
+	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /temp/filter2.out -g '{"principal_investigator":[67,69,70]}' -t project -f '["name"]' -v
+	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /temp/filter3.out -g '{"principal_investigator":[67,69,70], "project":[3,25,30]}' -t division -v -d
+	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /temp/filter3b.out -g '{"principal_investigator":[67,69,70], "project":[3,25,30]}' -t experiment -f '["name"]' -v
 '''
 from __future__ import print_function
 import sys
@@ -31,6 +33,7 @@ def main(argv):
 		# SAMPLE_TYPES = [1, 2, 3]
 
 		verbose = False
+		debug = False
 		connectionStr = ""
 		outputFilePath = ""
 		subGraphPath = ""
@@ -40,13 +43,14 @@ def main(argv):
 
 		#PARSE PARAMETERS/ARGUMENTS
 		try:
-			opts, args = getopt.getopt(argv, "hc:o:g:t:f:v", ["connectionString=", "outputFilePath=", "subGraphPath=", "targetVertexName=", "vertexColumnsToFetch=", "verbose"])
+			opts, args = getopt.getopt(argv, "hc:o:g:t:f:vd", ["connectionString=", "outputFilePath=", "subGraphPath=", "targetVertexName=", "vertexColumnsToFetch=", "verbose", "debug"])
 			#print (opts, args)
-			if len(args) < 1 and len(opts) < 1:
+			# No arguments supplied, show help
+			if len(args) < 2 and len(opts) < 2:
 				printUsageHelp(ReturnCodes.SUCCESS)
 		except getopt.GetoptError:
 			# print ("OptError: %s" % (str(e1)))
-			exitWithException(ReturnCodes.INVALID_OPTIONS, gqlMgr)
+			exitWithException(ReturnCodes.INVALID_OPTIONS, None)
 		for opt, arg in opts:
 			if opt == '-h':
 				printUsageHelp(ReturnCodes.SUCCESS)
@@ -62,6 +66,8 @@ def main(argv):
 				vertexColumnsToFetch = arg
 			elif opt in ("-v", "--verbose"):
 				verbose = True
+			elif opt in ("-d", "--debug"):
+				debug = True
 			# elif opt in ("-P", "--platformList"):
 			# 	try:
 			# 		platformList = arg.split(",")
@@ -73,17 +79,18 @@ def main(argv):
 		#VALIDATIONS
 		#initialize connection
 		gqlMgr = GraphQueryManager(connectionStr)
-		if len(args) < 4 and len(opts) < 4:
+		if len(args) < 3 and len(opts) < 3:
 				exitWithException(ReturnCodes.INCOMPLETE_PARAMETERS, gqlMgr)
 		if verbose:
 			print ("Opts: ", opts)
 
 		if subGraphPath == "":
-			print ("No vertices to visit. Proceeding as an entry vertex call.")
+			if verbose:
+				print ("No vertices to visit. Proceeding as an entry vertex call.")
 		else:
 			try:
 				subGraphPathJson = json.loads(subGraphPath)
-				if verbose:
+				if debug:
 					for key, value in subGraphPathJson.iteritems():
 						print ("Visiting vertex %s with filter IDs %s" % (key, value))
 						for filterId in value:
@@ -92,15 +99,19 @@ def main(argv):
 				print ("Exception occured while parsing subGraphPath: %s" % e.message)
 				exitWithException(ReturnCodes.ERROR_PARSING_JSON, gqlMgr)
 
-		try:
-			vertexColumnsToFetchJson = json.loads(vertexColumnsToFetch)
+		if vertexColumnsToFetch == "":
 			if verbose:
-				for col in vertexColumnsToFetchJson:
-					print ("Fetching column %s" % col)
-		except Exception as e:
-			traceback.print_exc()
-			print ("Exception occured while parsing vertexColumnsToFetch: %s" % e.message)
-			exitWithException(ReturnCodes.ERROR_PARSING_JSON, gqlMgr)
+				print ("No columns to fetch specified - will default to vertex.data_loc.")
+		else:
+			try:
+				vertexColumnsToFetchJson = json.loads(vertexColumnsToFetch)
+				if debug:
+					for col in vertexColumnsToFetchJson:
+						print ("Fetching column %s" % col)
+			except Exception as e:
+				traceback.print_exc()
+				print ("Exception occured while parsing vertexColumnsToFetch: %s" % e.message)
+				exitWithException(ReturnCodes.ERROR_PARSING_JSON, gqlMgr)
 
 		# markerList = []
 		# sampleList = []
@@ -166,7 +177,8 @@ def printUsageHelp(eCode):
 	print ("\t-g or --subGraphPath = (OPTIONAL) This is a JSON string of key-value-pairs of this format: {vertex_name1:[value_id1, value_id2], vertex_name2:[value_id1], ...}. This is basically just a list of vertices to visit but filtered with the listed vertices values (which affects the target vertex' values as well). To fetch the values for an entry vertex, simply don't set this parameter.")
 	print ("\t-t or --targetVertexName = The vertex to get the values of. In the context of flexQuery, this is the currently selected filter option.")
 	print ("\t-f or --vertexColumnsToFetch = (OPTIONAL) The list of columns of the target vertex to get values of. If it is not set, the library will just use target vertex.data_loc. For example, if the target vertex is 'project', then this will be just the column 'name', while for vertex 'marker', this will be 'name, dataset_marker_idx'. The columns that will appear on the output file is dependent on this. Just note that the list of columns will always be prepended with 'id' and will come out in the order you specify.")
-	print ("\t-v or --verbose = Print the status of GQL execution in more detail. Use only for debugging as this will slow down most of the library's queries.")
+	print ("\t-v or --verbose = (OPTIONAL) Print the status of GQL execution in more detail. Use only for debugging as this will slow down most of the library's queries.")
+	print ("\t-d or --debug = (OPTIONAL) Turns the debug mode on. The script will run significantly slower but will allow for very fine-tuned debugging.")
 	print ("\tNOTE: If vertex_type=KVP, vertexColumnsToFetch is irrelevant (and hence, ignored) as there is only one column returnable which will always be called 'value'.")
 	if eCode == ReturnCodes.SUCCESS:
 		sys.exit(eCode)
@@ -179,8 +191,9 @@ def printUsageHelp(eCode):
 
 def exitWithException(eCode, gqlMgr):
 	try:
-		gqlMgr.commitTransaction()
-		gqlMgr.closeConnection()
+		if gqlMgr is not None:
+			gqlMgr.commitTransaction()
+			gqlMgr.closeConnection()
 		raise GQLException(eCode)
 	except GQLException as e1:
 		print (e1.message)
