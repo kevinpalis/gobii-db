@@ -13,6 +13,7 @@
 	Exit Codes:TBD
 
 	Sample Usage:
+	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /temp/filter1.out -t principal_investigator -f '["firstname","lastname"]' -v
 	> python gobii_gql.py -o /temp/filter3.out -g '{"principal_investigator":[67,69,70], "project":[3,25,30]}' -t experiment -f '["name"]' -v
 '''
 from __future__ import print_function
@@ -20,9 +21,9 @@ import sys
 import getopt
 import traceback
 import json
-from util.mde_utility import MDEUtility
 from util.gql_utility import ReturnCodes
 from util.gql_utility import GQLException
+from db.graph_query_manager import GraphQueryManager
 
 def main(argv):
 		#TODO: Create a constant class when there's time, probably post-V1
@@ -45,7 +46,7 @@ def main(argv):
 				printUsageHelp(ReturnCodes.SUCCESS)
 		except getopt.GetoptError:
 			# print ("OptError: %s" % (str(e1)))
-			exitWithException(ReturnCodes.INVALID_OPTIONS)
+			exitWithException(ReturnCodes.INVALID_OPTIONS, gqlMgr)
 		for opt, arg in opts:
 			if opt == '-h':
 				printUsageHelp(ReturnCodes.SUCCESS)
@@ -70,31 +71,36 @@ def main(argv):
 			# 		sys.exit(exitCode)
 
 		#VALIDATIONS
+		#initialize connection
+		gqlMgr = GraphQueryManager(connectionStr)
 		if len(args) < 4 and len(opts) < 4:
-				exitWithException(ReturnCodes.INCOMPLETE_PARAMETERS)
+				exitWithException(ReturnCodes.INCOMPLETE_PARAMETERS, gqlMgr)
 		if verbose:
 			print ("Opts: ", opts)
 
-		try:
-			subGraphPathJson = json.loads(subGraphPath)
-			if verbose:
-				for key, value in subGraphPathJson.iteritems():
-					print ("Visiting vertex %s with filter IDs %s" % (key, value))
-					for filterId in value:
-						print ("Filtering by ID=%d" % filterId)
-		except Exception as e:
-			print ("Exception occured while parsing subGraphPath: %s" % e.message)
-			exitWithException(ReturnCodes.ERROR_PARSING_JSON)
+		if subGraphPath == "":
+			print ("No vertices to visit. Proceeding as an entry vertex call.")
+		else:
+			try:
+				subGraphPathJson = json.loads(subGraphPath)
+				if verbose:
+					for key, value in subGraphPathJson.iteritems():
+						print ("Visiting vertex %s with filter IDs %s" % (key, value))
+						for filterId in value:
+							print ("Filtering by ID=%d" % filterId)
+			except Exception as e:
+				print ("Exception occured while parsing subGraphPath: %s" % e.message)
+				exitWithException(ReturnCodes.ERROR_PARSING_JSON, gqlMgr)
 
 		try:
 			vertexColumnsToFetchJson = json.loads(vertexColumnsToFetch)
 			if verbose:
 				for col in vertexColumnsToFetchJson:
-					print ("Fetching columns %s" % col)
+					print ("Fetching column %s" % col)
 		except Exception as e:
 			traceback.print_exc()
 			print ("Exception occured while parsing vertexColumnsToFetch: %s" % e.message)
-			exitWithException(ReturnCodes.ERROR_PARSING_JSON)
+			exitWithException(ReturnCodes.ERROR_PARSING_JSON, gqlMgr)
 
 		# markerList = []
 		# sampleList = []
@@ -113,6 +119,9 @@ def main(argv):
 		# 		sampleNames = [line.strip() for line in open(sampleNamesFile, 'r')]
 
 		#Do the Dew
+		selectStr = ""
+		conditionStr = ""
+		fromStr = ""
 		#rn = False
 		#if connectionStr != "" and markerOutputFile != "":
 		# try:
@@ -143,7 +152,8 @@ def main(argv):
 		#if not rn:
 		#	print("At least one of -m, -s, or -p is required for the extractor to run.")
 		#	printUsageHelp(2)
-
+		gqlMgr.commitTransaction()
+		gqlMgr.closeConnection()
 		sys.exit(exitCode)
 		#cleanup
 
@@ -153,9 +163,9 @@ def printUsageHelp(eCode):
 	print ("\t-h = Usage help")
 	print ("\t-c or --connectionString = Database connection string (RFC 3986 URI).\n\t\tFormat: postgresql://[user[:password]@][netloc][:port][/dbname][?param1=value1&...]")
 	print ("\t-o or --outputFilePath = The absolute path of the file where the result of the query will be written to.")
-	print ("\t-g or --subGraphPath = This is a JSON string of key-value-pairs of this format: {vertex_name1:[value_id1, value_id2], vertex_name2:[value_id1], ...}. This is basically just a list of vertices to visit but filtered with the listed vertices values (which affects the target vertex' values as well).")
+	print ("\t-g or --subGraphPath = (OPTIONAL) This is a JSON string of key-value-pairs of this format: {vertex_name1:[value_id1, value_id2], vertex_name2:[value_id1], ...}. This is basically just a list of vertices to visit but filtered with the listed vertices values (which affects the target vertex' values as well). To fetch the values for an entry vertex, simply don't set this parameter.")
 	print ("\t-t or --targetVertexName = The vertex to get the values of. In the context of flexQuery, this is the currently selected filter option.")
-	print ("\t-f or --vertexColumnsToFetch = The list of columns of the target vertex to get values of. This is OPTIONAL. If it is not set, the library will just use target vertex.data_loc. For example, if the target vertex is 'project', then this will be just the column 'name', while for vertex 'marker', this will be 'name, dataset_marker_idx'. The columns that will appear on the output file is dependent on this. Just note that the list of columns will always be prepended with 'id' and will come out in the order you specify.")
+	print ("\t-f or --vertexColumnsToFetch = (OPTIONAL) The list of columns of the target vertex to get values of. If it is not set, the library will just use target vertex.data_loc. For example, if the target vertex is 'project', then this will be just the column 'name', while for vertex 'marker', this will be 'name, dataset_marker_idx'. The columns that will appear on the output file is dependent on this. Just note that the list of columns will always be prepended with 'id' and will come out in the order you specify.")
 	print ("\t-v or --verbose = Print the status of GQL execution in more detail. Use only for debugging as this will slow down most of the library's queries.")
 	print ("\tNOTE: If vertex_type=KVP, vertexColumnsToFetch is irrelevant (and hence, ignored) as there is only one column returnable which will always be called 'value'.")
 	if eCode == ReturnCodes.SUCCESS:
@@ -167,8 +177,10 @@ def printUsageHelp(eCode):
 		traceback.print_exc()
 		sys.exit(eCode)
 
-def exitWithException(eCode):
+def exitWithException(eCode, gqlMgr):
 	try:
+		gqlMgr.commitTransaction()
+		gqlMgr.closeConnection()
 		raise GQLException(eCode)
 	except GQLException as e1:
 		print (e1.message)
