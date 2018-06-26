@@ -37,3 +37,8 @@ class GraphQueryManager:
 			self.cur.execute("select * from vertex where name=%s", (vertexName,))
 			res = self.cur.fetchone()
 			return res
+
+	def getCvId(self, term, groupName):
+			self.cur.execute("select cvid from getcvid(%s, %s, %s)", (term, groupName, 1))
+			res = self.cur.fetchone()
+			return res

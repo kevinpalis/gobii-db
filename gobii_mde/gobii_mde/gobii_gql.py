@@ -13,7 +13,13 @@
 	Exit Codes:TBD
 
 	Sample Usage:
+	* Entry vertices:
 	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /temp/filter1.out -t principal_investigator -f '["firstname","lastname"]' -v
+	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /temp/filter1.out -t principal_investigator -v -d
+	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /temp/filter1.out -t project -f '["name"]' -v -d
+	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /temp/filter1.out -t sampling_date -v -d
+
+	With Subgraphs/Vertices-to-visit:
 	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /temp/filter2.out -g '{"principal_investigator":[67,69,70]}' -t project -f '["name"]' -v
 	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /temp/filter3.out -g '{"principal_investigator":[67,69,70], "project":[3,25,30]}' -t division -v -d
 	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /temp/filter3b.out -g '{"principal_investigator":[67,69,70], "project":[3,25,30]}' -t experiment -f '["name"]' -v
@@ -29,18 +35,17 @@ from util.gql_utility import GQLException
 from db.graph_query_manager import GraphQueryManager
 
 def main(argv):
-		#TODO: Create a constant class when there's time, probably post-V1
-		# EXTRACTION_TYPES = [1, 2, 3]
-		# SAMPLE_TYPES = [1, 2, 3]
-
 		verbose = False
 		debug = False
+		isKvpVertex = False
+		isDefaultDataLoc = False
 		connectionStr = ""
 		outputFilePath = ""
 		subGraphPath = ""
 		targetVertexName = ""
 		vertexColumnsToFetch = ""
 		limit = None
+		vertexTypes = {}
 		exitCode = ReturnCodes.SUCCESS
 
 		#PARSE PARAMETERS/ARGUMENTS
@@ -104,6 +109,7 @@ def main(argv):
 				exitWithException(ReturnCodes.ERROR_PARSING_JSON, gqlMgr)
 
 		if vertexColumnsToFetch == "":
+			isDefaultDataLoc = True
 			if verbose:
 				print ("No columns to fetch specified - will default to vertex.data_loc.")
 		else:
@@ -117,24 +123,37 @@ def main(argv):
 				print ("Exception occured while parsing vertexColumnsToFetch: %s" % e.message)
 				exitWithException(ReturnCodes.ERROR_PARSING_JSON, gqlMgr)
 
-		# markerList = []
-		# sampleList = []
-		# markerNames = []
-		# sampleNames = []
+		####################################################
+		# START: PREPARE VARIABLES AND PARAMS
+		####################################################
+		#initialize vertex types
+		vertexTypes['standard'] = gqlMgr.getCvId('standard', 'vertex_type')['cvid']
+		vertexTypes['standard_subset'] = gqlMgr.getCvId('standard_subset', 'vertex_type')['cvid']
+		vertexTypes['cv_subset'] = gqlMgr.getCvId('cv_subset', 'vertex_type')['cvid']
+		vertexTypes['key_value_pair'] = gqlMgr.getCvId('key_value_pair', 'vertex_type')['cvid']
 
-		#PREPARE PARAMETERS
 		targetVertexInfo = gqlMgr.getVertex(targetVertexName)
-		print ("targetVertexInfo: %s" % targetVertexInfo)
-		print ("type: %s" % type(targetVertexInfo))
-		print ("ID=%s,name=%s,type_id=%s, table_name=%s" % (targetVertexInfo['vertex_id'], targetVertexInfo['name'], targetVertexInfo['type_id'], targetVertexInfo['table_name']))
+		if debug:
+			print (vertexTypes)
+			print ("targetVertexInfo: %s" % targetVertexInfo)
 		tvAlias = targetVertexInfo['alias']
 		tvTableName = targetVertexInfo['table_name']
 		tvCriterion = targetVertexInfo['criterion']
-		if vertexColumnsToFetch == "":
-			#todo: make this iterable
+		tvType = targetVertexInfo['type_id']
+		# print ("tvType=%s, vertex_type.type_id=%s" % (type(tvType), type(vertexTypes['key_value_pair'])))
+		if tvType == vertexTypes['key_value_pair']:
+			isKvpVertex = True
+		if isKvpVertex:
+			# for KVP vertices, we ignore the vertexColumnsToFetch parameter
+			if verbose:
+				print ("Since this is a KVP vertex, vertexColumnsToFetch parameter will be ignored.")
 			tvDataLoc = targetVertexInfo['data_loc']
 		else:
-			tvDataLoc = vertexColumnsToFetchJson
+			if isDefaultDataLoc:
+				# parameter vertexColumnsToFetch wasn't set, defaulting to vertex.data_loc
+				tvDataLoc = targetVertexInfo['data_loc']
+			else:
+				tvDataLoc = vertexColumnsToFetchJson
 		tvIsEntry = targetVertexInfo['is_entry']
 
 		#VALIDATIONS OF PARSED PARAMETERS
@@ -142,6 +161,9 @@ def main(argv):
 			if verbose:
 				print ("This is not an entry vertex, so a subgraph is required.")
 			exitWithException(ReturnCodes.NOT_ENTRY_VERTEX, gqlMgr)
+		####################################################
+		# END: PREPARE VARIABLES AND PARAMS
+		####################################################
 
 		# if res is None:
 		# 	MDEUtility.printError('Invalid marker group passed.')
@@ -157,25 +179,42 @@ def main(argv):
 		# if sampleNamesFile != "":
 		# 		sampleNames = [line.strip() for line in open(sampleNamesFile, 'r')]
 
+		####################################################
+		# START: CREATE THE DYNAMIC QUERY
+		####################################################
 		#Do the Dew
 		selectStr = "select "
 		fromStr = "from"
 		conditionStr = "where"
+		dynamicQuery = ""
 
 		#Case when this is an entry vertex
-		if subGraphPath == "":
+		if tvIsEntry and subGraphPath == "":
 			if verbose:
 				print ("Building dynamic query for an entry vertex.")
-		selectStr += tvAlias+"."+tvTableName+"_id"
-		print ("dataloc: %s" % tvDataLoc)
-		print ("type: %s" % type(tvDataLoc))
-		for col in tvDataLoc:
-			if verbose:
-				print ("Adding column %s to selectStr." % col)
-				selectStr += ", "+tvAlias+"."+col
-		fromStr += " "+tvTableName+" as "+tvAlias
+			selectStr += tvAlias+"."+tvTableName+"_id as id"
+			print ("dataloc: %s" % tvDataLoc)
+			print ("type: %s" % type(tvDataLoc))
+			if isKvpVertex:
+				selectStr += ", "+tvAlias+"."+tvDataLoc+" as "+targetVertexName
+			elif isDefaultDataLoc:
+				selectStr += "".join([", "+tvAlias+"."+col.strip() for col in tvDataLoc.split(',')])
+				print ("@@@isDefaultDataLoc: %s" % selectStr)
+			else:
+				for col in tvDataLoc:
+					if verbose:
+						print ("Adding column %s to selectStr." % col)
+						selectStr += ", "+tvAlias+"."+col
+			#TODO: Handle case when data_loc is used instead (prepend with alias)
+			fromStr += " "+tvTableName+" as "+tvAlias
+			if tvCriterion is not None:
+				conditionStr += " "+tvCriterion
+				dynamicQuery = selectStr+" "+fromStr+" "+conditionStr+";"
+			else:
+				dynamicQuery = selectStr+" "+fromStr+";"
+
 		if debug:
-			print ("Generated dynamic query: \n%s" % selectStr+"\n"+fromStr)
+			print ("Generated dynamic query: \n%s" % dynamicQuery)
 		#rn = False
 		#if connectionStr != "" and markerOutputFile != "":
 		# try:
