@@ -80,7 +80,7 @@ def main(argv):
 			# 		exitCode = 6
 			# 		sys.exit(exitCode)
 
-		#VALIDATIONS
+		#INITIAL VALIDATIONS
 		#initialize connection
 		gqlMgr = GraphQueryManager(connectionStr)
 		if len(args) < 3 and len(opts) < 3:
@@ -127,6 +127,22 @@ def main(argv):
 		print ("targetVertexInfo: %s" % targetVertexInfo)
 		print ("type: %s" % type(targetVertexInfo))
 		print ("ID=%s,name=%s,type_id=%s, table_name=%s" % (targetVertexInfo['vertex_id'], targetVertexInfo['name'], targetVertexInfo['type_id'], targetVertexInfo['table_name']))
+		tvAlias = targetVertexInfo['alias']
+		tvTableName = targetVertexInfo['table_name']
+		tvCriterion = targetVertexInfo['criterion']
+		if vertexColumnsToFetch == "":
+			#todo: make this iterable
+			tvDataLoc = targetVertexInfo['data_loc']
+		else:
+			tvDataLoc = vertexColumnsToFetchJson
+		tvIsEntry = targetVertexInfo['is_entry']
+
+		#VALIDATIONS OF PARSED PARAMETERS
+		if not tvIsEntry and subGraphPath == "":
+			if verbose:
+				print ("This is not an entry vertex, so a subgraph is required.")
+			exitWithException(ReturnCodes.NOT_ENTRY_VERTEX, gqlMgr)
+
 		# if res is None:
 		# 	MDEUtility.printError('Invalid marker group passed.')
 		# 	sys.exit(13)
@@ -142,9 +158,24 @@ def main(argv):
 		# 		sampleNames = [line.strip() for line in open(sampleNamesFile, 'r')]
 
 		#Do the Dew
-		selectStr = ""
-		conditionStr = ""
-		fromStr = ""
+		selectStr = "select "
+		fromStr = "from"
+		conditionStr = "where"
+
+		#Case when this is an entry vertex
+		if subGraphPath == "":
+			if verbose:
+				print ("Building dynamic query for an entry vertex.")
+		selectStr += tvAlias+"."+tvTableName+"_id"
+		print ("dataloc: %s" % tvDataLoc)
+		print ("type: %s" % type(tvDataLoc))
+		for col in tvDataLoc:
+			if verbose:
+				print ("Adding column %s to selectStr." % col)
+				selectStr += ", "+tvAlias+"."+col
+		fromStr += " "+tvTableName+" as "+tvAlias
+		if debug:
+			print ("Generated dynamic query: \n%s" % selectStr+"\n"+fromStr)
 		#rn = False
 		#if connectionStr != "" and markerOutputFile != "":
 		# try:
