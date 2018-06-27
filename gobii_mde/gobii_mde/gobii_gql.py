@@ -15,14 +15,17 @@
 	Sample Usage:
 
 	* Entry vertices:
-	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /temp/filter1.out -t principal_investigator -f '["firstname","lastname"]' -v
-	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /temp/filter1.out -t principal_investigator -v -d
-	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /temp/filter1.out -t dataset -v -d
-	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /temp/filter1.out -t marker_linkage_group -v -d
-	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /temp/filter1.out -t reference_sample -v -d
-	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /temp/filter1.out -t germplasm_species -v -d
-	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /temp/filter1.out -t project -f '["name"]' -v -d
-	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /temp/filter1.out -t sampling_date -v -d
+	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /Users/KevinPalis/temp/filter1.out -t principal_investigator -f '["firstname","lastname"]' -v
+	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /Users/KevinPalis/temp/filter1.out -t principal_investigator -v -d
+	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /Users/KevinPalis/temp/filter1.out -t trial_name -v -d
+	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /Users/KevinPalis/temp/filter1.out -t germplasm_subspecies -v -d
+	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /Users/KevinPalis/temp/filter1.out -t dataset -v -d
+	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /Users/KevinPalis/temp/filter1.out -t marker_linkage_group -v -d
+	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /Users/KevinPalis/temp/filter1.out -t reference_sample -v -d
+	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /Users/KevinPalis/temp/filter1.out -t germplasm_species -v -d
+	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /Users/KevinPalis/temp/filter1.out -t project -f '["name"]' -v -d
+	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /Users/KevinPalis/temp/filter1.out -t sampling_date -v -d
+	> python gobii_gql.py -c postgresql://appuser:g0b11isw3s0m3@cbsugobii10.tc.cornell.edu:5433/gobii_dev -o /Users/KevinPalis/temp/filter1.out -t reference_sample -v -d
 
 	With Subgraphs/Vertices-to-visit:
 	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /temp/filter2.out -g '{"principal_investigator":[67,69,70]}' -t project -f '["name"]' -v
@@ -92,7 +95,7 @@ def main(argv):
 
 		#INITIAL VALIDATIONS
 		#initialize connection
-		gqlMgr = GraphQueryManager(connectionStr)
+		gqlMgr = GraphQueryManager(connectionStr, debug)
 		if len(args) < 3 and len(opts) < 3:
 				exitWithException(ReturnCodes.INCOMPLETE_PARAMETERS, gqlMgr)
 		if verbose:
@@ -215,12 +218,19 @@ def main(argv):
 			fromStr += " "+tvTableName+" as "+tvAlias
 			if tvCriterion is not None:
 				conditionStr += " "+tvCriterion
-				dynamicQuery = selectStr+" "+fromStr+" "+conditionStr+";"
+				dynamicQuery = selectStr+" "+fromStr+" "+conditionStr
 			else:
-				dynamicQuery = selectStr+" "+fromStr+";"
+				dynamicQuery = selectStr+" "+fromStr
 
 		if debug:
 			print ("Generated dynamic query: \n%s" % dynamicQuery)
+
+		if verbose:
+			print("Creating main output file: %s" % outputFilePath)
+		try:
+			gqlMgr.outputQueryToFile(outputFilePath, dynamicQuery)
+		except Exception as e:
+			exitWithException(ReturnCodes.OUTPUT_FILE_CREATION_FAILED, gqlMgr)
 		#rn = False
 		#if connectionStr != "" and markerOutputFile != "":
 		# try:

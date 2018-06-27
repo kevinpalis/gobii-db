@@ -6,10 +6,11 @@ from connection_manager import ConnectionManager
 
 class GraphQueryManager:
 
-	def __init__(self, connectionStr):
+	def __init__(self, connectionStr, debug):
 		self.connMgr = ConnectionManager()
 		self.conn = self.connMgr.connectToDatabase(connectionStr)
 		self.cur = self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+		self.debug = debug
 		# self.fdm = ForeignDataManager()
 
 	def getMarkerIdsInGroups(self, markerGroupList, platformList):
@@ -43,8 +44,11 @@ class GraphQueryManager:
 			res = self.cur.fetchone()
 			return res
 
-	def createQCMarkerMetadataByMarkerList(self, outputFilePath, markerList):
-		sql = "copy (select * from getMarkerQCMetadataByMarkerList('{"+(','.join(markerList))+"}')) to STDOUT with delimiter E'\\t'"+" csv header;"
+	def outputQueryToFile(self, outputFilePath, sqlQuery):
+		# sql = "copy (select * from getMarkerQCMetadataByMarkerList('{"+(','.join(markerList))+"}')) to STDOUT with delimiter E'\\t'"+" csv header;"
+		sql = "copy ("+sqlQuery+") to STDOUT with delimiter E'\\t'"+" csv header;"
+		if self.debug:
+			print ("Copy command to execute: %s" % sql)
 		with open(outputFilePath, 'w') as outputFile:
 			self.cur.copy_expert(sql, outputFile, 20480)
 		outputFile.close()
