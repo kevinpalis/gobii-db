@@ -42,3 +42,9 @@ class GraphQueryManager:
 			self.cur.execute("select cvid from getcvid(%s, %s, %s)", (term, groupName, 1))
 			res = self.cur.fetchone()
 			return res
+
+	def createQCMarkerMetadataByMarkerList(self, outputFilePath, markerList):
+		sql = "copy (select * from getMarkerQCMetadataByMarkerList('{"+(','.join(markerList))+"}')) to STDOUT with delimiter E'\\t'"+" csv header;"
+		with open(outputFilePath, 'w') as outputFile:
+			self.cur.copy_expert(sql, outputFile, 20480)
+		outputFile.close()

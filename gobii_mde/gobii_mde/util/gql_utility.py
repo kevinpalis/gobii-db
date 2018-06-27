@@ -12,13 +12,15 @@ class ReturnCodes:
 	INVALID_OPTIONS = 3
 	ERROR_PARSING_JSON = 4
 	NOT_ENTRY_VERTEX = 5
+	NO_OUTPUT_PATH = 6
 	MESSAGES = {
 		SUCCESS: "Operation completed successfully.",
 		INCOMPLETE_PARAMETERS: "There were fewer parameters passed than what is required. Please check the usage help (-h).",
 		ERROR_PARSING_PARAMETERS: "The parameters given cannot be parsed. Please check your syntax.",
 		INVALID_OPTIONS: "A given option/flag is invalid. Please check.",
 		ERROR_PARSING_JSON: "An error occured while parsing a json parameter. Make sure it is of the proper format.",
-		NOT_ENTRY_VERTEX: "A non-entry vertex was supplied without a sub-graph."
+		NOT_ENTRY_VERTEX: "A non-entry vertex was supplied without a sub-graph.",
+		NO_OUTPUT_PATH: "No output file path was given."
 	}
 
 

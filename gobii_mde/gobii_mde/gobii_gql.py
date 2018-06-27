@@ -13,9 +13,14 @@
 	Exit Codes:TBD
 
 	Sample Usage:
+
 	* Entry vertices:
 	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /temp/filter1.out -t principal_investigator -f '["firstname","lastname"]' -v
 	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /temp/filter1.out -t principal_investigator -v -d
+	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /temp/filter1.out -t dataset -v -d
+	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /temp/filter1.out -t marker_linkage_group -v -d
+	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /temp/filter1.out -t reference_sample -v -d
+	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /temp/filter1.out -t germplasm_species -v -d
 	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /temp/filter1.out -t project -f '["name"]' -v -d
 	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /temp/filter1.out -t sampling_date -v -d
 
@@ -92,7 +97,8 @@ def main(argv):
 				exitWithException(ReturnCodes.INCOMPLETE_PARAMETERS, gqlMgr)
 		if verbose:
 			print ("Opts: ", opts)
-
+		if outputFilePath == "":
+			exitWithException(ReturnCodes.NO_OUTPUT_PATH, gqlMgr)
 		if subGraphPath == "":
 			if verbose:
 				print ("No vertices to visit. Proceeding as an entry vertex call.")
@@ -134,7 +140,7 @@ def main(argv):
 
 		targetVertexInfo = gqlMgr.getVertex(targetVertexName)
 		if debug:
-			print (vertexTypes)
+			# print (vertexTypes)
 			print ("targetVertexInfo: %s" % targetVertexInfo)
 		tvAlias = targetVertexInfo['alias']
 		tvTableName = targetVertexInfo['table_name']
