@@ -15,7 +15,7 @@
 	Sample Usage:
 
 	* Entry vertices:
-	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /Users/KevinPalis/temp/filter1.out -t principal_investigator -f '["firstname","lastname"]' -v
+	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /Users/KevinPalis/temp/filter1.out -t principal_investigator -f '["firstname","lastname"]' -v -d
 	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /Users/KevinPalis/temp/filter1.out -t principal_investigator -v -d
 	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /Users/KevinPalis/temp/filter1.out -t trial_name -v -d
 	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /Users/KevinPalis/temp/filter1.out -t germplasm_subspecies -v -d
@@ -24,7 +24,12 @@
 	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /Users/KevinPalis/temp/filter1.out -t reference_sample -v -d
 	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /Users/KevinPalis/temp/filter1.out -t project -f '["name"]' -v -d
 	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /Users/KevinPalis/temp/filter1.out -t sampling_date -v -d
-	> python gobii_gql.py -c postgresql://changeme:changeme@cbsugobii10.tc.cornell.edu:5433/gobii_dev -o /Users/KevinPalis/temp/filter1.out -t reference_sample -v -d
+	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /Users/KevinPalis/temp/filter1.out -t germplasm_type -v -d
+
+
+	* Limit Tests:
+	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /Users/KevinPalis/temp/filter1.out -t germplasm_subspecies -v -d -u -l 10
+	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /Users/KevinPalis/temp/filter1.out -t principal_investigator -f '["firstname","lastname"]' -v -d -l 10
 
 	With Subgraphs/Vertices-to-visit:
 	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /temp/filter2.out -g '{"principal_investigator":[67,69,70]}' -t project -f '["name"]' -v
@@ -52,7 +57,7 @@ def main(argv):
 		subGraphPath = ""
 		targetVertexName = ""
 		vertexColumnsToFetch = ""
-		limit = None
+		limit = ""
 		vertexTypes = {}
 		exitCode = ReturnCodes.SUCCESS
 
@@ -95,7 +100,9 @@ def main(argv):
 			# 		exitCode = 6
 			# 		sys.exit(exitCode)
 
-		#INITIAL VALIDATIONS
+		####################################################
+		# START: INITIAL VALIDATIONS
+		####################################################
 		#initialize connection
 		gqlMgr = GraphQueryManager(connectionStr, debug)
 		if len(args) < 3 and len(opts) < 3:
@@ -135,6 +142,7 @@ def main(argv):
 				exitWithException(ReturnCodes.ERROR_PARSING_JSON, gqlMgr)
 
 		####################################################
+		# END: INITIAL VALIDATIONS
 		# START: PREPARE VARIABLES AND PARAMS
 		####################################################
 		#initialize vertex types
@@ -206,19 +214,26 @@ def main(argv):
 			if isUnique:
 				selectStr += "distinct "
 			else:
-				selectStr += tvAlias+"."+tvTableName+"_id as id,"
+				selectStr += tvAlias+"."+tvTableName+"_id as id"
 			print ("dataloc: %s" % tvDataLoc)
 			print ("type: %s" % type(tvDataLoc))
-			if isKvpVertex:
-				selectStr += ""+tvAlias+"."+tvDataLoc+" as "+targetVertexName
-			elif isDefaultDataLoc:
-				selectStr += "".join([tvAlias+"."+col.strip() for col in tvDataLoc.split(',')])
-				print ("@@@isDefaultDataLoc: %s" % selectStr)
+
+			if isKvpVertex and isUnique:
+				selectStr += tvAlias+"."+tvDataLoc+" as "+targetVertexName
+			elif isKvpVertex and not isUnique:
+				selectStr += ", "+tvAlias+"."+tvDataLoc+" as "+targetVertexName
+			elif not isKvpVertex and not isUnique and isDefaultDataLoc:
+				selectStr += ", " + ",".join([tvAlias+"."+col.strip() for col in tvDataLoc.split(',')])
+				if verbose:
+					print ("@isDefaultDataLoc and not unique: %s" % selectStr)
+			elif not isKvpVertex and isUnique and isDefaultDataLoc:
+				selectStr += ",".join([tvAlias+"."+col.strip() for col in tvDataLoc.split(',')])
+				print ("@isDefaultDataLoc and unique: %s" % selectStr)
 			else:
 				for col in tvDataLoc:
 					if verbose:
 						print ("Adding column %s to selectStr." % col)
-						selectStr += ", "+tvAlias+"."+col
+					selectStr += ", "+tvAlias+"."+col
 			#TODO: Handle case when data_loc is used instead (prepend with alias)
 			fromStr += " "+tvTableName+" as "+tvAlias
 			if tvCriterion is not None:
@@ -227,6 +242,11 @@ def main(argv):
 			else:
 				dynamicQuery = selectStr+" "+fromStr
 
+			#apply the limit if set
+			if limit.isdigit():
+				if verbose:
+					print ("Limit is set to %s." % limit)
+				dynamicQuery += " limit "+limit
 		if debug:
 			print ("Generated dynamic query: \n%s" % dynamicQuery)
 
@@ -235,37 +255,12 @@ def main(argv):
 		try:
 			gqlMgr.outputQueryToFile(outputFilePath, dynamicQuery)
 		except Exception as e:
+			print("Exception caught: %s" % e.message)
 			exitWithException(ReturnCodes.OUTPUT_FILE_CREATION_FAILED, gqlMgr)
-		#rn = False
-		#if connectionStr != "" and markerOutputFile != "":
-		# try:
-		# 	mFile, markerList, sampleList = extract_marker_metadata.main(verbose, connectionStr, datasetId, markerOutputFile, allMeta, namesOnly, mapId, includeChrLen, displayMap, markerList, sampleList, mapsetOutputFile, extractionType, datasetType, markerNames, platformList, piId, projectId, sampleType, sampleNames, markerGroupList)
-		# 	if extractionType == 2 and not markerList:
-		# 		MDEUtility.printError("Resulting list of marker IDs is empty. Nothing to extract.")
-		# 		sys.exit(7)
-		# except Exception as e1:
-		# 	MDEUtility.printError("Extraction of marker metadata failed. Error: %s" % (str(e1)))
-		# 	exitCode = 3
-		#rn = True
-		#if connectionStr != "" and sampleOutputFile != "":
-		# try:
-		# 	extract_sample_metadata.main(verbose, connectionStr, datasetId, sampleOutputFile, allMeta, namesOnly, markerList, sampleList, extractionType, datasetType)
-		# except Exception as e:
-		# 	MDEUtility.printError("Extraction of sample metadata failed. Error: %s" % str(e))
-		# 	exitCode = 4
-		#rn = True
-		# if projectOutputFile != "":
-		# 	try:
-		# 		if extractionType == 1:
-		# 			if verbose:
-		# 				print("Generating project metadata file...")
-		# 			extract_project_metadata.main(verbose, connectionStr, datasetId, projectOutputFile, allMeta)
-		# 	except Exception as e:
-		# 		MDEUtility.printError("Error: %s" % str(e))
-		# 		exitCode = 5
-		#if not rn:
-		#	print("At least one of -m, -s, or -p is required for the extractor to run.")
-		#	printUsageHelp(2)
+
+		####################################################
+		# START: CLEANUP
+		####################################################
 		gqlMgr.commitTransaction()
 		gqlMgr.closeConnection()
 		sys.exit(exitCode)
