@@ -22,10 +22,9 @@
 	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /Users/KevinPalis/temp/filter1.out -t dataset -v -d
 	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /Users/KevinPalis/temp/filter1.out -t marker_linkage_group -v -d
 	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /Users/KevinPalis/temp/filter1.out -t reference_sample -v -d
-	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /Users/KevinPalis/temp/filter1.out -t germplasm_species -v -d
 	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /Users/KevinPalis/temp/filter1.out -t project -f '["name"]' -v -d
 	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /Users/KevinPalis/temp/filter1.out -t sampling_date -v -d
-	> python gobii_gql.py -c postgresql://appuser:g0b11isw3s0m3@cbsugobii10.tc.cornell.edu:5433/gobii_dev -o /Users/KevinPalis/temp/filter1.out -t reference_sample -v -d
+	> python gobii_gql.py -c postgresql://changeme:changeme@cbsugobii10.tc.cornell.edu:5433/gobii_dev -o /Users/KevinPalis/temp/filter1.out -t reference_sample -v -d
 
 	With Subgraphs/Vertices-to-visit:
 	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /temp/filter2.out -g '{"principal_investigator":[67,69,70]}' -t project -f '["name"]' -v
@@ -47,6 +46,7 @@ def main(argv):
 		debug = False
 		isKvpVertex = False
 		isDefaultDataLoc = False
+		isUnique = False
 		connectionStr = ""
 		outputFilePath = ""
 		subGraphPath = ""
@@ -58,7 +58,7 @@ def main(argv):
 
 		#PARSE PARAMETERS/ARGUMENTS
 		try:
-			opts, args = getopt.getopt(argv, "hc:o:g:t:f:l:vd", ["connectionString=", "outputFilePath=", "subGraphPath=", "targetVertexName=", "vertexColumnsToFetch=", "verbose", "debug"])
+			opts, args = getopt.getopt(argv, "hc:o:g:t:f:l:uvd", ["connectionString=", "outputFilePath=", "subGraphPath=", "targetVertexName=", "vertexColumnsToFetch=", "limit=", "unique", "verbose", "debug"])
 			#print (opts, args)
 			# No arguments supplied, show help
 			if len(args) < 2 and len(opts) < 2:
@@ -81,6 +81,8 @@ def main(argv):
 				vertexColumnsToFetch = arg
 			elif opt in ("-l", "--limit"):
 				limit = arg
+			elif opt in ("-u", "--unique"):
+				isUnique = True
 			elif opt in ("-v", "--verbose"):
 				verbose = True
 			elif opt in ("-d", "--debug"):
@@ -201,13 +203,16 @@ def main(argv):
 		if tvIsEntry and subGraphPath == "":
 			if verbose:
 				print ("Building dynamic query for an entry vertex.")
-			selectStr += tvAlias+"."+tvTableName+"_id as id"
+			if isUnique:
+				selectStr += "distinct "
+			else:
+				selectStr += tvAlias+"."+tvTableName+"_id as id,"
 			print ("dataloc: %s" % tvDataLoc)
 			print ("type: %s" % type(tvDataLoc))
 			if isKvpVertex:
-				selectStr += ", "+tvAlias+"."+tvDataLoc+" as "+targetVertexName
+				selectStr += ""+tvAlias+"."+tvDataLoc+" as "+targetVertexName
 			elif isDefaultDataLoc:
-				selectStr += "".join([", "+tvAlias+"."+col.strip() for col in tvDataLoc.split(',')])
+				selectStr += "".join([tvAlias+"."+col.strip() for col in tvDataLoc.split(',')])
 				print ("@@@isDefaultDataLoc: %s" % selectStr)
 			else:
 				for col in tvDataLoc:
@@ -274,8 +279,9 @@ def printUsageHelp(eCode):
 	print ("\t-o or --outputFilePath = The absolute path of the file where the result of the query will be written to.")
 	print ("\t-g or --subGraphPath = (OPTIONAL) This is a JSON string of key-value-pairs of this format: {vertex_name1:[value_id1, value_id2], vertex_name2:[value_id1], ...}. This is basically just a list of vertices to visit but filtered with the listed vertices values (which affects the target vertex' values as well). To fetch the values for an entry vertex, simply don't set this parameter.")
 	print ("\t-t or --targetVertexName = The vertex to get the values of. In the context of flexQuery, this is the currently selected filter option.")
-	print ("\t-f or --vertexColumnsToFetch = (OPTIONAL) The list of columns of the target vertex to get values of. If it is not set, the library will just use target vertex.data_loc. For example, if the target vertex is 'project', then this will be just the column 'name', while for vertex 'marker', this will be 'name, dataset_marker_idx'. The columns that will appear on the output file is dependent on this. Just note that the list of columns will always be prepended with 'id' and will come out in the order you specify.")
+	print ("\t-f or --vertexColumnsToFetch = (OPTIONAL) The list of columns of the target vertex to get values of. If it is not set, the library will just use target vertex.data_loc. For example, if the target vertex is 'project', then this will be just the column 'name', while for vertex 'marker', this will be 'name, dataset_marker_idx'. The columns that will appear on the output file is dependent on this. Just note that the list of columns will always be prepended with 'id' (IF the unique flag is not set) and will come out in the order you specify.")
 	print ("\t-l or --limit = (OPTIONAL) This will effectively apply a row limit to all query results. Hence, the output files will have at most limit+1 number of rows.")
+	print ("\t-u or --unique = (OPTIONAL) This will add a 'distinct' keyword to the dynamic SQL - useful for KVP vertices (props fields).")
 	print ("\t-v or --verbose = (OPTIONAL) Print the status of GQL execution in more detail. Use only for debugging as this will slow down most of the library's queries.")
 	print ("\t-d or --debug = (OPTIONAL) Turns the debug mode on. The script will run significantly slower but will allow for very fine-tuned debugging.")
 	print ("\tNOTE: If vertex_type=KVP, vertexColumnsToFetch is irrelevant (and hence, ignored) as there is only one column returnable which will always be called 'value'.")
