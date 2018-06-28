@@ -25,7 +25,8 @@
 	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /Users/KevinPalis/temp/filter1.out -t project -f '["name"]' -v -d
 	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /Users/KevinPalis/temp/filter1.out -t sampling_date -v -d
 	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /Users/KevinPalis/temp/filter1.out -t germplasm_type -v -d
-
+	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /Users/KevinPalis/temp/filter1.out -t dataset_type -v -d
+	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /Users/KevinPalis/temp/filter1.out -t analysis_type -v -d
 
 	* Limit Tests:
 	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /Users/KevinPalis/temp/filter1.out -t germplasm_subspecies -v -d -u -l 10
@@ -61,7 +62,9 @@ def main(argv):
 		vertexTypes = {}
 		exitCode = ReturnCodes.SUCCESS
 
-		#PARSE PARAMETERS/ARGUMENTS
+		####################################################
+		# START: GET PARAMETERS/ARGUMENTS
+		####################################################
 		try:
 			opts, args = getopt.getopt(argv, "hc:o:g:t:f:l:uvd", ["connectionString=", "outputFilePath=", "subGraphPath=", "targetVertexName=", "vertexColumnsToFetch=", "limit=", "unique", "verbose", "debug"])
 			#print (opts, args)
@@ -92,18 +95,12 @@ def main(argv):
 				verbose = True
 			elif opt in ("-d", "--debug"):
 				debug = True
-			# elif opt in ("-P", "--platformList"):
-			# 	try:
-			# 		platformList = arg.split(",")
-			# 	except Exception as e:
-			# 		MDEUtility.printError("Invalid platform list format. Only comma-delimited ID list is accepted. Error: %s" % str(e))
-			# 		exitCode = 6
-			# 		sys.exit(exitCode)
 
 		####################################################
-		# START: INITIAL VALIDATIONS
+		# END: GET PARAMETERS/ARGUMENTS
+		# START: INITIAL VALIDATIONS AND PARAMETERS PARSING
 		####################################################
-		#initialize connection
+		#initialize database connection
 		gqlMgr = GraphQueryManager(connectionStr, debug)
 		if len(args) < 3 and len(opts) < 3:
 				exitWithException(ReturnCodes.INCOMPLETE_PARAMETERS, gqlMgr)
@@ -142,8 +139,8 @@ def main(argv):
 				exitWithException(ReturnCodes.ERROR_PARSING_JSON, gqlMgr)
 
 		####################################################
-		# END: INITIAL VALIDATIONS
-		# START: PREPARE VARIABLES AND PARAMS
+		# END: INITIAL VALIDATIONS AND PARAMETERS PARSING
+		# START: PREPARE DATABASE VARIABLES AND PARAMETERS
 		####################################################
 		#initialize vertex types
 		vertexTypes['standard'] = gqlMgr.getCvId('standard', 'vertex_type')['cvid']
@@ -159,6 +156,7 @@ def main(argv):
 		tvTableName = targetVertexInfo['table_name']
 		tvCriterion = targetVertexInfo['criterion']
 		tvType = targetVertexInfo['type_id']
+		tvId = targetVertexInfo['vertex_id']
 		# print ("tvType=%s, vertex_type.type_id=%s" % (type(tvType), type(vertexTypes['key_value_pair'])))
 		if tvType == vertexTypes['key_value_pair']:
 			isKvpVertex = True
@@ -181,7 +179,7 @@ def main(argv):
 				print ("This is not an entry vertex, so a subgraph is required.")
 			exitWithException(ReturnCodes.NOT_ENTRY_VERTEX, gqlMgr)
 		####################################################
-		# END: PREPARE VARIABLES AND PARAMS
+		# END: PREPARE DATABASE VARIABLES AND PARAMS
 		####################################################
 
 		# if res is None:
