@@ -33,19 +33,22 @@
 	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /Users/KevinPalis/temp/filter1.out -t principal_investigator -f '["firstname","lastname"]' -v -d -l 10
 
 	With Subgraphs/Vertices-to-visit:
-	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /temp/filter2.out -g '{"principal_investigator":[67,69,70]}' -t project -f '["name"]' -v
-	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /temp/filter3.out -g '{"principal_investigator":[67,69,70], "project":[3,25,30]}' -t division -v -d
-	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /temp/filter3b.out -g '{"principal_investigator":[67,69,70], "project":[3,25,30]}' -t experiment -f '["name"]' -v
-	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /temp/filter4.out -g '{"principal_investigator":[67,69,70], "project":[3,25,30], "division":[25,30]}' -t experiment -f '["name"]' -v
+	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /Users/KevinPalis/temp/filter2.out -g '{"principal_investigator":[67,69,70]}' -t project -f '["name"]' -v -d
+	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /Users/KevinPalis/temp/filter3.out -g '{"principal_investigator":[67,69,70], "project":[3,25,30]}' -t division -v -d
+	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /Users/KevinPalis/temp/filter3.out -g '{"principal_investigator":[67,69,70], "project":[3,25,30]}' -t experiment -f '["name"]' -v
+	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /Users/KevinPalis/temp/filter4.out -g '{"principal_investigator":[67,69,70], "project":[3,25,30], "division":[25,30]}' -t experiment -f '["name"]' -v -d
 '''
 from __future__ import print_function
 import sys
 import getopt
 import traceback
 import json
+import itertools
+from collections import OrderedDict
 from util.gql_utility import ReturnCodes
 from util.gql_utility import GQLException
 from db.graph_query_manager import GraphQueryManager
+from collections import namedtuple
 
 def main(argv):
 		verbose = False
@@ -60,8 +63,10 @@ def main(argv):
 		vertexColumnsToFetch = ""
 		limit = ""
 		vertexTypes = {}
+		vertices = OrderedDict()
 		exitCode = ReturnCodes.SUCCESS
-
+		FilteredVertex = namedtuple('FilteredVertex', 'name filter')
+		pathStr = ""
 		####################################################
 		# START: GET PARAMETERS/ARGUMENTS
 		####################################################
@@ -112,13 +117,19 @@ def main(argv):
 			if verbose:
 				print ("No vertices to visit. Proceeding as an entry vertex call.")
 		else:
+			#create a dictionary of vertexID:vertexName
 			try:
 				subGraphPathJson = json.loads(subGraphPath)
+				print ("subGraphPathJson: %s" % subGraphPathJson)
+				for key, value in subGraphPathJson.iteritems():
+					if verbose:
+						print ("Building the dictionary entry for vertex %s with filter IDs %s" % (key, value))
+					vId = gqlMgr.getVertexId(key)['vertex_id']
+					vertices[vId] = FilteredVertex(key, value)
+					# for filterId in value:
+					# 	print ("Filtering by ID=%d" % filterId)
 				if debug:
-					for key, value in subGraphPathJson.iteritems():
-						print ("Visiting vertex %s with filter IDs %s" % (key, value))
-						for filterId in value:
-							print ("Filtering by ID=%d" % filterId)
+					print ("Vertices: %s" % vertices)
 			except Exception as e:
 				print ("Exception occured while parsing subGraphPath: %s" % e.message)
 				exitWithException(ReturnCodes.ERROR_PARSING_JSON, gqlMgr)
@@ -178,6 +189,24 @@ def main(argv):
 			if verbose:
 				print ("This is not an entry vertex, so a subgraph is required.")
 			exitWithException(ReturnCodes.NOT_ENTRY_VERTEX, gqlMgr)
+
+		#COMPUTE FOR THE ACTUAL PATH
+		totalVertices = len(vertices)
+		print ("totalVertices: %s" % totalVertices)
+		for i, j in zip(range(0, totalVertices), range(1, totalVertices)):
+			print ("i: %d, j: %d" % (i, j))
+			print ("FilteredVertex[%d]: %s" % (i, vertices.items()[i]))
+			print ("FilteredVertex[%d]: %s" % (j, vertices.items()[j]))
+			pathStr += gqlMgr.getPath(vertices.items()[i][0], vertices.items()[j][0])['path_string']
+		if verbose:
+			print ("Derived path: %s" % (pathStr,))
+
+		#parse the path string to an iterable object, removing empty strings
+		tempPath = [col.strip() for col in filter(None, pathStr.split('.'))]
+		#remove duplicated adjacent entries
+		path = [k for k, g in itertools.groupby(tempPath)]
+		print ("Path: %s" % path)
+
 		####################################################
 		# END: PREPARE DATABASE VARIABLES AND PARAMS
 		####################################################
@@ -245,6 +274,8 @@ def main(argv):
 				if verbose:
 					print ("Limit is set to %s." % limit)
 				dynamicQuery += " limit "+limit
+		else:
+			exitWithException(ReturnCodes.FEATURE_NOT_IMPLEMENTED, gqlMgr)
 		if debug:
 			print ("Generated dynamic query: \n%s" % dynamicQuery)
 
@@ -253,7 +284,7 @@ def main(argv):
 		try:
 			gqlMgr.outputQueryToFile(outputFilePath, dynamicQuery)
 		except Exception as e:
-			print("Exception caught: %s" % e.message)
+			print("Exception caught: %s" % e)
 			exitWithException(ReturnCodes.OUTPUT_FILE_CREATION_FAILED, gqlMgr)
 
 		####################################################
