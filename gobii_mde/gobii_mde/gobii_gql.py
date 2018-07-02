@@ -274,6 +274,7 @@ def main(argv):
 				if verbose:
 					print ("Limit is set to %s." % limit)
 				dynamicQuery += " limit "+limit
+		#Case when this is NOT an entry vertex
 		else:
 			exitWithException(ReturnCodes.FEATURE_NOT_IMPLEMENTED, gqlMgr)
 		if debug:
