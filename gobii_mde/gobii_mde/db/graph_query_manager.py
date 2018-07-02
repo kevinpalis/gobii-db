@@ -52,3 +52,13 @@ class GraphQueryManager:
 		with open(outputFilePath, 'w') as outputFile:
 			self.cur.copy_expert(sql, outputFile, 20480)
 		outputFile.close()
+
+	def getVertexId(self, vertexName):
+			self.cur.execute("select vertex_id from vertex where name=%s", (vertexName,))
+			res = self.cur.fetchone()
+			return res
+
+	def getPath(self, startVertex, endVertex):
+			self.cur.execute("select path_string from transitive_closure where start_vertex=%s and end_vertex=%s", (startVertex, endVertex))
+			res = self.cur.fetchone()
+			return res

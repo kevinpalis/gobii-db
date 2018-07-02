@@ -13,7 +13,8 @@ class ReturnCodes:
 	ERROR_PARSING_JSON = 4
 	NOT_ENTRY_VERTEX = 5
 	NO_OUTPUT_PATH = 6
-	OUTPUT_FILE_CREATION_FAILED = 6
+	OUTPUT_FILE_CREATION_FAILED = 7
+	FEATURE_NOT_IMPLEMENTED = 8
 	MESSAGES = {
 		SUCCESS: "Operation completed successfully.",
 		INCOMPLETE_PARAMETERS: "There were fewer parameters passed than what is required. Please check the usage help (-h).",
@@ -22,7 +23,8 @@ class ReturnCodes:
 		ERROR_PARSING_JSON: "An error occured while parsing a json parameter. Make sure it is of the proper format.",
 		NOT_ENTRY_VERTEX: "A non-entry vertex was supplied without a sub-graph.",
 		NO_OUTPUT_PATH: "No output file path was given.",
-		OUTPUT_FILE_CREATION_FAILED: "Creating the output file failed."
+		OUTPUT_FILE_CREATION_FAILED: "Creating the output file failed.",
+		FEATURE_NOT_IMPLEMENTED: "This feature is not implemented for this version of GQL."
 	}
 
 

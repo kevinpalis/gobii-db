@@ -15,50 +15,63 @@
 	Sample Usage:
 
 	* Entry vertices:
-	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /Users/KevinPalis/temp/filter1.out -t principal_investigator -f '["firstname","lastname"]' -v
+	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /Users/KevinPalis/temp/filter1.out -t principal_investigator -f '["firstname","lastname"]' -v -d
 	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /Users/KevinPalis/temp/filter1.out -t principal_investigator -v -d
 	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /Users/KevinPalis/temp/filter1.out -t trial_name -v -d
 	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /Users/KevinPalis/temp/filter1.out -t germplasm_subspecies -v -d
 	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /Users/KevinPalis/temp/filter1.out -t dataset -v -d
 	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /Users/KevinPalis/temp/filter1.out -t marker_linkage_group -v -d
 	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /Users/KevinPalis/temp/filter1.out -t reference_sample -v -d
-	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /Users/KevinPalis/temp/filter1.out -t germplasm_species -v -d
 	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /Users/KevinPalis/temp/filter1.out -t project -f '["name"]' -v -d
 	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /Users/KevinPalis/temp/filter1.out -t sampling_date -v -d
-	> python gobii_gql.py -c postgresql://appuser:g0b11isw3s0m3@cbsugobii10.tc.cornell.edu:5433/gobii_dev -o /Users/KevinPalis/temp/filter1.out -t reference_sample -v -d
+	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /Users/KevinPalis/temp/filter1.out -t germplasm_type -v -d
+	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /Users/KevinPalis/temp/filter1.out -t dataset_type -v -d
+	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /Users/KevinPalis/temp/filter1.out -t analysis_type -v -d
+
+	* Limit Tests:
+	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /Users/KevinPalis/temp/filter1.out -t germplasm_subspecies -v -d -u -l 10
+	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /Users/KevinPalis/temp/filter1.out -t principal_investigator -f '["firstname","lastname"]' -v -d -l 10
 
 	With Subgraphs/Vertices-to-visit:
-	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /temp/filter2.out -g '{"principal_investigator":[67,69,70]}' -t project -f '["name"]' -v
-	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /temp/filter3.out -g '{"principal_investigator":[67,69,70], "project":[3,25,30]}' -t division -v -d
-	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /temp/filter3b.out -g '{"principal_investigator":[67,69,70], "project":[3,25,30]}' -t experiment -f '["name"]' -v
-	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /temp/filter4.out -g '{"principal_investigator":[67,69,70], "project":[3,25,30], "division":[25,30]}' -t experiment -f '["name"]' -v
+	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /Users/KevinPalis/temp/filter2.out -g '{"principal_investigator":[67,69,70]}' -t project -f '["name"]' -v -d
+	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /Users/KevinPalis/temp/filter3.out -g '{"principal_investigator":[67,69,70], "project":[3,25,30]}' -t division -v -d
+	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /Users/KevinPalis/temp/filter3.out -g '{"principal_investigator":[67,69,70], "project":[3,25,30]}' -t experiment -f '["name"]' -v
+	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /Users/KevinPalis/temp/filter4.out -g '{"principal_investigator":[67,69,70], "project":[3,25,30], "division":[25,30]}' -t experiment -f '["name"]' -v -d
 '''
 from __future__ import print_function
 import sys
 import getopt
 import traceback
 import json
+import itertools
+from collections import OrderedDict
 from util.gql_utility import ReturnCodes
 from util.gql_utility import GQLException
 from db.graph_query_manager import GraphQueryManager
+from collections import namedtuple
 
 def main(argv):
 		verbose = False
 		debug = False
 		isKvpVertex = False
 		isDefaultDataLoc = False
+		isUnique = False
 		connectionStr = ""
 		outputFilePath = ""
 		subGraphPath = ""
 		targetVertexName = ""
 		vertexColumnsToFetch = ""
-		limit = None
+		limit = ""
 		vertexTypes = {}
+		vertices = OrderedDict()
 		exitCode = ReturnCodes.SUCCESS
-
-		#PARSE PARAMETERS/ARGUMENTS
+		FilteredVertex = namedtuple('FilteredVertex', 'name filter')
+		pathStr = ""
+		####################################################
+		# START: GET PARAMETERS/ARGUMENTS
+		####################################################
 		try:
-			opts, args = getopt.getopt(argv, "hc:o:g:t:f:l:vd", ["connectionString=", "outputFilePath=", "subGraphPath=", "targetVertexName=", "vertexColumnsToFetch=", "verbose", "debug"])
+			opts, args = getopt.getopt(argv, "hc:o:g:t:f:l:uvd", ["connectionString=", "outputFilePath=", "subGraphPath=", "targetVertexName=", "vertexColumnsToFetch=", "limit=", "unique", "verbose", "debug"])
 			#print (opts, args)
 			# No arguments supplied, show help
 			if len(args) < 2 and len(opts) < 2:
@@ -81,20 +94,18 @@ def main(argv):
 				vertexColumnsToFetch = arg
 			elif opt in ("-l", "--limit"):
 				limit = arg
+			elif opt in ("-u", "--unique"):
+				isUnique = True
 			elif opt in ("-v", "--verbose"):
 				verbose = True
 			elif opt in ("-d", "--debug"):
 				debug = True
-			# elif opt in ("-P", "--platformList"):
-			# 	try:
-			# 		platformList = arg.split(",")
-			# 	except Exception as e:
-			# 		MDEUtility.printError("Invalid platform list format. Only comma-delimited ID list is accepted. Error: %s" % str(e))
-			# 		exitCode = 6
-			# 		sys.exit(exitCode)
 
-		#INITIAL VALIDATIONS
-		#initialize connection
+		####################################################
+		# END: GET PARAMETERS/ARGUMENTS
+		# START: INITIAL VALIDATIONS AND PARAMETERS PARSING
+		####################################################
+		#initialize database connection
 		gqlMgr = GraphQueryManager(connectionStr, debug)
 		if len(args) < 3 and len(opts) < 3:
 				exitWithException(ReturnCodes.INCOMPLETE_PARAMETERS, gqlMgr)
@@ -106,13 +117,19 @@ def main(argv):
 			if verbose:
 				print ("No vertices to visit. Proceeding as an entry vertex call.")
 		else:
+			#create a dictionary of vertexID:vertexName
 			try:
 				subGraphPathJson = json.loads(subGraphPath)
+				print ("subGraphPathJson: %s" % subGraphPathJson)
+				for key, value in subGraphPathJson.iteritems():
+					if verbose:
+						print ("Building the dictionary entry for vertex %s with filter IDs %s" % (key, value))
+					vId = gqlMgr.getVertexId(key)['vertex_id']
+					vertices[vId] = FilteredVertex(key, value)
+					# for filterId in value:
+					# 	print ("Filtering by ID=%d" % filterId)
 				if debug:
-					for key, value in subGraphPathJson.iteritems():
-						print ("Visiting vertex %s with filter IDs %s" % (key, value))
-						for filterId in value:
-							print ("Filtering by ID=%d" % filterId)
+					print ("Vertices: %s" % vertices)
 			except Exception as e:
 				print ("Exception occured while parsing subGraphPath: %s" % e.message)
 				exitWithException(ReturnCodes.ERROR_PARSING_JSON, gqlMgr)
@@ -133,7 +150,8 @@ def main(argv):
 				exitWithException(ReturnCodes.ERROR_PARSING_JSON, gqlMgr)
 
 		####################################################
-		# START: PREPARE VARIABLES AND PARAMS
+		# END: INITIAL VALIDATIONS AND PARAMETERS PARSING
+		# START: PREPARE DATABASE VARIABLES AND PARAMETERS
 		####################################################
 		#initialize vertex types
 		vertexTypes['standard'] = gqlMgr.getCvId('standard', 'vertex_type')['cvid']
@@ -149,6 +167,7 @@ def main(argv):
 		tvTableName = targetVertexInfo['table_name']
 		tvCriterion = targetVertexInfo['criterion']
 		tvType = targetVertexInfo['type_id']
+		tvId = targetVertexInfo['vertex_id']
 		# print ("tvType=%s, vertex_type.type_id=%s" % (type(tvType), type(vertexTypes['key_value_pair'])))
 		if tvType == vertexTypes['key_value_pair']:
 			isKvpVertex = True
@@ -170,8 +189,26 @@ def main(argv):
 			if verbose:
 				print ("This is not an entry vertex, so a subgraph is required.")
 			exitWithException(ReturnCodes.NOT_ENTRY_VERTEX, gqlMgr)
+
+		#COMPUTE FOR THE ACTUAL PATH
+		totalVertices = len(vertices)
+		print ("totalVertices: %s" % totalVertices)
+		for i, j in zip(range(0, totalVertices), range(1, totalVertices)):
+			print ("i: %d, j: %d" % (i, j))
+			print ("FilteredVertex[%d]: %s" % (i, vertices.items()[i]))
+			print ("FilteredVertex[%d]: %s" % (j, vertices.items()[j]))
+			pathStr += gqlMgr.getPath(vertices.items()[i][0], vertices.items()[j][0])['path_string']
+		if verbose:
+			print ("Derived path: %s" % (pathStr,))
+
+		#parse the path string to an iterable object, removing empty strings
+		tempPath = [col.strip() for col in filter(None, pathStr.split('.'))]
+		#remove duplicated adjacent entries
+		path = [k for k, g in itertools.groupby(tempPath)]
+		print ("Path: %s" % path)
+
 		####################################################
-		# END: PREPARE VARIABLES AND PARAMS
+		# END: PREPARE DATABASE VARIABLES AND PARAMS
 		####################################################
 
 		# if res is None:
@@ -201,19 +238,29 @@ def main(argv):
 		if tvIsEntry and subGraphPath == "":
 			if verbose:
 				print ("Building dynamic query for an entry vertex.")
-			selectStr += tvAlias+"."+tvTableName+"_id as id"
+			if isUnique:
+				selectStr += "distinct "
+			else:
+				selectStr += tvAlias+"."+tvTableName+"_id as id"
 			print ("dataloc: %s" % tvDataLoc)
 			print ("type: %s" % type(tvDataLoc))
-			if isKvpVertex:
+
+			if isKvpVertex and isUnique:
+				selectStr += tvAlias+"."+tvDataLoc+" as "+targetVertexName
+			elif isKvpVertex and not isUnique:
 				selectStr += ", "+tvAlias+"."+tvDataLoc+" as "+targetVertexName
-			elif isDefaultDataLoc:
-				selectStr += "".join([", "+tvAlias+"."+col.strip() for col in tvDataLoc.split(',')])
-				print ("@@@isDefaultDataLoc: %s" % selectStr)
+			elif not isKvpVertex and not isUnique and isDefaultDataLoc:
+				selectStr += ", " + ",".join([tvAlias+"."+col.strip() for col in tvDataLoc.split(',')])
+				if verbose:
+					print ("@isDefaultDataLoc and not unique: %s" % selectStr)
+			elif not isKvpVertex and isUnique and isDefaultDataLoc:
+				selectStr += ",".join([tvAlias+"."+col.strip() for col in tvDataLoc.split(',')])
+				print ("@isDefaultDataLoc and unique: %s" % selectStr)
 			else:
 				for col in tvDataLoc:
 					if verbose:
 						print ("Adding column %s to selectStr." % col)
-						selectStr += ", "+tvAlias+"."+col
+					selectStr += ", "+tvAlias+"."+col
 			#TODO: Handle case when data_loc is used instead (prepend with alias)
 			fromStr += " "+tvTableName+" as "+tvAlias
 			if tvCriterion is not None:
@@ -222,6 +269,14 @@ def main(argv):
 			else:
 				dynamicQuery = selectStr+" "+fromStr
 
+			#apply the limit if set
+			if limit.isdigit():
+				if verbose:
+					print ("Limit is set to %s." % limit)
+				dynamicQuery += " limit "+limit
+		#Case when this is NOT an entry vertex
+		else:
+			exitWithException(ReturnCodes.FEATURE_NOT_IMPLEMENTED, gqlMgr)
 		if debug:
 			print ("Generated dynamic query: \n%s" % dynamicQuery)
 
@@ -230,37 +285,12 @@ def main(argv):
 		try:
 			gqlMgr.outputQueryToFile(outputFilePath, dynamicQuery)
 		except Exception as e:
+			print("Exception caught: %s" % e)
 			exitWithException(ReturnCodes.OUTPUT_FILE_CREATION_FAILED, gqlMgr)
-		#rn = False
-		#if connectionStr != "" and markerOutputFile != "":
-		# try:
-		# 	mFile, markerList, sampleList = extract_marker_metadata.main(verbose, connectionStr, datasetId, markerOutputFile, allMeta, namesOnly, mapId, includeChrLen, displayMap, markerList, sampleList, mapsetOutputFile, extractionType, datasetType, markerNames, platformList, piId, projectId, sampleType, sampleNames, markerGroupList)
-		# 	if extractionType == 2 and not markerList:
-		# 		MDEUtility.printError("Resulting list of marker IDs is empty. Nothing to extract.")
-		# 		sys.exit(7)
-		# except Exception as e1:
-		# 	MDEUtility.printError("Extraction of marker metadata failed. Error: %s" % (str(e1)))
-		# 	exitCode = 3
-		#rn = True
-		#if connectionStr != "" and sampleOutputFile != "":
-		# try:
-		# 	extract_sample_metadata.main(verbose, connectionStr, datasetId, sampleOutputFile, allMeta, namesOnly, markerList, sampleList, extractionType, datasetType)
-		# except Exception as e:
-		# 	MDEUtility.printError("Extraction of sample metadata failed. Error: %s" % str(e))
-		# 	exitCode = 4
-		#rn = True
-		# if projectOutputFile != "":
-		# 	try:
-		# 		if extractionType == 1:
-		# 			if verbose:
-		# 				print("Generating project metadata file...")
-		# 			extract_project_metadata.main(verbose, connectionStr, datasetId, projectOutputFile, allMeta)
-		# 	except Exception as e:
-		# 		MDEUtility.printError("Error: %s" % str(e))
-		# 		exitCode = 5
-		#if not rn:
-		#	print("At least one of -m, -s, or -p is required for the extractor to run.")
-		#	printUsageHelp(2)
+
+		####################################################
+		# START: CLEANUP
+		####################################################
 		gqlMgr.commitTransaction()
 		gqlMgr.closeConnection()
 		sys.exit(exitCode)
@@ -274,8 +304,9 @@ def printUsageHelp(eCode):
 	print ("\t-o or --outputFilePath = The absolute path of the file where the result of the query will be written to.")
 	print ("\t-g or --subGraphPath = (OPTIONAL) This is a JSON string of key-value-pairs of this format: {vertex_name1:[value_id1, value_id2], vertex_name2:[value_id1], ...}. This is basically just a list of vertices to visit but filtered with the listed vertices values (which affects the target vertex' values as well). To fetch the values for an entry vertex, simply don't set this parameter.")
 	print ("\t-t or --targetVertexName = The vertex to get the values of. In the context of flexQuery, this is the currently selected filter option.")
-	print ("\t-f or --vertexColumnsToFetch = (OPTIONAL) The list of columns of the target vertex to get values of. If it is not set, the library will just use target vertex.data_loc. For example, if the target vertex is 'project', then this will be just the column 'name', while for vertex 'marker', this will be 'name, dataset_marker_idx'. The columns that will appear on the output file is dependent on this. Just note that the list of columns will always be prepended with 'id' and will come out in the order you specify.")
+	print ("\t-f or --vertexColumnsToFetch = (OPTIONAL) The list of columns of the target vertex to get values of. If it is not set, the library will just use target vertex.data_loc. For example, if the target vertex is 'project', then this will be just the column 'name', while for vertex 'marker', this will be 'name, dataset_marker_idx'. The columns that will appear on the output file is dependent on this. Just note that the list of columns will always be prepended with 'id' (IF the unique flag is not set) and will come out in the order you specify.")
 	print ("\t-l or --limit = (OPTIONAL) This will effectively apply a row limit to all query results. Hence, the output files will have at most limit+1 number of rows.")
+	print ("\t-u or --unique = (OPTIONAL) This will add a 'distinct' keyword to the dynamic SQL - useful for KVP vertices (props fields).")
 	print ("\t-v or --verbose = (OPTIONAL) Print the status of GQL execution in more detail. Use only for debugging as this will slow down most of the library's queries.")
 	print ("\t-d or --debug = (OPTIONAL) Turns the debug mode on. The script will run significantly slower but will allow for very fine-tuned debugging.")
 	print ("\tNOTE: If vertex_type=KVP, vertexColumnsToFetch is irrelevant (and hence, ignored) as there is only one column returnable which will always be called 'value'.")
