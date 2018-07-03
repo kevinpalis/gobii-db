@@ -37,6 +37,8 @@
 	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /Users/KevinPalis/temp/filter3.out -g '{"principal_investigator":[67,69,70], "project":[3,25,30]}' -t division -v -d
 	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /Users/KevinPalis/temp/filter3.out -g '{"principal_investigator":[67,69,70], "project":[3,25,30]}' -t experiment -f '["name"]' -v
 	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /Users/KevinPalis/temp/filter4.out -g '{"principal_investigator":[67,69,70], "project":[3,25,30], "division":[25,30]}' -t experiment -f '["name"]' -v -d
+	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /Users/KevinPalis/temp/filter3.out -g '{"principal_investigator":[67,69,70], "project":[3,25,30]}' -t dataset -v -d
+	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /Users/KevinPalis/temp/filter3.out -g '{"principal_investigator":[67,69,70], "project":[3,25,30], "dataset":[1,2,3,4,5]}' -t marker -v -d
 '''
 from __future__ import print_function
 import sys
@@ -191,21 +193,36 @@ def main(argv):
 			exitWithException(ReturnCodes.NOT_ENTRY_VERTEX, gqlMgr)
 
 		#COMPUTE FOR THE ACTUAL PATH
-		totalVertices = len(vertices)
-		print ("totalVertices: %s" % totalVertices)
-		for i, j in zip(range(0, totalVertices), range(1, totalVertices)):
-			print ("i: %d, j: %d" % (i, j))
-			print ("FilteredVertex[%d]: %s" % (i, vertices.items()[i]))
-			print ("FilteredVertex[%d]: %s" % (j, vertices.items()[j]))
-			pathStr += gqlMgr.getPath(vertices.items()[i][0], vertices.items()[j][0])['path_string']
-		if verbose:
-			print ("Derived path: %s" % (pathStr,))
+		if subGraphPath != "":
+			path = []
+			totalVertices = len(vertices)
+			print ("totalVertices: %s" % totalVertices)
+			for i, j in zip(range(0, totalVertices), range(1, totalVertices)):
+				print ("i: %d, j: %d" % (i, j))
+				print ("FilteredVertex[%d]: %s" % (i, vertices.items()[i]))
+				print ("FilteredVertex[%d]: %s" % (j, vertices.items()[j]))
+				pathStr += gqlMgr.getPath(vertices.items()[i][0], vertices.items()[j][0])['path_string']
 
-		#parse the path string to an iterable object, removing empty strings
-		tempPath = [col.strip() for col in filter(None, pathStr.split('.'))]
-		#remove duplicated adjacent entries
-		path = [k for k, g in itertools.groupby(tempPath)]
-		print ("Path: %s" % path)
+			if totalVertices > 1:
+				#parse the path string to an iterable object, removing empty strings
+				tempPath = [col.strip() for col in filter(None, pathStr.split('.'))]
+				#remove duplicated adjacent entries
+				path = [k for k, g in itertools.groupby(tempPath)]
+				lastVertexInPath = path[len(path)-1]
+				endPathStr = gqlMgr.getPath(lastVertexInPath, tvId)['path_string']
+				print ("path length: %s, path=%s, last element=%s, endPathStr=%s" % (len(path), path, path[len(path)-1], endPathStr))
+				#parse the path string to an iterable object, removing empty strings
+				endPath = [col.strip() for col in filter(None, endPathStr.split('.'))]
+				#remove duplicated adjacent entries
+				path = [k for k, g in itertools.groupby(path+endPath)]
+				if verbose:
+					print ("Derived path: %s" % pathStr)
+			elif totalVertices == 1:
+				path.append(str(vertices.keys()[0]))
+			else:
+				#TODO
+				print ("Did not resolve to vertices to visit. Throw an exception here.")
+			print ("Path: %s" % path)
 
 		####################################################
 		# END: PREPARE DATABASE VARIABLES AND PARAMS
@@ -234,35 +251,37 @@ def main(argv):
 		conditionStr = "where"
 		dynamicQuery = ""
 
+		#Common parts of the dynamic query between a non-entry and an entry vertex
+		if isUnique:
+				selectStr += "distinct "
+		else:
+			selectStr += tvAlias+"."+tvTableName+"_id as id"
+
+		if isKvpVertex and isUnique:
+			selectStr += tvAlias+"."+tvDataLoc+" as "+targetVertexName
+		elif isKvpVertex and not isUnique:
+			selectStr += ", "+tvAlias+"."+tvDataLoc+" as "+targetVertexName
+		elif not isKvpVertex and not isUnique and isDefaultDataLoc:
+			selectStr += ", " + ",".join([tvAlias+"."+col.strip() for col in tvDataLoc.split(',')])
+			if verbose:
+				print ("@isDefaultDataLoc and not unique: %s" % selectStr)
+		elif not isKvpVertex and isUnique and isDefaultDataLoc:
+			selectStr += ",".join([tvAlias+"."+col.strip() for col in tvDataLoc.split(',')])
+			print ("@isDefaultDataLoc and unique: %s" % selectStr)
+		else:
+			for col in tvDataLoc:
+				if verbose:
+					print ("Adding column %s to selectStr." % col)
+				selectStr += ", "+tvAlias+"."+col
+		#TODO: Handle case when data_loc is used instead (prepend with alias)
+		fromStr += " "+tvTableName+" as "+tvAlias
+
 		#Case when this is an entry vertex
 		if tvIsEntry and subGraphPath == "":
 			if verbose:
 				print ("Building dynamic query for an entry vertex.")
-			if isUnique:
-				selectStr += "distinct "
-			else:
-				selectStr += tvAlias+"."+tvTableName+"_id as id"
-			print ("dataloc: %s" % tvDataLoc)
-			print ("type: %s" % type(tvDataLoc))
-
-			if isKvpVertex and isUnique:
-				selectStr += tvAlias+"."+tvDataLoc+" as "+targetVertexName
-			elif isKvpVertex and not isUnique:
-				selectStr += ", "+tvAlias+"."+tvDataLoc+" as "+targetVertexName
-			elif not isKvpVertex and not isUnique and isDefaultDataLoc:
-				selectStr += ", " + ",".join([tvAlias+"."+col.strip() for col in tvDataLoc.split(',')])
-				if verbose:
-					print ("@isDefaultDataLoc and not unique: %s" % selectStr)
-			elif not isKvpVertex and isUnique and isDefaultDataLoc:
-				selectStr += ",".join([tvAlias+"."+col.strip() for col in tvDataLoc.split(',')])
-				print ("@isDefaultDataLoc and unique: %s" % selectStr)
-			else:
-				for col in tvDataLoc:
-					if verbose:
-						print ("Adding column %s to selectStr." % col)
-					selectStr += ", "+tvAlias+"."+col
-			#TODO: Handle case when data_loc is used instead (prepend with alias)
-			fromStr += " "+tvTableName+" as "+tvAlias
+				print ("dataloc: %s" % tvDataLoc)
+				print ("type: %s" % type(tvDataLoc))
 			if tvCriterion is not None:
 				conditionStr += " "+tvCriterion
 				dynamicQuery = selectStr+" "+fromStr+" "+conditionStr
@@ -276,6 +295,11 @@ def main(argv):
 				dynamicQuery += " limit "+limit
 		#Case when this is NOT an entry vertex
 		else:
+			if verbose:
+				print ("Building dynamic query for a vertex with a list of vertices to visit (subGraphPath).")
+				print ("dataloc: %s" % tvDataLoc)
+				print ("type: %s" % type(tvDataLoc))
+
 			exitWithException(ReturnCodes.FEATURE_NOT_IMPLEMENTED, gqlMgr)
 		if debug:
 			print ("Generated dynamic query: \n%s" % dynamicQuery)
