@@ -62,3 +62,8 @@ class GraphQueryManager:
 			self.cur.execute("select path_string from transitive_closure where start_vertex=%s and end_vertex=%s", (startVertex, endVertex))
 			res = self.cur.fetchone()
 			return res
+
+	def getEdge(self, startVertex, endVertex):
+			self.cur.execute("select * from edge where start_vertex=%s and end_vertex=%s", (startVertex, endVertex))
+			res = self.cur.fetchone()
+			return res

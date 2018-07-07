@@ -197,13 +197,16 @@ def main(argv):
 			path = []
 			totalVertices = len(vertices)
 			print ("totalVertices: %s" % totalVertices)
-			for i, j in zip(range(0, totalVertices), range(1, totalVertices)):
-				print ("i: %d, j: %d" % (i, j))
-				print ("FilteredVertex[%d]: %s" % (i, vertices.items()[i]))
-				print ("FilteredVertex[%d]: %s" % (j, vertices.items()[j]))
-				pathStr += gqlMgr.getPath(vertices.items()[i][0], vertices.items()[j][0])['path_string']
+			if totalVertices == 1:
+				pathStr = str(vertices.items()[0][0])
+			else:
+				for i, j in zip(range(0, totalVertices), range(1, totalVertices)):
+					print ("i: %d, j: %d" % (i, j))
+					print ("FilteredVertex[%d]: %s" % (i, vertices.items()[i]))
+					print ("FilteredVertex[%d]: %s" % (j, vertices.items()[j]))
+					pathStr += gqlMgr.getPath(vertices.items()[i][0], vertices.items()[j][0])['path_string']
 
-			if totalVertices > 1:
+			if totalVertices > 0:
 				#parse the path string to an iterable object, removing empty strings
 				tempPath = [col.strip() for col in filter(None, pathStr.split('.'))]
 				#remove duplicated adjacent entries
@@ -217,8 +220,8 @@ def main(argv):
 				path = [k for k, g in itertools.groupby(path+endPath)]
 				if verbose:
 					print ("Derived path: %s" % pathStr)
-			elif totalVertices == 1:
-				path.append(str(vertices.keys()[0]))
+			# elif totalVertices == 1:
+			# 	path.append(str(vertices.keys()[0]))
 			else:
 				#TODO
 				print ("Did not resolve to vertices to visit. Throw an exception here.")
@@ -294,12 +297,21 @@ def main(argv):
 					print ("Limit is set to %s." % limit)
 				dynamicQuery += " limit "+limit
 		#Case when this is NOT an entry vertex
-		else:
+		elif subGraphPath != "":
 			if verbose:
 				print ("Building dynamic query for a vertex with a list of vertices to visit (subGraphPath).")
 				print ("dataloc: %s" % tvDataLoc)
 				print ("type: %s" % type(tvDataLoc))
+			#iterate through the path
+			totalVerticesInPath = len(path)
+			print ("totalVerticesInPath: %s" % totalVerticesInPath)
+			for i, j in zip(range(0, totalVerticesInPath), range(1, totalVerticesInPath)):
+				print ("i: %d, j: %d" % (i, j))
+				print ("path[%d]: %s" % (i, path[i]))
+				print ("path[%d]: %s" % (j, path[j]))
 
+			dynamicQuery = selectStr+" "+fromStr+" "+conditionStr
+			print ("Generated dynamic query: \n%s" % dynamicQuery)
 			exitWithException(ReturnCodes.FEATURE_NOT_IMPLEMENTED, gqlMgr)
 		if debug:
 			print ("Generated dynamic query: \n%s" % dynamicQuery)
