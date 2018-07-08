@@ -277,10 +277,10 @@ def main(argv):
 					print ("Adding column %s to selectStr." % col)
 				selectStr += ", "+tvAlias+"."+col
 		#TODO: Handle case when data_loc is used instead (prepend with alias)
-		fromStr += " "+tvTableName+" as "+tvAlias
 
 		#Case when this is an entry vertex
 		if tvIsEntry and subGraphPath == "":
+			fromStr += " "+tvTableName+" as "+tvAlias
 			if verbose:
 				print ("Building dynamic query for an entry vertex.")
 				print ("dataloc: %s" % tvDataLoc)
@@ -309,7 +309,8 @@ def main(argv):
 				print ("i: %d, j: %d" % (i, j))
 				print ("path[%d]: %s" % (i, path[i]))
 				print ("path[%d]: %s" % (j, path[j]))
-
+				edge = gqlMgr.getEdge(path[i], path[j])
+				print ("Current edge: %s" % edge)
 			dynamicQuery = selectStr+" "+fromStr+" "+conditionStr
 			print ("Generated dynamic query: \n%s" % dynamicQuery)
 			exitWithException(ReturnCodes.FEATURE_NOT_IMPLEMENTED, gqlMgr)
