@@ -65,6 +65,7 @@ def main(argv):
 		vertexColumnsToFetch = ""
 		limit = ""
 		vertexTypes = {}
+		tableDict = {}
 		vertices = OrderedDict()
 		exitCode = ReturnCodes.SUCCESS
 		FilteredVertex = namedtuple('FilteredVertex', 'name filter')
@@ -255,6 +256,9 @@ def main(argv):
 		dynamicQuery = ""
 
 		#Common parts of the dynamic query between a non-entry and an entry vertex
+		#----------------------------
+		# Building the select string
+		#----------------------------
 		if isUnique:
 				selectStr += "distinct "
 		else:
@@ -278,7 +282,9 @@ def main(argv):
 				selectStr += ", "+tvAlias+"."+col
 		#TODO: Handle case when data_loc is used instead (prepend with alias)
 
-		#Case when this is an entry vertex
+		#--------------------------------------
+		# Case when this is an entry vertex - build the from and where clause strings
+		#--------------------------------------
 		if tvIsEntry and subGraphPath == "":
 			fromStr += " "+tvTableName+" as "+tvAlias
 			if verbose:
@@ -296,7 +302,10 @@ def main(argv):
 				if verbose:
 					print ("Limit is set to %s." % limit)
 				dynamicQuery += " limit "+limit
+
+		#--------------------------------------
 		#Case when this is NOT an entry vertex
+		#--------------------------------------
 		elif subGraphPath != "":
 			if verbose:
 				print ("Building dynamic query for a vertex with a list of vertices to visit (subGraphPath).")
@@ -305,6 +314,9 @@ def main(argv):
 			#iterate through the path
 			totalVerticesInPath = len(path)
 			print ("totalVerticesInPath: %s" % totalVerticesInPath)
+			#----------------------------
+			# Building the from clause string
+			#----------------------------	
 			for i, j in zip(range(0, totalVerticesInPath), range(1, totalVerticesInPath)):
 				print ("i: %d, j: %d" % (i, j))
 				print ("path[%d]: %s" % (i, path[i]))
@@ -314,33 +326,59 @@ def main(argv):
 				vertexI = gqlMgr.getVertexById(path[i])
 				vertexJ = gqlMgr.getVertexById(path[j])
 				print ("vertices in edge: %s ||| %s" % (vertexI, vertexJ))
+				#BUILD THE TABLE NAMES DICTIONARY (unique list of table names that allows reuse - hence, save query time by avoiding joins)
+				#for vertexI
+				tableReuseVi = False
+				tableReuseVj = False
+				if vertexI['table_name'] in tableDict:
+					vertexI['alias'] = tableDict[vertexI['table_name']]
+					tableReuseVi = True
+				else:
+					tableDict[vertexI['table_name']] = vertexI['alias']
+				#for vertexJ
+				if vertexJ['table_name'] in tableDict:
+					vertexJ['alias'] = tableDict[vertexJ['table_name']]
+					tableReuseVj = True
+				else:
+					tableDict[vertexJ['table_name']] = vertexJ['alias']
+				if debug:
+					print ("tableDict: %s" % tableDict)
 				if i == 0:
 					fromStr += " "+vertexI['table_name']+" as "+vertexI['alias']
-				fromStr += " inner join "+vertexJ['table_name']+" as "+vertexJ['alias']
-				qualifiedCriterion = ""
-				if '=' in edge['criterion']:
-					#todo: error checks
-					critList = edge['criterion'].split('=')
-					critList[0] = vertexI['alias']+"."+critList[0]
-					critList[1] = vertexJ['alias']+"."+critList[1]
-					qualifiedCriterion = "=".join(critList)
-				elif '?' in edge['criterion']:
-					critList = edge['criterion'].split('?')
-					critList[0] = vertexJ['alias']+"."+critList[0]
-					critList[1] = vertexI['alias']+"."+critList[1]
-					qualifiedCriterion = "?".join(critList)
-				#handle: criterion==null
-				fromStr += " on "+qualifiedCriterion
+				if not tableReuseVj:
+					fromStr += " inner join "+vertexJ['table_name']+" as "+vertexJ['alias']
+					qualifiedCriterion = ""
+					if edge['criterion'] is not None:
+						if '=' in edge['criterion']:
+							#todo: error checks
+							critList = edge['criterion'].split('=')
+							critList[0] = vertexI['alias']+"."+critList[0]
+							critList[1] = vertexJ['alias']+"."+critList[1]
+							qualifiedCriterion = "=".join(critList)
+						elif '?' in edge['criterion']:
+							critList = edge['criterion'].split('?')
+							critList[0] = vertexJ['alias']+"."+critList[0]
+							critList[1] = vertexI['alias']+"."+critList[1]
+							qualifiedCriterion = "?".join(critList)
+					#handle: criterion==null
+					fromStr += " on "+qualifiedCriterion
+			#Case when the last vertex in the path, aka targetVertex, was tagged to reuse a table in the subpath
+			if tableReuseVj:
+				selectStr = selectStr.replace(tvAlias+".", vertexJ['alias']+".")
+			#----------------------------
+			# Building the where clause string
+			#----------------------------
 			i = 0
 			for p in path:
 				v = gqlMgr.getVertexById(p)
 				print ("Processing condition for vertex %s" % v)
 				if v['criterion'] is not None:
 					if i == 0:
+						#TODO: Append alias wherever needed
 						conditionStr += " "+v['criterion']
 						i += 1
 					else:
-						conditionStr += "and "+v['criterion']
+						conditionStr += " and "+v['criterion']
 						i += 1
 				# gqlMgr.getPath(vertices.items()[i][0], vertices.items()[j][0])['path_string']
 			dynamicQuery = selectStr+" "+fromStr+" "+conditionStr
