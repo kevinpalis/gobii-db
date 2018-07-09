@@ -311,6 +311,38 @@ def main(argv):
 				print ("path[%d]: %s" % (j, path[j]))
 				edge = gqlMgr.getEdge(path[i], path[j])
 				print ("Current edge: %s" % edge)
+				vertexI = gqlMgr.getVertexById(path[i])
+				vertexJ = gqlMgr.getVertexById(path[j])
+				print ("vertices in edge: %s ||| %s" % (vertexI, vertexJ))
+				if i == 0:
+					fromStr += " "+vertexI['table_name']+" as "+vertexI['alias']
+				fromStr += " inner join "+vertexJ['table_name']+" as "+vertexJ['alias']
+				qualifiedCriterion = ""
+				if '=' in edge['criterion']:
+					#todo: error checks
+					critList = edge['criterion'].split('=')
+					critList[0] = vertexI['alias']+"."+critList[0]
+					critList[1] = vertexJ['alias']+"."+critList[1]
+					qualifiedCriterion = "=".join(critList)
+				elif '?' in edge['criterion']:
+					critList = edge['criterion'].split('?')
+					critList[0] = vertexJ['alias']+"."+critList[0]
+					critList[1] = vertexI['alias']+"."+critList[1]
+					qualifiedCriterion = "?".join(critList)
+				#handle: criterion==null
+				fromStr += " on "+qualifiedCriterion
+			i = 0
+			for p in path:
+				v = gqlMgr.getVertexById(p)
+				print ("Processing condition for vertex %s" % v)
+				if v['criterion'] is not None:
+					if i == 0:
+						conditionStr += " "+v['criterion']
+						i += 1
+					else:
+						conditionStr += "and "+v['criterion']
+						i += 1
+				# gqlMgr.getPath(vertices.items()[i][0], vertices.items()[j][0])['path_string']
 			dynamicQuery = selectStr+" "+fromStr+" "+conditionStr
 			print ("Generated dynamic query: \n%s" % dynamicQuery)
 			exitWithException(ReturnCodes.FEATURE_NOT_IMPLEMENTED, gqlMgr)
