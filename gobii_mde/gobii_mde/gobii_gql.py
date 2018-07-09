@@ -373,6 +373,12 @@ def main(argv):
 				v = gqlMgr.getVertexById(p)
 				print ("Processing condition for vertex %s" % v)
 				if v['criterion'] is not None:
+					# unfortunately, with the current seed data, this vertex needs to be treated differently
+					if v['name'] != 'principal_investigator':
+						#if the current vertex was tagged as tableReuse earlier
+						if v['table_name'] in tableDict:
+							v['alias'] = tableDict[v['table_name']]
+						v['criterion'] = v['alias'] + "." + v['criterion']
 					if i == 0:
 						#TODO: Append alias wherever needed
 						conditionStr += " "+v['criterion']
