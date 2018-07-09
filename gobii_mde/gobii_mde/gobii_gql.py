@@ -316,7 +316,7 @@ def main(argv):
 			print ("totalVerticesInPath: %s" % totalVerticesInPath)
 			#----------------------------
 			# Building the from clause string
-			#----------------------------	
+			#----------------------------
 			for i, j in zip(range(0, totalVerticesInPath), range(1, totalVerticesInPath)):
 				print ("i: %d, j: %d" % (i, j))
 				print ("path[%d]: %s" % (i, path[i]))
@@ -386,6 +386,8 @@ def main(argv):
 					else:
 						conditionStr += " and "+v['criterion']
 						i += 1
+			for vName, vFilter in vertices.items():
+				print ("Adding where clause entry for filtered vertex: %s = %s" % (vName, vFilter))
 				# gqlMgr.getPath(vertices.items()[i][0], vertices.items()[j][0])['path_string']
 			dynamicQuery = selectStr+" "+fromStr+" "+conditionStr
 			print ("Generated dynamic query: \n%s" % dynamicQuery)
