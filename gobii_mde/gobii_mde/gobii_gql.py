@@ -386,8 +386,20 @@ def main(argv):
 					else:
 						conditionStr += " and "+v['criterion']
 						i += 1
-			for vName, vFilter in vertices.items():
-				print ("Adding where clause entry for filtered vertex: %s = %s" % (vName, vFilter))
+
+			for key, value in vertices.items():
+				print ("Adding where clause entry for filtered vertex: %s = ( %s : %s )" % (key, value[0], value[1]))
+				fv = gqlMgr.getVertexById(key)
+				if fv['table_name'] in tableDict:
+					fv['alias'] = tableDict[fv['table_name']]
+				idCol = fv['alias'] + "." + fv['table_name'] + "_id"
+				if i == 0:
+					#TODO: Append alias wherever needed
+					conditionStr += " " + idCol + " in (" + ",".join(map(str, value[1])) + ")"
+					i += 1
+				else:
+					conditionStr += " and " + idCol + " in (" + ",".join(map(str, value[1])) + ")"
+					i += 1
 				# gqlMgr.getPath(vertices.items()[i][0], vertices.items()[j][0])['path_string']
 			dynamicQuery = selectStr+" "+fromStr+" "+conditionStr
 			print ("Generated dynamic query: \n%s" % dynamicQuery)
