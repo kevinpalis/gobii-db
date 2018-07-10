@@ -15,6 +15,7 @@ class ReturnCodes:
 	NO_OUTPUT_PATH = 6
 	OUTPUT_FILE_CREATION_FAILED = 7
 	FEATURE_NOT_IMPLEMENTED = 8
+	NO_PATH_FOUND = 9
 	MESSAGES = {
 		SUCCESS: "Operation completed successfully.",
 		INCOMPLETE_PARAMETERS: "There were fewer parameters passed than what is required. Please check the usage help (-h).",
@@ -24,7 +25,8 @@ class ReturnCodes:
 		NOT_ENTRY_VERTEX: "A non-entry vertex was supplied without a sub-graph.",
 		NO_OUTPUT_PATH: "No output file path was given.",
 		OUTPUT_FILE_CREATION_FAILED: "Creating the output file failed.",
-		FEATURE_NOT_IMPLEMENTED: "This feature is not implemented for this version of GQL."
+		FEATURE_NOT_IMPLEMENTED: "This feature is not implemented for this version of GQL.",
+		NO_PATH_FOUND: "No path can be derived between the two vertices given. Both direct descendants and common relative algorithms have been exhausted."
 	}
 
 

@@ -39,6 +39,10 @@
 	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /Users/KevinPalis/temp/filter4.out -g '{"principal_investigator":[67,69,70], "project":[3,25,30], "division":[25,30]}' -t experiment -f '["name"]' -v -d
 	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /Users/KevinPalis/temp/filter3.out -g '{"principal_investigator":[67,69,70], "project":[3,25,30]}' -t dataset -v -d
 	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /Users/KevinPalis/temp/filter3.out -g '{"principal_investigator":[67,69,70], "project":[3,25,30], "dataset":[1,2,3,4,5]}' -t marker -v -d
+
+	VALID SYNTAX FOR PROP FIELDS FETCHING:
+	select * from project p
+	where props@>('{"'||getCvId('division', 'project_prop', 1)::text||'":"Sim_division"}')::jsonb;
 '''
 from __future__ import print_function
 import sys
@@ -70,6 +74,7 @@ def main(argv):
 		exitCode = ReturnCodes.SUCCESS
 		FilteredVertex = namedtuple('FilteredVertex', 'name filter')
 		pathStr = ""
+
 		####################################################
 		# START: GET PARAMETERS/ARGUMENTS
 		####################################################
@@ -110,6 +115,12 @@ def main(argv):
 		####################################################
 		#initialize database connection
 		gqlMgr = GraphQueryManager(connectionStr, debug)
+		#initialize vertex types
+		vertexTypes['standard'] = gqlMgr.getCvId('standard', 'vertex_type')['cvid']
+		vertexTypes['standard_subset'] = gqlMgr.getCvId('standard_subset', 'vertex_type')['cvid']
+		vertexTypes['cv_subset'] = gqlMgr.getCvId('cv_subset', 'vertex_type')['cvid']
+		vertexTypes['key_value_pair'] = gqlMgr.getCvId('key_value_pair', 'vertex_type')['cvid']
+
 		if len(args) < 3 and len(opts) < 3:
 				exitWithException(ReturnCodes.INCOMPLETE_PARAMETERS, gqlMgr)
 		if verbose:
@@ -120,15 +131,21 @@ def main(argv):
 			if verbose:
 				print ("No vertices to visit. Proceeding as an entry vertex call.")
 		else:
-			#create a dictionary of vertexID:vertexName
+			#create a dictionary of vertexID:FilteredVertex(vertexName,filters)
 			try:
 				subGraphPathJson = json.loads(subGraphPath)
 				print ("subGraphPathJson: %s" % subGraphPathJson)
 				for key, value in subGraphPathJson.iteritems():
 					if verbose:
 						print ("Building the dictionary entry for vertex %s with filter IDs %s" % (key, value))
-					vId = gqlMgr.getVertexId(key)['vertex_id']
-					vertices[vId] = FilteredVertex(key, value)
+					currVertex = gqlMgr.getVertex(key)
+					vertices[currVertex['vertex_id']] = FilteredVertex(key, value)
+					if currVertex['type_id'] == vertexTypes['key_value_pair']:
+						#get the kvp vertex's parent vertex (as all kvp vertices are property entities)
+						parentVertex = gqlMgr.getVertex(currVertex['table_name'])
+						vertices[parentVertex['vertex_id']] = FilteredVertex(currVertex['table_name'], '')
+						if debug:
+							print ("Added the parent vertex '%s' for the kvp vertex '%s'." % (parentVertex['name'], currVertex['name']))
 					# for filterId in value:
 					# 	print ("Filtering by ID=%d" % filterId)
 				if debug:
@@ -156,11 +173,6 @@ def main(argv):
 		# END: INITIAL VALIDATIONS AND PARAMETERS PARSING
 		# START: PREPARE DATABASE VARIABLES AND PARAMETERS
 		####################################################
-		#initialize vertex types
-		vertexTypes['standard'] = gqlMgr.getCvId('standard', 'vertex_type')['cvid']
-		vertexTypes['standard_subset'] = gqlMgr.getCvId('standard_subset', 'vertex_type')['cvid']
-		vertexTypes['cv_subset'] = gqlMgr.getCvId('cv_subset', 'vertex_type')['cvid']
-		vertexTypes['key_value_pair'] = gqlMgr.getCvId('key_value_pair', 'vertex_type')['cvid']
 
 		targetVertexInfo = gqlMgr.getVertex(targetVertexName)
 		if debug:
@@ -205,24 +217,31 @@ def main(argv):
 					print ("i: %d, j: %d" % (i, j))
 					print ("FilteredVertex[%d]: %s" % (i, vertices.items()[i]))
 					print ("FilteredVertex[%d]: %s" % (j, vertices.items()[j]))
-					pathStr += gqlMgr.getPath(vertices.items()[i][0], vertices.items()[j][0])['path_string']
-
+					try:
+						pathStr += gqlMgr.getPath(vertices.items()[i][0], vertices.items()[j][0])['path_string']
+					except Exception as e:
+						print ("ERROR: No path found from vertex %s to %s. Message: %s" % (vertices.items()[i][0], vertices.items()[j][0], e.message))
+						exitWithException(ReturnCodes.NO_PATH_FOUND, gqlMgr)
 			if totalVertices > 0:
 				#parse the path string to an iterable object, removing empty strings
 				tempPath = [col.strip() for col in filter(None, pathStr.split('.'))]
 				#remove duplicated adjacent entries
 				path = [k for k, g in itertools.groupby(tempPath)]
 				lastVertexInPath = path[len(path)-1]
-				endPathStr = gqlMgr.getPath(lastVertexInPath, tvId)['path_string']
-				print ("path length: %s, path=%s, last element=%s, endPathStr=%s" % (len(path), path, path[len(path)-1], endPathStr))
-				#parse the path string to an iterable object, removing empty strings
-				endPath = [col.strip() for col in filter(None, endPathStr.split('.'))]
-				#remove duplicated adjacent entries
-				path = [k for k, g in itertools.groupby(path+endPath)]
-				if verbose:
-					print ("Derived path: %s" % pathStr)
-			# elif totalVertices == 1:
-			# 	path.append(str(vertices.keys()[0]))
+				try:
+					endPathStr = gqlMgr.getPath(lastVertexInPath, tvId)['path_string']
+					print ("path length: %s, path=%s, last element=%s, endPathStr=%s" % (len(path), path, path[len(path)-1], endPathStr))
+					#parse the path string to an iterable object, removing empty strings
+					endPath = [col.strip() for col in filter(None, endPathStr.split('.'))]
+					#remove duplicated adjacent entries
+					path = [k for k, g in itertools.groupby(path+endPath)]
+					if verbose:
+						print ("Derived path: %s" % pathStr)
+					# elif totalVertices == 1:
+					# 	path.append(str(vertices.keys()[0]))
+				except Exception as e:
+					print ("ERROR: No path found from vertex %s to %s. Message: %s" % (lastVertexInPath, tvId, e.message))
+					exitWithException(ReturnCodes.NO_PATH_FOUND, gqlMgr)
 			else:
 				#TODO
 				print ("Did not resolve to vertices to visit. Throw an exception here.")
