@@ -139,13 +139,15 @@ def main(argv):
 					if verbose:
 						print ("Building the dictionary entry for vertex %s with filter IDs %s" % (key, value))
 					currVertex = gqlMgr.getVertex(key)
-					vertices[currVertex['vertex_id']] = FilteredVertex(key, value)
+					#vertices[currVertex['vertex_id']] = FilteredVertex(key, value)
 					if currVertex['type_id'] == vertexTypes['key_value_pair']:
 						#get the kvp vertex's parent vertex (as all kvp vertices are property entities)
 						parentVertex = gqlMgr.getVertex(currVertex['table_name'])
 						vertices[parentVertex['vertex_id']] = FilteredVertex(currVertex['table_name'], '')
 						if debug:
 							print ("Added the parent vertex '%s' for the kvp vertex '%s'." % (parentVertex['name'], currVertex['name']))
+					else:
+						vertices[currVertex['vertex_id']] = FilteredVertex(key, value)
 					# for filterId in value:
 					# 	print ("Filtering by ID=%d" % filterId)
 				if debug:
@@ -422,7 +424,7 @@ def main(argv):
 				# gqlMgr.getPath(vertices.items()[i][0], vertices.items()[j][0])['path_string']
 			dynamicQuery = selectStr+" "+fromStr+" "+conditionStr
 			print ("Generated dynamic query: \n%s" % dynamicQuery)
-			exitWithException(ReturnCodes.FEATURE_NOT_IMPLEMENTED, gqlMgr)
+			# exitWithException(ReturnCodes.FEATURE_NOT_IMPLEMENTED, gqlMgr)
 		if debug:
 			print ("Generated dynamic query: \n%s" % dynamicQuery)
 
