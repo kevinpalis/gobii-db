@@ -423,10 +423,10 @@ def main(argv):
 					i += 1
 				# gqlMgr.getPath(vertices.items()[i][0], vertices.items()[j][0])['path_string']
 			dynamicQuery = selectStr+" "+fromStr+" "+conditionStr
-			print ("Generated dynamic query: \n%s" % dynamicQuery)
+			# print ("Generated dynamic query: \n%s" % dynamicQuery)
 			# exitWithException(ReturnCodes.FEATURE_NOT_IMPLEMENTED, gqlMgr)
 		if debug:
-			print ("Generated dynamic query: \n%s" % dynamicQuery)
+			print ("\nGenerated dynamic query: \n%s\n" % dynamicQuery)
 
 		if verbose:
 			print("Creating main output file: %s" % outputFilePath)
