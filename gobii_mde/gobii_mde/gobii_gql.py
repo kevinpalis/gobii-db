@@ -43,6 +43,9 @@
 	VALID SYNTAX FOR PROP FIELDS FETCHING:
 	select * from project p
 	where props@>('{"'||getCvId('division', 'project_prop', 1)::text||'":"Sim_division"}')::jsonb;
+
+	Data Structure to store all computed paths and filters:
+	allPaths = {vertexId:(vertexName, userFilters, pathToTarget[])}
 '''
 from __future__ import print_function
 import sys
@@ -72,7 +75,9 @@ def main(argv):
 		tableDict = {}
 		vertices = OrderedDict()
 		exitCode = ReturnCodes.SUCCESS
-		FilteredVertex = namedtuple('FilteredVertex', 'name filter')
+		FilteredVertex = namedtuple('FilteredVertex', 'name filter')  # TODO: Get rid of this once the new datastruct is in place
+		allPaths = OrderedDict()
+		FilteredPath = namedtuple('FilteredPath', 'vertexName userFilters pathToTarget')
 		pathStr = ""
 
 		####################################################
@@ -127,35 +132,10 @@ def main(argv):
 			print ("Opts: ", opts)
 		if outputFilePath == "":
 			exitWithException(ReturnCodes.NO_OUTPUT_PATH, gqlMgr)
-		if subGraphPath == "":
-			if verbose:
-				print ("No vertices to visit. Proceeding as an entry vertex call.")
-		else:
-			#create a dictionary of vertexID:FilteredVertex(vertexName,filters)
-			try:
-				subGraphPathJson = json.loads(subGraphPath)
-				print ("subGraphPathJson: %s" % subGraphPathJson)
-				for key, value in subGraphPathJson.iteritems():
-					if verbose:
-						print ("Building the dictionary entry for vertex %s with filter IDs %s" % (key, value))
-					currVertex = gqlMgr.getVertex(key)
-					#vertices[currVertex['vertex_id']] = FilteredVertex(key, value)
-					if currVertex['type_id'] == vertexTypes['key_value_pair']:
-						#get the kvp vertex's parent vertex (as all kvp vertices are property entities)
-						parentVertex = gqlMgr.getVertex(currVertex['table_name'])
-						vertices[parentVertex['vertex_id']] = FilteredVertex(currVertex['table_name'], '')
-						if debug:
-							print ("Added the parent vertex '%s' for the kvp vertex '%s'." % (parentVertex['name'], currVertex['name']))
-					else:
-						vertices[currVertex['vertex_id']] = FilteredVertex(key, value)
-					# for filterId in value:
-					# 	print ("Filtering by ID=%d" % filterId)
-				if debug:
-					print ("Vertices: %s" % vertices)
-			except Exception as e:
-				print ("Exception occured while parsing subGraphPath: %s" % e.message)
-				exitWithException(ReturnCodes.ERROR_PARSING_JSON, gqlMgr)
 
+		#------------------------------------------
+		# Parse and prep the target vertex info
+		#------------------------------------------
 		if vertexColumnsToFetch == "":
 			isDefaultDataLoc = True
 			if verbose:
@@ -170,11 +150,6 @@ def main(argv):
 				traceback.print_exc()
 				print ("Exception occured while parsing vertexColumnsToFetch: %s" % e.message)
 				exitWithException(ReturnCodes.ERROR_PARSING_JSON, gqlMgr)
-
-		####################################################
-		# END: INITIAL VALIDATIONS AND PARAMETERS PARSING
-		# START: PREPARE DATABASE VARIABLES AND PARAMETERS
-		####################################################
 
 		targetVertexInfo = gqlMgr.getVertex(targetVertexName)
 		if debug:
@@ -201,12 +176,75 @@ def main(argv):
 				tvDataLoc = vertexColumnsToFetchJson
 		tvIsEntry = targetVertexInfo['is_entry']
 
-		#VALIDATIONS OF PARSED PARAMETERS
+		#Validate the target vertex
 		if not tvIsEntry and subGraphPath == "":
 			if verbose:
-				print ("This is not an entry vertex, so a subgraph is required.")
+				print ("The target vertex is not an entry vertex, so a subgraph is required.")
 			exitWithException(ReturnCodes.NOT_ENTRY_VERTEX, gqlMgr)
 
+		if subGraphPath == "":
+			if verbose:
+				print ("No vertices to visit. Proceeding as an entry vertex call.")
+		else:
+			#create a dictionary of vertexID:FilteredVertex(vertexName,filters)
+			'''try:
+				subGraphPathJson = json.loads(subGraphPath)
+				print ("subGraphPathJson: %s" % subGraphPathJson)
+				for key, value in subGraphPathJson.iteritems():
+					if verbose:
+						print ("Building the dictionary entry for vertex %s with filter IDs %s" % (key, value))
+					currVertex = gqlMgr.getVertex(key)
+					#vertices[currVertex['vertex_id']] = FilteredVertex(key, value)
+					if currVertex['type_id'] == vertexTypes['key_value_pair']:
+						#get the kvp vertex's parent vertex (as all kvp vertices are property entities)
+						parentVertex = gqlMgr.getVertex(currVertex['table_name'])
+						vertices[parentVertex['vertex_id']] = FilteredVertex(currVertex['table_name'], '')
+						if debug:
+							print ("Added the parent vertex '%s' for the kvp vertex '%s'." % (parentVertex['name'], currVertex['name']))
+					else:
+						vertices[currVertex['vertex_id']] = FilteredVertex(key, value)
+					# for filterId in value:
+					# 	print ("Filtering by ID=%d" % filterId)
+				if debug:
+					print ("Vertices: %s" % vertices)
+			except Exception as e:
+				print ("Exception occured while parsing subGraphPath: %s" % e.message)
+				exitWithException(ReturnCodes.ERROR_PARSING_JSON, gqlMgr) '''
+			#----
+			#create a dictionary of allPaths = {vertexId:FilteredPath(vertexName, userFilters, pathToTarget[])}
+			try:
+				subGraphPathJson = json.loads(subGraphPath)
+				if debug:
+					print ("subGraphPathJson: %s" % subGraphPathJson)
+				for vertexName, vertexFilter in subGraphPathJson.iteritems():
+					if verbose:
+						print ("Building the dictionary entry for vertex %s with filter IDs %s" % (vertexName, vertexFilter))
+					currVertex = gqlMgr.getVertex(vertexName)
+					if currVertex['type_id'] == vertexTypes['key_value_pair']:
+						#get the kvp vertex's parent vertex (as all kvp vertices are property entities)
+						parentVertex = gqlMgr.getVertex(currVertex['table_name'])
+						# vertices[parentVertex['vertex_id']] = FilteredVertex(currVertex['table_name'], '')
+						pathToTarget = [parentVertex['vertex_id']]  # TODO: Check if computing for the path to target in here is doable
+						allPaths[currVertex['vertex_id']] = FilteredPath(vertexName, vertexFilter, pathToTarget)
+						if debug:
+							print ("Added the parent vertex '%s' for the kvp vertex '%s'." % (parentVertex['name'], currVertex['name']))
+					else:
+						# vertices[currVertex['vertex_id']] = FilteredVertex(key, value)
+						pathToTarget = [currVertex['vertex_id']]  # TODO: Check if computing for the path to target in here is doable
+						allPaths[currVertex['vertex_id']] = FilteredPath(vertexName, vertexFilter, pathToTarget)
+					# for filterId in value:
+					# 	print ("Filtering by ID=%d" % filterId)
+				if debug:
+					print ("allPaths: %s" % allPaths)
+			except Exception as e:
+				print ("Exception occured while parsing subGraphPath and creating allPaths: %s" % e.message)
+				exitWithException(ReturnCodes.ERROR_PARSING_JSON, gqlMgr)
+
+		####################################################
+		# END: INITIAL VALIDATIONS AND PARAMETERS PARSING
+		# START: PREPARE DATABASE VARIABLES AND PARAMETERS
+		####################################################
+		#>>>>>YOU ARE HERE!!!!!!
 		#COMPUTE FOR THE ACTUAL PATH
 		if subGraphPath != "":
 			path = []
