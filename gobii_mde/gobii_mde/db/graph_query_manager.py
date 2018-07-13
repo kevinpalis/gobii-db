@@ -39,6 +39,11 @@ class GraphQueryManager:
 			res = self.cur.fetchone()
 			return res
 
+	def getVertexById(self, vertexId):
+			self.cur.execute("select * from vertex where vertex_id=%s", (vertexId,))
+			res = self.cur.fetchone()
+			return res
+
 	def getCvId(self, term, groupName):
 			self.cur.execute("select cvid from getcvid(%s, %s, %s)", (term, groupName, 1))
 			res = self.cur.fetchone()
@@ -60,5 +65,10 @@ class GraphQueryManager:
 
 	def getPath(self, startVertex, endVertex):
 			self.cur.execute("select path_string from transitive_closure where start_vertex=%s and end_vertex=%s", (startVertex, endVertex))
+			res = self.cur.fetchone()
+			return res
+
+	def getEdge(self, startVertex, endVertex):
+			self.cur.execute("select * from edge where start_vertex=%s and end_vertex=%s", (startVertex, endVertex))
 			res = self.cur.fetchone()
 			return res

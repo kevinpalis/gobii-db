@@ -37,6 +37,12 @@
 	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /Users/KevinPalis/temp/filter3.out -g '{"principal_investigator":[67,69,70], "project":[3,25,30]}' -t division -v -d
 	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /Users/KevinPalis/temp/filter3.out -g '{"principal_investigator":[67,69,70], "project":[3,25,30]}' -t experiment -f '["name"]' -v
 	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /Users/KevinPalis/temp/filter4.out -g '{"principal_investigator":[67,69,70], "project":[3,25,30], "division":[25,30]}' -t experiment -f '["name"]' -v -d
+	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /Users/KevinPalis/temp/filter3.out -g '{"principal_investigator":[67,69,70], "project":[3,25,30]}' -t dataset -v -d
+	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /Users/KevinPalis/temp/filter3.out -g '{"principal_investigator":[67,69,70], "project":[3,25,30], "dataset":[1,2,3,4,5]}' -t marker -v -d
+
+	VALID SYNTAX FOR PROP FIELDS FETCHING:
+	select * from project p
+	where props@>('{"'||getCvId('division', 'project_prop', 1)::text||'":"Sim_division"}')::jsonb;
 '''
 from __future__ import print_function
 import sys
@@ -63,10 +69,12 @@ def main(argv):
 		vertexColumnsToFetch = ""
 		limit = ""
 		vertexTypes = {}
+		tableDict = {}
 		vertices = OrderedDict()
 		exitCode = ReturnCodes.SUCCESS
 		FilteredVertex = namedtuple('FilteredVertex', 'name filter')
 		pathStr = ""
+
 		####################################################
 		# START: GET PARAMETERS/ARGUMENTS
 		####################################################
@@ -107,6 +115,12 @@ def main(argv):
 		####################################################
 		#initialize database connection
 		gqlMgr = GraphQueryManager(connectionStr, debug)
+		#initialize vertex types
+		vertexTypes['standard'] = gqlMgr.getCvId('standard', 'vertex_type')['cvid']
+		vertexTypes['standard_subset'] = gqlMgr.getCvId('standard_subset', 'vertex_type')['cvid']
+		vertexTypes['cv_subset'] = gqlMgr.getCvId('cv_subset', 'vertex_type')['cvid']
+		vertexTypes['key_value_pair'] = gqlMgr.getCvId('key_value_pair', 'vertex_type')['cvid']
+
 		if len(args) < 3 and len(opts) < 3:
 				exitWithException(ReturnCodes.INCOMPLETE_PARAMETERS, gqlMgr)
 		if verbose:
@@ -117,15 +131,23 @@ def main(argv):
 			if verbose:
 				print ("No vertices to visit. Proceeding as an entry vertex call.")
 		else:
-			#create a dictionary of vertexID:vertexName
+			#create a dictionary of vertexID:FilteredVertex(vertexName,filters)
 			try:
 				subGraphPathJson = json.loads(subGraphPath)
 				print ("subGraphPathJson: %s" % subGraphPathJson)
 				for key, value in subGraphPathJson.iteritems():
 					if verbose:
 						print ("Building the dictionary entry for vertex %s with filter IDs %s" % (key, value))
-					vId = gqlMgr.getVertexId(key)['vertex_id']
-					vertices[vId] = FilteredVertex(key, value)
+					currVertex = gqlMgr.getVertex(key)
+					#vertices[currVertex['vertex_id']] = FilteredVertex(key, value)
+					if currVertex['type_id'] == vertexTypes['key_value_pair']:
+						#get the kvp vertex's parent vertex (as all kvp vertices are property entities)
+						parentVertex = gqlMgr.getVertex(currVertex['table_name'])
+						vertices[parentVertex['vertex_id']] = FilteredVertex(currVertex['table_name'], '')
+						if debug:
+							print ("Added the parent vertex '%s' for the kvp vertex '%s'." % (parentVertex['name'], currVertex['name']))
+					else:
+						vertices[currVertex['vertex_id']] = FilteredVertex(key, value)
 					# for filterId in value:
 					# 	print ("Filtering by ID=%d" % filterId)
 				if debug:
@@ -153,11 +175,6 @@ def main(argv):
 		# END: INITIAL VALIDATIONS AND PARAMETERS PARSING
 		# START: PREPARE DATABASE VARIABLES AND PARAMETERS
 		####################################################
-		#initialize vertex types
-		vertexTypes['standard'] = gqlMgr.getCvId('standard', 'vertex_type')['cvid']
-		vertexTypes['standard_subset'] = gqlMgr.getCvId('standard_subset', 'vertex_type')['cvid']
-		vertexTypes['cv_subset'] = gqlMgr.getCvId('cv_subset', 'vertex_type')['cvid']
-		vertexTypes['key_value_pair'] = gqlMgr.getCvId('key_value_pair', 'vertex_type')['cvid']
 
 		targetVertexInfo = gqlMgr.getVertex(targetVertexName)
 		if debug:
@@ -191,21 +208,46 @@ def main(argv):
 			exitWithException(ReturnCodes.NOT_ENTRY_VERTEX, gqlMgr)
 
 		#COMPUTE FOR THE ACTUAL PATH
-		totalVertices = len(vertices)
-		print ("totalVertices: %s" % totalVertices)
-		for i, j in zip(range(0, totalVertices), range(1, totalVertices)):
-			print ("i: %d, j: %d" % (i, j))
-			print ("FilteredVertex[%d]: %s" % (i, vertices.items()[i]))
-			print ("FilteredVertex[%d]: %s" % (j, vertices.items()[j]))
-			pathStr += gqlMgr.getPath(vertices.items()[i][0], vertices.items()[j][0])['path_string']
-		if verbose:
-			print ("Derived path: %s" % (pathStr,))
-
-		#parse the path string to an iterable object, removing empty strings
-		tempPath = [col.strip() for col in filter(None, pathStr.split('.'))]
-		#remove duplicated adjacent entries
-		path = [k for k, g in itertools.groupby(tempPath)]
-		print ("Path: %s" % path)
+		if subGraphPath != "":
+			path = []
+			totalVertices = len(vertices)
+			print ("totalVertices: %s" % totalVertices)
+			if totalVertices == 1:
+				pathStr = str(vertices.items()[0][0])
+			else:
+				for i, j in zip(range(0, totalVertices), range(1, totalVertices)):
+					print ("i: %d, j: %d" % (i, j))
+					print ("FilteredVertex[%d]: %s" % (i, vertices.items()[i]))
+					print ("FilteredVertex[%d]: %s" % (j, vertices.items()[j]))
+					try:
+						pathStr += gqlMgr.getPath(vertices.items()[i][0], vertices.items()[j][0])['path_string']
+					except Exception as e:
+						print ("ERROR: No path found from vertex %s to %s. Message: %s" % (vertices.items()[i][0], vertices.items()[j][0], e.message))
+						exitWithException(ReturnCodes.NO_PATH_FOUND, gqlMgr)
+			if totalVertices > 0:
+				#parse the path string to an iterable object, removing empty strings
+				tempPath = [col.strip() for col in filter(None, pathStr.split('.'))]
+				#remove duplicated adjacent entries
+				path = [k for k, g in itertools.groupby(tempPath)]
+				lastVertexInPath = path[len(path)-1]
+				try:
+					endPathStr = gqlMgr.getPath(lastVertexInPath, tvId)['path_string']
+					print ("path length: %s, path=%s, last element=%s, endPathStr=%s" % (len(path), path, path[len(path)-1], endPathStr))
+					#parse the path string to an iterable object, removing empty strings
+					endPath = [col.strip() for col in filter(None, endPathStr.split('.'))]
+					#remove duplicated adjacent entries
+					path = [k for k, g in itertools.groupby(path+endPath)]
+					if verbose:
+						print ("Derived path: %s" % pathStr)
+					# elif totalVertices == 1:
+					# 	path.append(str(vertices.keys()[0]))
+				except Exception as e:
+					print ("ERROR: No path found from vertex %s to %s. Message: %s" % (lastVertexInPath, tvId, e.message))
+					exitWithException(ReturnCodes.NO_PATH_FOUND, gqlMgr)
+			else:
+				#TODO
+				print ("Did not resolve to vertices to visit. Throw an exception here.")
+			print ("Path: %s" % path)
 
 		####################################################
 		# END: PREPARE DATABASE VARIABLES AND PARAMS
@@ -234,35 +276,42 @@ def main(argv):
 		conditionStr = "where"
 		dynamicQuery = ""
 
-		#Case when this is an entry vertex
+		#Common parts of the dynamic query between a non-entry and an entry vertex
+		#----------------------------
+		# Building the select string
+		#----------------------------
+		if isUnique:
+				selectStr += "distinct "
+		else:
+			selectStr += tvAlias+"."+tvTableName+"_id as id"
+
+		if isKvpVertex and isUnique:
+			selectStr += tvAlias+"."+tvDataLoc+" as "+targetVertexName
+		elif isKvpVertex and not isUnique:
+			selectStr += ", "+tvAlias+"."+tvDataLoc+" as "+targetVertexName
+		elif not isKvpVertex and not isUnique and isDefaultDataLoc:
+			selectStr += ", " + ",".join([tvAlias+"."+col.strip() for col in tvDataLoc.split(',')])
+			if verbose:
+				print ("@isDefaultDataLoc and not unique: %s" % selectStr)
+		elif not isKvpVertex and isUnique and isDefaultDataLoc:
+			selectStr += ",".join([tvAlias+"."+col.strip() for col in tvDataLoc.split(',')])
+			print ("@isDefaultDataLoc and unique: %s" % selectStr)
+		else:
+			for col in tvDataLoc:
+				if verbose:
+					print ("Adding column %s to selectStr." % col)
+				selectStr += ", "+tvAlias+"."+col
+		#TODO: Handle case when data_loc is used instead (prepend with alias)
+
+		#--------------------------------------
+		# Case when this is an entry vertex - build the from and where clause strings
+		#--------------------------------------
 		if tvIsEntry and subGraphPath == "":
+			fromStr += " "+tvTableName+" as "+tvAlias
 			if verbose:
 				print ("Building dynamic query for an entry vertex.")
-			if isUnique:
-				selectStr += "distinct "
-			else:
-				selectStr += tvAlias+"."+tvTableName+"_id as id"
-			print ("dataloc: %s" % tvDataLoc)
-			print ("type: %s" % type(tvDataLoc))
-
-			if isKvpVertex and isUnique:
-				selectStr += tvAlias+"."+tvDataLoc+" as "+targetVertexName
-			elif isKvpVertex and not isUnique:
-				selectStr += ", "+tvAlias+"."+tvDataLoc+" as "+targetVertexName
-			elif not isKvpVertex and not isUnique and isDefaultDataLoc:
-				selectStr += ", " + ",".join([tvAlias+"."+col.strip() for col in tvDataLoc.split(',')])
-				if verbose:
-					print ("@isDefaultDataLoc and not unique: %s" % selectStr)
-			elif not isKvpVertex and isUnique and isDefaultDataLoc:
-				selectStr += ",".join([tvAlias+"."+col.strip() for col in tvDataLoc.split(',')])
-				print ("@isDefaultDataLoc and unique: %s" % selectStr)
-			else:
-				for col in tvDataLoc:
-					if verbose:
-						print ("Adding column %s to selectStr." % col)
-					selectStr += ", "+tvAlias+"."+col
-			#TODO: Handle case when data_loc is used instead (prepend with alias)
-			fromStr += " "+tvTableName+" as "+tvAlias
+				print ("dataloc: %s" % tvDataLoc)
+				print ("type: %s" % type(tvDataLoc))
 			if tvCriterion is not None:
 				conditionStr += " "+tvCriterion
 				dynamicQuery = selectStr+" "+fromStr+" "+conditionStr
@@ -274,11 +323,110 @@ def main(argv):
 				if verbose:
 					print ("Limit is set to %s." % limit)
 				dynamicQuery += " limit "+limit
+
+		#--------------------------------------
 		#Case when this is NOT an entry vertex
-		else:
-			exitWithException(ReturnCodes.FEATURE_NOT_IMPLEMENTED, gqlMgr)
+		#--------------------------------------
+		elif subGraphPath != "":
+			if verbose:
+				print ("Building dynamic query for a vertex with a list of vertices to visit (subGraphPath).")
+				print ("dataloc: %s" % tvDataLoc)
+				print ("type: %s" % type(tvDataLoc))
+			#iterate through the path
+			totalVerticesInPath = len(path)
+			print ("totalVerticesInPath: %s" % totalVerticesInPath)
+			#----------------------------
+			# Building the from clause string
+			#----------------------------
+			for i, j in zip(range(0, totalVerticesInPath), range(1, totalVerticesInPath)):
+				print ("i: %d, j: %d" % (i, j))
+				print ("path[%d]: %s" % (i, path[i]))
+				print ("path[%d]: %s" % (j, path[j]))
+				edge = gqlMgr.getEdge(path[i], path[j])
+				print ("Current edge: %s" % edge)
+				vertexI = gqlMgr.getVertexById(path[i])
+				vertexJ = gqlMgr.getVertexById(path[j])
+				print ("vertices in edge: %s ||| %s" % (vertexI, vertexJ))
+				#BUILD THE TABLE NAMES DICTIONARY (unique list of table names that allows reuse - hence, save query time by avoiding joins)
+				#for vertexI
+				tableReuseVi = False
+				tableReuseVj = False
+				if vertexI['table_name'] in tableDict:
+					vertexI['alias'] = tableDict[vertexI['table_name']]
+					tableReuseVi = True
+				else:
+					tableDict[vertexI['table_name']] = vertexI['alias']
+				#for vertexJ
+				if vertexJ['table_name'] in tableDict:
+					vertexJ['alias'] = tableDict[vertexJ['table_name']]
+					tableReuseVj = True
+				else:
+					tableDict[vertexJ['table_name']] = vertexJ['alias']
+				if debug:
+					print ("tableDict: %s" % tableDict)
+				if i == 0:
+					fromStr += " "+vertexI['table_name']+" as "+vertexI['alias']
+				if not tableReuseVj:
+					fromStr += " inner join "+vertexJ['table_name']+" as "+vertexJ['alias']
+					qualifiedCriterion = ""
+					if edge['criterion'] is not None:
+						if '=' in edge['criterion']:
+							#todo: error checks
+							critList = edge['criterion'].split('=')
+							critList[0] = vertexI['alias']+"."+critList[0]
+							critList[1] = vertexJ['alias']+"."+critList[1]
+							qualifiedCriterion = "=".join(critList)
+						elif '?' in edge['criterion']:
+							critList = edge['criterion'].split('?')
+							critList[0] = vertexJ['alias']+"."+critList[0]
+							critList[1] = vertexI['alias']+"."+critList[1]
+							qualifiedCriterion = "?".join(critList)
+					#handle: criterion==null
+					fromStr += " on "+qualifiedCriterion
+			#Case when the last vertex in the path, aka targetVertex, was tagged to reuse a table in the subpath
+			if tableReuseVj:
+				selectStr = selectStr.replace(tvAlias+".", vertexJ['alias']+".")
+			#----------------------------
+			# Building the where clause string
+			#----------------------------
+			i = 0
+			for p in path:
+				v = gqlMgr.getVertexById(p)
+				print ("Processing condition for vertex %s" % v)
+				if v['criterion'] is not None:
+					# unfortunately, with the current seed data, this vertex needs to be treated differently
+					if v['name'] != 'principal_investigator':
+						#if the current vertex was tagged as tableReuse earlier
+						if v['table_name'] in tableDict:
+							v['alias'] = tableDict[v['table_name']]
+						v['criterion'] = v['alias'] + "." + v['criterion']
+					if i == 0:
+						#TODO: Append alias wherever needed
+						conditionStr += " "+v['criterion']
+						i += 1
+					else:
+						conditionStr += " and "+v['criterion']
+						i += 1
+
+			for key, value in vertices.items():
+				print ("Adding where clause entry for filtered vertex: %s = ( %s : %s )" % (key, value[0], value[1]))
+				fv = gqlMgr.getVertexById(key)
+				if fv['table_name'] in tableDict:
+					fv['alias'] = tableDict[fv['table_name']]
+				idCol = fv['alias'] + "." + fv['table_name'] + "_id"
+				if i == 0:
+					#TODO: Append alias wherever needed
+					conditionStr += " " + idCol + " in (" + ",".join(map(str, value[1])) + ")"
+					i += 1
+				else:
+					conditionStr += " and " + idCol + " in (" + ",".join(map(str, value[1])) + ")"
+					i += 1
+				# gqlMgr.getPath(vertices.items()[i][0], vertices.items()[j][0])['path_string']
+			dynamicQuery = selectStr+" "+fromStr+" "+conditionStr
+			# print ("Generated dynamic query: \n%s" % dynamicQuery)
+			# exitWithException(ReturnCodes.FEATURE_NOT_IMPLEMENTED, gqlMgr)
 		if debug:
-			print ("Generated dynamic query: \n%s" % dynamicQuery)
+			print ("\nGenerated dynamic query: \n%s\n" % dynamicQuery)
 
 		if verbose:
 			print("Creating main output file: %s" % outputFilePath)
