@@ -214,6 +214,10 @@ def main(argv):
 			#create a dictionary of allPaths = {vertexId:FilteredPath(vertexName, userFilters, pathToTarget[])}
 			try:
 				subGraphPathJson = json.loads(subGraphPath)
+				path = []
+				totalVertices = len(subGraphPathJson)
+				pathStr = ""
+				print ("totalVertices: %s" % totalVertices)
 				if debug:
 					print ("subGraphPathJson: %s" % subGraphPathJson)
 				for vertexName, vertexFilter in subGraphPathJson.iteritems():
@@ -224,18 +228,39 @@ def main(argv):
 						#get the kvp vertex's parent vertex (as all kvp vertices are property entities)
 						parentVertex = gqlMgr.getVertex(currVertex['table_name'])
 						# vertices[parentVertex['vertex_id']] = FilteredVertex(currVertex['table_name'], '')
-						pathToTarget = [parentVertex['vertex_id']]  # TODO: Check if computing for the path to target in here is doable
+						#pathToTarget = [parentVertex['vertex_id']]  # TODO: Check if computing for the path to target in here is doable
+						try:
+							pathStr += gqlMgr.getPath(parentVertex['vertex_id'], tvId)['path_string']
+							#parse the path string to an iterable object, removing empty strings
+							pathToTarget = [gqlMgr.getVertexById(col.strip()) for col in filter(None, pathStr.split('.'))]
+							#remove duplicated adjacent entries
+							# pathToTarget = [k for k, g in itertools.groupby(tempPath)]
+							print ("\npathStr=%s / pathToTarget=%s" % (pathStr, pathToTarget))
+						except Exception as e:
+							print ("ERROR: No path found from vertex %s to %s. Message: %s" % (parentVertex['vertex_id'], tvId, e.message))
+							exitWithException(ReturnCodes.NO_PATH_FOUND, gqlMgr)
 						allPaths[currVertex['vertex_id']] = FilteredPath(vertexName, vertexFilter, pathToTarget)
 						if debug:
 							print ("Added the parent vertex '%s' for the kvp vertex '%s'." % (parentVertex['name'], currVertex['name']))
 					else:
 						# vertices[currVertex['vertex_id']] = FilteredVertex(key, value)
-						pathToTarget = [currVertex['vertex_id']]  # TODO: Check if computing for the path to target in here is doable
+						# pathToTarget = [currVertex['vertex_id']]  # TODO: Check if computing for the path to target in here is doable
+						try:
+							pathStr += gqlMgr.getPath(currVertex['vertex_id'], tvId)['path_string']
+							#parse the path string to an iterable object, removing empty strings
+							pathToTarget = [gqlMgr.getVertexById(col.strip()) for col in filter(None, pathStr.split('.'))]
+							#remove duplicated adjacent entries
+							# pathToTarget = [k for k, g in itertools.groupby(tempPath)]
+							print ("\npathStr=%s / pathToTarget=%s" % (pathStr, pathToTarget))
+						except Exception as e:
+							print ("ERROR: No path found from vertex %s to %s. Message: %s" % (currVertex['vertex_id'], tvId, e.message))
+							exitWithException(ReturnCodes.NO_PATH_FOUND, gqlMgr)
 						allPaths[currVertex['vertex_id']] = FilteredPath(vertexName, vertexFilter, pathToTarget)
 					# for filterId in value:
 					# 	print ("Filtering by ID=%d" % filterId)
 				if debug:
 					print ("allPaths: %s" % allPaths)
+				exit(1)  # TEMP
 			except Exception as e:
 				print ("Exception occured while parsing subGraphPath and creating allPaths: %s" % e.message)
 				exitWithException(ReturnCodes.ERROR_PARSING_JSON, gqlMgr)
