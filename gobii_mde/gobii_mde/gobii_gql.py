@@ -256,8 +256,13 @@ def main(argv):
 							print ("ERROR: No path found from vertex %s to %s. Message: %s" % (currVertex['vertex_id'], tvId, e.message))
 							exitWithException(ReturnCodes.NO_PATH_FOUND, gqlMgr)
 						allPaths[currVertex['vertex_id']] = FilteredPath(vertexName, vertexFilter, pathToTarget)
-					# for filterId in value:
-					# 	print ("Filtering by ID=%d" % filterId)
+
+					#Do the Dew
+					selectStr = "select "
+					fromStr = "from"
+					conditionStr = "where"
+					dynamicQuery = ""
+					selectStr += buildSelectString(isUnique, isKvpVertex, isDefaultDataLoc, verbose, targetVertexInfo['alias'], targetVertexInfo['table_name'], tvDataLoc, targetVertexInfo['name'])
 				if debug:
 					print ("allPaths: %s" % allPaths)
 				exit(1)  # TEMP
@@ -271,7 +276,7 @@ def main(argv):
 		####################################################
 		#>>>>>YOU ARE HERE!!!!!!
 		#COMPUTE FOR THE ACTUAL PATH
-		if subGraphPath != "":
+		'''if subGraphPath != "":
 			path = []
 			totalVertices = len(vertices)
 			print ("totalVertices: %s" % totalVertices)
@@ -310,7 +315,7 @@ def main(argv):
 			else:
 				#TODO
 				print ("Did not resolve to vertices to visit. Throw an exception here.")
-			print ("Path: %s" % path)
+			print ("Path: %s" % path)'''
 
 		####################################################
 		# END: PREPARE DATABASE VARIABLES AND PARAMS
@@ -334,41 +339,42 @@ def main(argv):
 		# START: CREATE THE DYNAMIC QUERY
 		####################################################
 		#Do the Dew
-		selectStr = "select "
-		fromStr = "from"
-		conditionStr = "where"
-		dynamicQuery = ""
+		# selectStr = "select "
+		# fromStr = "from"
+		# conditionStr = "where"
+		# dynamicQuery = ""
 
 		#Common parts of the dynamic query between a non-entry and an entry vertex
 		#----------------------------
 		# Building the select string
 		#----------------------------
-		if isUnique:
-				selectStr += "distinct "
-		else:
-			selectStr += tvAlias+"."+tvTableName+"_id as id"
+		# if isUnique:
+		# 		selectStr += "distinct "
+		# else:
+		# 	selectStr += tvAlias+"."+tvTableName+"_id as id"
 
-		if isKvpVertex and isUnique:
-			selectStr += tvAlias+"."+tvDataLoc+" as "+targetVertexName
-		elif isKvpVertex and not isUnique:
-			selectStr += ", "+tvAlias+"."+tvDataLoc+" as "+targetVertexName
-		elif not isKvpVertex and not isUnique and isDefaultDataLoc:
-			selectStr += ", " + ",".join([tvAlias+"."+col.strip() for col in tvDataLoc.split(',')])
-			if verbose:
-				print ("@isDefaultDataLoc and not unique: %s" % selectStr)
-		elif not isKvpVertex and isUnique and isDefaultDataLoc:
-			selectStr += ",".join([tvAlias+"."+col.strip() for col in tvDataLoc.split(',')])
-			print ("@isDefaultDataLoc and unique: %s" % selectStr)
-		else:
-			for col in tvDataLoc:
-				if verbose:
-					print ("Adding column %s to selectStr." % col)
-				selectStr += ", "+tvAlias+"."+col
+		# if isKvpVertex and isUnique:
+		# 	selectStr += tvAlias+"."+tvDataLoc+" as "+targetVertexName
+		# elif isKvpVertex and not isUnique:
+		# 	selectStr += ", "+tvAlias+"."+tvDataLoc+" as "+targetVertexName
+		# elif not isKvpVertex and not isUnique and isDefaultDataLoc:
+		# 	selectStr += ", " + ",".join([tvAlias+"."+col.strip() for col in tvDataLoc.split(',')])
+		# 	if verbose:
+		# 		print ("@isDefaultDataLoc and not unique: %s" % selectStr)
+		# elif not isKvpVertex and isUnique and isDefaultDataLoc:
+		# 	selectStr += ",".join([tvAlias+"."+col.strip() for col in tvDataLoc.split(',')])
+		# 	print ("@isDefaultDataLoc and unique: %s" % selectStr)
+		# else:
+		# 	for col in tvDataLoc:
+		# 		if verbose:
+		# 			print ("Adding column %s to selectStr." % col)
+		# 		selectStr += ", "+tvAlias+"."+col
 		#TODO: Handle case when data_loc is used instead (prepend with alias)
 
 		#--------------------------------------
 		# Case when this is an entry vertex - build the from and where clause strings
 		#--------------------------------------
+		#>>>>>YOU ARE HERE!!!!!!
 		if tvIsEntry and subGraphPath == "":
 			fromStr += " "+tvTableName+" as "+tvAlias
 			if verbose:
@@ -540,6 +546,34 @@ def exitWithException(eCode, gqlMgr):
 		print (e1.message)
 		traceback.print_exc()
 		sys.exit(eCode)
+
+def buildSelectString(isUnique, isKvpVertex, isDefaultDataLoc, verbose, tvAlias, tvTableName, tvDataLoc, tvName):
+	#----------------------------
+	# Building the select string
+	#----------------------------
+	selectStr = "select "
+	if isUnique:
+			selectStr += "distinct "
+	else:
+		selectStr += tvAlias+"."+tvTableName+"_id as id"
+
+	if isKvpVertex and isUnique:
+		selectStr += tvAlias+"."+tvDataLoc+" as "+tvName
+	elif isKvpVertex and not isUnique:
+		selectStr += ", "+tvAlias+"."+tvDataLoc+" as "+tvName
+	elif not isKvpVertex and not isUnique and isDefaultDataLoc:
+		selectStr += ", " + ",".join([tvAlias+"."+col.strip() for col in tvDataLoc.split(',')])
+		if verbose:
+			print ("@isDefaultDataLoc and not unique: %s" % selectStr)
+	elif not isKvpVertex and isUnique and isDefaultDataLoc:
+		selectStr += ",".join([tvAlias+"."+col.strip() for col in tvDataLoc.split(',')])
+		print ("@isDefaultDataLoc and unique: %s" % selectStr)
+	else:
+		for col in tvDataLoc:
+			if verbose:
+				print ("Adding column %s to selectStr." % col)
+			selectStr += ", "+tvAlias+"."+col
+	return selectStr
 
 
 if __name__ == "__main__":
