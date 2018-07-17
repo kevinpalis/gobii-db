@@ -232,6 +232,7 @@ def main(argv):
 			#----
 			#create a dictionary of allPaths = {vertexId:FilteredPath(vertexName, userFilters, pathToTarget[])}
 			try:
+				subDynamicQuery = ""
 				subGraphPathJson = json.loads(subGraphPath)
 				path = []
 				totalVertices = len(subGraphPathJson)
@@ -240,6 +241,9 @@ def main(argv):
 				if debug:
 					print ("subGraphPathJson: %s" % subGraphPathJson)
 				for vertexName, vertexFilter in subGraphPathJson.iteritems():
+					selectStr = "select "
+					fromStr = "from"
+					conditionStr = "where"
 					if verbose:
 						print ("Building the dictionary entry for vertex %s with filter IDs %s" % (vertexName, vertexFilter))
 					currVertex = gqlMgr.getVertex(vertexName)
@@ -277,6 +281,7 @@ def main(argv):
 						allPaths[currVertex['vertex_id']] = FilteredPath(vertexName, vertexFilter, pathToTarget)
 
 					selectStr += buildSelectString(isUnique, isKvpVertex, isDefaultDataLoc, verbose, targetVertexInfo['alias'], targetVertexInfo['table_name'], tvDataLoc, targetVertexInfo['name'])
+					fromStr += buildFromString(allPaths)
 				if debug:
 					print ("allPaths: %s" % allPaths)
 				exit(1)  # TEMP
@@ -409,7 +414,7 @@ def main(argv):
 		#Case when this is NOT an entry vertex
 		#--------------------------------------
 		#>>>>>YOU ARE HERE!!!!!!
-		elif subGraphPath != "":
+		if subGraphPath != "":
 			if verbose:
 				print ("Building dynamic query for a vertex with a list of vertices to visit (subGraphPath).")
 				print ("dataloc: %s" % tvDataLoc)
@@ -643,6 +648,7 @@ def buildFromString(path):
 	#Case when the last vertex in the path, aka targetVertex, was tagged to reuse a table in the subpath
 	if tableReuseVj:
 		selectStr = selectStr.replace(tvAlias+".", vertexJ['alias']+".")
+	return fromStr
 
 
 if __name__ == "__main__":
