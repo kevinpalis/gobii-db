@@ -150,16 +150,16 @@ def main(argv):
 				print ("Exception occured while parsing vertexColumnsToFetch: %s" % e.message)
 				exitWithException(ReturnCodes.ERROR_PARSING_JSON, gqlMgr)
 
-		targetVertexInfo = gqlMgr.getVertex(targetVertexName)
+		targetVertex = gqlMgr.getVertex(targetVertexName)
 		if debug:
 			# print (vertexTypes)
-			print ("targetVertexInfo: %s" % targetVertexInfo)
-		tvAlias = targetVertexInfo['alias']
-		tvTableName = targetVertexInfo['table_name']
-		tvCriterion = targetVertexInfo['criterion']
-		tvType = targetVertexInfo['type_id']
-		tvId = targetVertexInfo['vertex_id']
-		tvIsEntry = targetVertexInfo['is_entry']
+			print ("targetVertex: %s" % targetVertex)
+		tvAlias = targetVertex['alias']
+		tvTableName = targetVertex['table_name']
+		tvCriterion = targetVertex['criterion']
+		tvType = targetVertex['type_id']
+		tvId = targetVertex['vertex_id']
+		tvIsEntry = targetVertex['is_entry']
 		# print ("tvType=%s, vertex_type.type_id=%s" % (type(tvType), type(vertexTypes['key_value_pair'])))
 		if tvType == vertexTypes['key_value_pair']:
 			isKvpVertex = True
@@ -167,18 +167,18 @@ def main(argv):
 			# for KVP vertices, we ignore the vertexColumnsToFetch parameter
 			if verbose:
 				print ("Since this is a KVP vertex, vertexColumnsToFetch parameter will be ignored.")
-			tvDataLoc = targetVertexInfo['data_loc']
+			tvDataLoc = targetVertex['data_loc']
 		else:
 			if isDefaultDataLoc:
 				# parameter vertexColumnsToFetch wasn't set, defaulting to vertex.data_loc
-				tvDataLoc = targetVertexInfo['data_loc']
+				tvDataLoc = targetVertex['data_loc']
 			else:
 				tvDataLoc = vertexColumnsToFetchJson
 
 		#Validate the target vertex
 		if not tvIsEntry and subGraphPath == "":
 			if verbose:
-				print ("The target vertex is not an entry vertex, so a subgraph is required.")
+				print ("The target vertex is not an entry vertex, hence a subgraph (-g) is required.")
 			exitWithException(ReturnCodes.NOT_ENTRY_VERTEX, gqlMgr)
 
 		#Do the Dew
@@ -186,12 +186,16 @@ def main(argv):
 		fromStr = "from"
 		conditionStr = "where"
 		dynamicQuery = ""
+		#----------------------------------------
+		# CASE: ENTRY VERTEX - No subgraph given
+		#----------------------------------------
 		if subGraphPath == "" and tvIsEntry:
 			if verbose:
 				print ("No vertices to visit. Proceeding as an entry vertex call.")
-				print ("dataloc: %s" % tvDataLoc)
-			selectStr += buildSelectString(isUnique, isKvpVertex, isDefaultDataLoc, targetVertexInfo['alias'], targetVertexInfo['table_name'], tvDataLoc, targetVertexInfo['name'], verbose, debug)
+				# print ("dataloc: %s" % tvDataLoc)
+			selectStr += buildSelectString(isUnique, isKvpVertex, isDefaultDataLoc, targetVertex['alias'], targetVertex['table_name'], tvDataLoc, targetVertex['name'], verbose, debug)
 			fromStr += " "+tvTableName+" as "+tvAlias
+			# If there is a target vertex criterion, add it to the dynamic query, otherwise, end the sql on the from-clause.
 			if tvCriterion is not None:
 				conditionStr += " "+tvCriterion
 				dynamicQuery = selectStr+" "+fromStr+" "+conditionStr
@@ -203,31 +207,11 @@ def main(argv):
 				if verbose:
 					print ("Limit is set to %s." % limit)
 				dynamicQuery += " limit "+limit
+		#--------------------------------------------------------------------------------------------------------
+		# CASE: WITH SUBGRAPH - FOR ALL V IN SUBGRAPH, COMPUTE THE PATH, THEN BUILD THE DYNAMIC NESTED SQL
+		# MAIN DATA STRUCT: allPaths = {vertexId:FilteredPath(vertexName, userFilters, pathToTarget[Vertex()])}
+		#--------------------------------------------------------------------------------------------------------
 		else:
-			#create a dictionary of vertexID:FilteredVertex(vertexName,filters)
-			'''try:
-				subGraphPathJson = json.loads(subGraphPath)
-				print ("subGraphPathJson: %s" % subGraphPathJson)
-				for key, value in subGraphPathJson.iteritems():
-					if verbose:
-						print ("Building the dictionary entry for vertex %s with filter IDs %s" % (key, value))
-					currVertex = gqlMgr.getVertex(key)
-					#vertices[currVertex['vertex_id']] = FilteredVertex(key, value)
-					if currVertex['type_id'] == vertexTypes['key_value_pair']:
-						#get the kvp vertex's parent vertex (as all kvp vertices are property entities)
-						parentVertex = gqlMgr.getVertex(currVertex['table_name'])
-						vertices[parentVertex['vertex_id']] = FilteredVertex(currVertex['table_name'], '')
-						if debug:
-							print ("Added the parent vertex '%s' for the kvp vertex '%s'." % (parentVertex['name'], currVertex['name']))
-					else:
-						vertices[currVertex['vertex_id']] = FilteredVertex(key, value)
-					# for filterId in value:
-					# 	print ("Filtering by ID=%d" % filterId)
-				if debug:
-					print ("Vertices: %s" % vertices)
-			except Exception as e:
-				print ("Exception occured while parsing subGraphPath: %s" % e.message)
-				exitWithException(ReturnCodes.ERROR_PARSING_JSON, gqlMgr) '''
 			#----
 			#create a dictionary of allPaths = {vertexId:FilteredPath(vertexName, userFilters, pathToTarget[])}
 			try:
@@ -282,7 +266,7 @@ def main(argv):
 							exitWithException(ReturnCodes.NO_PATH_FOUND, gqlMgr)
 						allPaths[currVertex['vertex_id']] = FilteredPath(vertexName, vertexFilter, pathToTarget)
 
-					selectStr = buildSelectString(isUnique, isKvpVertex, isDefaultDataLoc, targetVertexInfo['alias'], targetVertexInfo['table_name'], tvDataLoc, targetVertexInfo['name'], verbose, debug)
+					selectStr = buildSelectString(isUnique, isKvpVertex, isDefaultDataLoc, targetVertex['alias'], targetVertex['table_name'], tvDataLoc, targetVertex['name'], verbose, debug)
 					fromStr, selectStr, tableDict = buildFromString(gqlMgr, pathToTarget, selectStr, tvAlias, verbose, debug)
 					conditionStr = buildConditionString(gqlMgr, pathToTarget, tableDict, vertexFilter, currVertex, verbose, debug)
 					subDynamicQuery = selectStr+" "+fromStr+" "+conditionStr
