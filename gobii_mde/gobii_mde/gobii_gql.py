@@ -72,7 +72,6 @@ def main(argv):
 		vertexColumnsToFetch = ""
 		limit = ""
 		vertexTypes = {}
-		tableDict = {}
 		vertices = OrderedDict()
 		exitCode = ReturnCodes.SUCCESS
 		FilteredVertex = namedtuple('FilteredVertex', 'name filter')  # TODO: Get rid of this once the new datastruct is in place
@@ -191,7 +190,7 @@ def main(argv):
 			if verbose:
 				print ("No vertices to visit. Proceeding as an entry vertex call.")
 				print ("dataloc: %s" % tvDataLoc)
-			selectStr += buildSelectString(isUnique, isKvpVertex, isDefaultDataLoc, verbose, targetVertexInfo['alias'], targetVertexInfo['table_name'], tvDataLoc, targetVertexInfo['name'])
+			selectStr += buildSelectString(isUnique, isKvpVertex, isDefaultDataLoc, targetVertexInfo['alias'], targetVertexInfo['table_name'], tvDataLoc, targetVertexInfo['name'], verbose, debug)
 			fromStr += " "+tvTableName+" as "+tvAlias
 			if tvCriterion is not None:
 				conditionStr += " "+tvCriterion
@@ -232,18 +231,21 @@ def main(argv):
 			#----
 			#create a dictionary of allPaths = {vertexId:FilteredPath(vertexName, userFilters, pathToTarget[])}
 			try:
-				subDynamicQuery = ""
+				subDynamicQueries = []
 				subGraphPathJson = json.loads(subGraphPath)
 				path = []
 				totalVertices = len(subGraphPathJson)
-				pathStr = ""
 				print ("totalVertices: %s" % totalVertices)
 				if debug:
 					print ("subGraphPathJson: %s" % subGraphPathJson)
+				#----------------------
+				# SUBGRAPH LOOP START
+				#----------------------
 				for vertexName, vertexFilter in subGraphPathJson.iteritems():
-					selectStr = "select "
-					fromStr = "from"
-					conditionStr = "where"
+					# selectStr = "select "
+					# fromStr = "from"
+					# conditionStr = "where"
+					pathStr = ""
 					if verbose:
 						print ("Building the dictionary entry for vertex %s with filter IDs %s" % (vertexName, vertexFilter))
 					currVertex = gqlMgr.getVertex(vertexName)
@@ -258,7 +260,7 @@ def main(argv):
 							pathToTarget = [gqlMgr.getVertexById(col.strip()) for col in filter(None, pathStr.split('.'))]
 							#remove duplicated adjacent entries
 							# pathToTarget = [k for k, g in itertools.groupby(tempPath)]
-							print ("\npathStr=%s / pathToTarget=%s" % (pathStr, pathToTarget))
+							print (" pathStr=%s\n pathToTarget=%s" % (pathStr, pathToTarget))
 						except Exception as e:
 							print ("ERROR: No path found from vertex %s to %s. Message: %s" % (parentVertex['vertex_id'], tvId, e.message))
 							exitWithException(ReturnCodes.NO_PATH_FOUND, gqlMgr)
@@ -274,19 +276,25 @@ def main(argv):
 							pathToTarget = [gqlMgr.getVertexById(col.strip()) for col in filter(None, pathStr.split('.'))]
 							#remove duplicated adjacent entries
 							# pathToTarget = [k for k, g in itertools.groupby(tempPath)]
-							print ("\npathStr=%s / pathToTarget=%s" % (pathStr, pathToTarget))
+							print (" pathStr=%s\n pathToTarget=%s" % (pathStr, pathToTarget))
 						except Exception as e:
 							print ("ERROR: No path found from vertex %s to %s. Message: %s" % (currVertex['vertex_id'], tvId, e.message))
 							exitWithException(ReturnCodes.NO_PATH_FOUND, gqlMgr)
 						allPaths[currVertex['vertex_id']] = FilteredPath(vertexName, vertexFilter, pathToTarget)
 
-					selectStr += buildSelectString(isUnique, isKvpVertex, isDefaultDataLoc, verbose, targetVertexInfo['alias'], targetVertexInfo['table_name'], tvDataLoc, targetVertexInfo['name'])
-					fromStr += buildFromString(allPaths)
+					selectStr = buildSelectString(isUnique, isKvpVertex, isDefaultDataLoc, targetVertexInfo['alias'], targetVertexInfo['table_name'], tvDataLoc, targetVertexInfo['name'], verbose, debug)
+					fromStr, selectStr, tableDict = buildFromString(gqlMgr, pathToTarget, selectStr, tvAlias, verbose, debug)
+					conditionStr = buildConditionString(gqlMgr, pathToTarget, tableDict, vertexFilter, currVertex, verbose, debug)
+					subDynamicQuery = selectStr+" "+fromStr+" "+conditionStr
+					if debug:
+						print ("\nsubDynamicQuery:\n %s\n" % subDynamicQuery)
+					subDynamicQueries.append(subDynamicQuery)
 				if debug:
 					print ("allPaths: %s" % allPaths)
 				exit(1)  # TEMP
 			except Exception as e:
 				print ("Exception occured while parsing subGraphPath and creating allPaths: %s" % e.message)
+				traceback.print_exc()
 				exitWithException(ReturnCodes.ERROR_PARSING_JSON, gqlMgr)
 
 		####################################################
@@ -413,7 +421,6 @@ def main(argv):
 		#--------------------------------------
 		#Case when this is NOT an entry vertex
 		#--------------------------------------
-		#>>>>>YOU ARE HERE!!!!!!
 		if subGraphPath != "":
 			if verbose:
 				print ("Building dynamic query for a vertex with a list of vertices to visit (subGraphPath).")
@@ -565,7 +572,7 @@ def exitWithException(eCode, gqlMgr):
 		traceback.print_exc()
 		sys.exit(eCode)
 
-def buildSelectString(isUnique, isKvpVertex, isDefaultDataLoc, verbose, tvAlias, tvTableName, tvDataLoc, tvName):
+def buildSelectString(isUnique, isKvpVertex, isDefaultDataLoc, tvAlias, tvTableName, tvDataLoc, tvName, verbose, debug):
 	#----------------------------
 	# Building the select string
 	#----------------------------
@@ -589,66 +596,107 @@ def buildSelectString(isUnique, isKvpVertex, isDefaultDataLoc, verbose, tvAlias,
 	else:
 		for col in tvDataLoc:
 			if verbose:
-				print ("Adding column %s to selectStr." % col)
+				print ("Adding column '%s' to selectStr." % col)
 			selectStr += ", "+tvAlias+"."+col
 	return selectStr
 
-def buildFromString(path):
+def buildFromString(gqlMgr, path, selectStr, tvAlias, verbose, debug):
 	#iterate through the path
 	totalVerticesInPath = len(path)
+	tableDict = {}
+	fromStr = "from"
+	tableReuseVi = False
+	tableReuseVj = False
 	print ("totalVerticesInPath: %s" % totalVerticesInPath)
+	# print ("\nPATH: %s\n" % path)
 	#----------------------------
 	# Building the from clause string
 	#----------------------------
 	for i, j in zip(range(0, totalVerticesInPath), range(1, totalVerticesInPath)):
 		print ("i: %d, j: %d" % (i, j))
-		print ("path[%d]: %s" % (i, path[i]))
-		print ("path[%d]: %s" % (j, path[j]))
-		edge = gqlMgr.getEdge(path[i], path[j])
+		print ("path[%d]['name']: %s" % (i, path[i]['name']))
+		print ("path[%d]['name']: %s" % (j, path[j]['name']))
+		edge = gqlMgr.getEdge(path[i]['vertex_id'], path[j]['vertex_id'])
 		print ("Current edge: %s" % edge)
-		vertexI = gqlMgr.getVertexById(path[i])
-		vertexJ = gqlMgr.getVertexById(path[j])
-		print ("vertices in edge: %s ||| %s" % (vertexI, vertexJ))
+
+		# print ("vertices in edge:\n %s \n %s" % (path[i], path[j]))
 		#BUILD THE TABLE NAMES DICTIONARY (unique list of table names that allows reuse - hence, save query time by avoiding joins)
-		#for vertexI
+		#for path[i]
 		tableReuseVi = False
 		tableReuseVj = False
-		if vertexI['table_name'] in tableDict:
-			vertexI['alias'] = tableDict[vertexI['table_name']]
+		if path[i]['table_name'] in tableDict:
+			path[i]['alias'] = tableDict[path[i]['table_name']]
 			tableReuseVi = True
 		else:
-			tableDict[vertexI['table_name']] = vertexI['alias']
-		#for vertexJ
-		if vertexJ['table_name'] in tableDict:
-			vertexJ['alias'] = tableDict[vertexJ['table_name']]
+			tableDict[path[i]['table_name']] = path[i]['alias']
+		#for path[j]
+		if path[j]['table_name'] in tableDict:
+			path[j]['alias'] = tableDict[path[j]['table_name']]
 			tableReuseVj = True
 		else:
-			tableDict[vertexJ['table_name']] = vertexJ['alias']
+			tableDict[path[j]['table_name']] = path[j]['alias']
 		if debug:
 			print ("tableDict: %s" % tableDict)
 		if i == 0:
-			fromStr += " "+vertexI['table_name']+" as "+vertexI['alias']
+			fromStr += " "+path[i]['table_name']+" as "+path[i]['alias']
 		if not tableReuseVj:
-			fromStr += " inner join "+vertexJ['table_name']+" as "+vertexJ['alias']
+			fromStr += " inner join "+path[j]['table_name']+" as "+path[j]['alias']
 			qualifiedCriterion = ""
 			if edge['criterion'] is not None:
 				if '=' in edge['criterion']:
 					#todo: error checks
 					critList = edge['criterion'].split('=')
-					critList[0] = vertexI['alias']+"."+critList[0]
-					critList[1] = vertexJ['alias']+"."+critList[1]
+					critList[0] = path[i]['alias']+"."+critList[0]
+					critList[1] = path[j]['alias']+"."+critList[1]
 					qualifiedCriterion = "=".join(critList)
 				elif '?' in edge['criterion']:
 					critList = edge['criterion'].split('?')
-					critList[0] = vertexJ['alias']+"."+critList[0]
-					critList[1] = vertexI['alias']+"."+critList[1]
+					critList[0] = path[j]['alias']+"."+critList[0]
+					critList[1] = path[i]['alias']+"."+critList[1]
 					qualifiedCriterion = "?".join(critList)
-			#handle: criterion==null
+			#todo: handle: criterion==null
 			fromStr += " on "+qualifiedCriterion
 	#Case when the last vertex in the path, aka targetVertex, was tagged to reuse a table in the subpath
 	if tableReuseVj:
-		selectStr = selectStr.replace(tvAlias+".", vertexJ['alias']+".")
-	return fromStr
+		selectStr = selectStr.replace(tvAlias+".", path[j]['alias']+".")
+	return fromStr, selectStr, tableDict
+
+def buildConditionString(gqlMgr, path, tableDict, vertexFilter, currVertex, verbose, debug):
+	#----------------------------
+	# Building the where clause string
+	#----------------------------
+	conditionStr = "where"
+	i = 0
+	for v in path:
+		print ("Processing condition for vertex %s" % v)
+		if v['criterion'] is not None:
+			# unfortunately, with the current seed data, this vertex needs to be treated differently
+			if v['name'] != 'principal_investigator':
+				#if the current vertex was tagged as tableReuse earlier
+				if v['table_name'] in tableDict:
+					v['alias'] = tableDict[v['table_name']]
+				v['criterion'] = v['alias'] + "." + v['criterion']
+			if i == 0:
+				#TODO: Append alias wherever needed
+				conditionStr += " "+v['criterion']
+				i += 1
+			else:
+				conditionStr += " and "+v['criterion']
+				i += 1
+	#>>>>>YOU ARE HERE!!!!!!
+	# for key, value in vertices.items():
+	print ("Adding where clause entry for filtered vertex, filter = %s" % (vertexFilter))
+
+	if currVertex['table_name'] in tableDict:
+		currVertex['alias'] = tableDict[currVertex['table_name']]
+	idCol = currVertex['alias'] + "." + currVertex['table_name'] + "_id"
+	if i == 0:
+		conditionStr += " " + idCol + " in (" + ",".join(map(str, vertexFilter)) + ")"
+		i += 1
+	else:
+		conditionStr += " and " + idCol + " in (" + ",".join(map(str, vertexFilter)) + ")"
+		i += 1
+	return conditionStr
 
 
 if __name__ == "__main__":
