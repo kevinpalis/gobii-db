@@ -276,6 +276,28 @@ def main(argv):
 					subDynamicQueries.append(subDynamicQuery)
 				# if debug:
 					# print ("allPaths: %s" % allPaths)
+				print ("\nsubDynamicQueries: %s" % subDynamicQueries)
+				f = 1
+				dynamicQuery = "with"
+				selectStr = "select f1.*"
+				fromStr = "from"
+				conditionStr = "where"
+				for q in subDynamicQueries:
+					# CTE part of the query
+					if f == 1:
+						dynamicQuery += " f" + str(f) + " as (" + q + ")"
+						fromStr += " f" + str(f)
+					else:
+						dynamicQuery += ", f" + str(f) + " as (" + q + ")"
+						if isUnique:
+							#case: property field or -u flag set or a kvp
+							fromStr += " inner join f" + str(f) + " on f" + str(f-1) + "." + targetVertex['name'] + "=f" + str(f) + "." + targetVertex['name']
+						else:
+							fromStr += " inner join f" + str(f) + " on f" + str(f-1) + ".id=f" + str(f) + ".id"
+					f += 1
+				dynamicQuery += " " + selectStr + " " + fromStr
+				if verbose:
+					print ("Dynamic Query: \n %s" % dynamicQuery)
 				exit(1)  # TEMP
 			except Exception as e:
 				print ("Exception occured while parsing subGraphPath and creating allPaths: %s" % e.message)
