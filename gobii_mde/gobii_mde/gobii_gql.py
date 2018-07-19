@@ -9,22 +9,12 @@
 		1. Extraction by Markers
 		2. Extraction by Samples
 		3. Extraction by Markers AND Samples
+	Relevance column:
+		1 = Marker
+		2 = Dnarun
+		3 = Both
 
 	Exit Codes:TBD
-
-
-	With Subgraphs/Vertices-to-visit:
-	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /Users/KevinPalis/temp/filter2.out -g '{"principal_investigator":[67,69,70]}' -t project -f '["name"]' -v -d
-	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /Users/KevinPalis/temp/filter3.out -g '{"principal_investigator":[67,69,70], "project":[3,25,30]}' -t division -v -d
-	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /Users/KevinPalis/temp/filter3.out -g '{"principal_investigator":[67,69,70], "project":[3,25,30]}' -t experiment -f '["name"]' -v
-	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /Users/KevinPalis/temp/filter4.out -g '{"principal_investigator":[67,69,70], "project":[3,25,30], "division":[25,30]}' -t experiment -f '["name"]' -v -d
-	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /Users/KevinPalis/temp/filter3.out -g '{"principal_investigator":[67,69,70], "project":[3,25,30]}' -t dataset -v -d
-	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /Users/KevinPalis/temp/filter3.out -g '{"principal_investigator":[67,69,70], "project":[3,25,30], "dataset":[1,2,3,4,5]}' -t marker -v -d
-
-
-	VALID SYNTAX FOR PROP FIELDS FETCHING:
-	select * from project p
-	where props@>('{"'||getCvId('division', 'project_prop', 1)::text||'":"Sim_division"}')::jsonb;
 
 	Data Structure to store all computed paths and filters:
 	allPaths = {vertexId:(vertexName, userFilters, pathToTarget[])}
@@ -42,6 +32,7 @@ from db.graph_query_manager import GraphQueryManager
 from collections import namedtuple
 
 def main(argv):
+		goalVertices = ['marker', 'dnarun']
 		verbose = False
 		debug = False
 		isKvpVertex = False
@@ -276,6 +267,8 @@ def main(argv):
 				selectStr = "select f1.*"
 				fromStr = "from"
 				conditionStr = "where"
+				if targetVertexName in goalVertices:
+					selectStr = "select distinct f1.*"
 				for q in subDynamicQueries:
 					# CTE part of the query
 					if f == 1:
@@ -292,7 +285,7 @@ def main(argv):
 				dynamicQuery += " " + selectStr + " " + fromStr
 				if verbose:
 					print ("Dynamic Query: \n %s" % dynamicQuery)
-				exit(1)  # TEMP
+				# exit(1)  # TEMP
 			except Exception as e:
 				print ("Exception occured while parsing subGraphPath and creating allPaths: %s" % e.message)
 				traceback.print_exc()
