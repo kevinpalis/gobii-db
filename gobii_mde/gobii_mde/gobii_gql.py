@@ -40,6 +40,9 @@
 	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /Users/KevinPalis/temp/filter3.out -g '{"principal_investigator":[67,69,70], "project":[3,25,30]}' -t dataset -v -d
 	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /Users/KevinPalis/temp/filter3.out -g '{"principal_investigator":[67,69,70], "project":[3,25,30], "dataset":[1,2,3,4,5]}' -t marker -v -d
 
+	* Props/KVP vertices in path
+	> python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /Users/KevinPalis/temp/filter4.out -g '{"principal_investigator":[19,3,4], "project":[1,10,20], "division":["cornell"]}' -t experiment -f '["name"]' -v -d
+
 	VALID SYNTAX FOR PROP FIELDS FETCHING:
 	select * from project p
 	where props@>('{"'||getCvId('division', 'project_prop', 1)::text||'":"Sim_division"}')::jsonb;
@@ -229,23 +232,30 @@ def main(argv):
 					# fromStr = "from"
 					# conditionStr = "where"
 					pathStr = ""
+					propConditions = []
+					currVertexIsKvp = False
 					if verbose:
 						print ("Building the dictionary entry for vertex %s with filter IDs %s" % (vertexName, vertexFilter))
 					currVertex = gqlMgr.getVertex(vertexName)
 					if currVertex['type_id'] == vertexTypes['key_value_pair']:
 						#get the kvp vertex's parent vertex (as all kvp vertices are property entities)
 						parentVertex = gqlMgr.getVertex(currVertex['table_name'])
+						currVertexIsKvp = True
 						# vertices[parentVertex['vertex_id']] = FilteredVertex(currVertex['table_name'], '')
 						#pathToTarget = [parentVertex['vertex_id']]  # TODO: Check if computing for the path to target in here is doable
 						try:
 							pathStr += gqlMgr.getPath(parentVertex['vertex_id'], tvId)['path_string']
 							#parse the path string to an iterable object, removing empty strings
 							pathToTarget = [gqlMgr.getVertexById(col.strip()) for col in filter(None, pathStr.split('.'))]
-							#remove duplicated adjacent entries
-							# pathToTarget = [k for k, g in itertools.groupby(tempPath)]
+							#for KVPs, add a special jsonb where clause for each filter
+							#as of postgres 9.5, there is no "in" construct for jsonb columns of kvp format
+							for fil in vertexFilter:
+								propConditionStr = buildPropConditionString(gqlMgr, currVertex['name'], currVertex['table_name']+"_prop", fil, parentVertex['alias'], verbose, debug)
+								propConditions.append(propConditionStr)
 							if debug:
 								print (" pathStr=%s\n pathToTarget=%s" % (pathStr, pathToTarget))
 						except Exception as e:
+							traceback.print_exc()
 							print ("ERROR: No path found from vertex %s to %s. Message: %s" % (parentVertex['vertex_id'], tvId, e.message))
 							exitWithException(ReturnCodes.NO_PATH_FOUND, gqlMgr)
 						allPaths[currVertex['vertex_id']] = FilteredPath(vertexName, vertexFilter, pathToTarget)
@@ -269,7 +279,12 @@ def main(argv):
 
 					selectStr = buildSelectString(isUnique, isKvpVertex, isDefaultDataLoc, targetVertex['alias'], targetVertex['table_name'], tvDataLoc, targetVertex['name'], verbose, debug)
 					fromStr, selectStr, tableDict = buildFromString(gqlMgr, pathToTarget, selectStr, tvAlias, verbose, debug)
-					conditionStr = buildConditionString(gqlMgr, pathToTarget, tableDict, vertexFilter, currVertex, verbose, debug)
+					conditionStr = buildConditionString(gqlMgr, pathToTarget, tableDict, vertexFilter, currVertex, verbose, debug, currVertexIsKvp)
+					for propCond in propConditions:
+						if conditionStr == "where":
+							conditionStr += " "+propCond
+						else:
+							conditionStr += " and "+propCond
 					subDynamicQuery = selectStr+" "+fromStr+" "+conditionStr
 					if debug:
 						print ("\nsubDynamicQuery:\n %s\n" % subDynamicQuery)
@@ -670,7 +685,7 @@ def buildFromString(gqlMgr, path, selectStr, tvAlias, verbose, debug):
 		selectStr = selectStr.replace(tvAlias+".", path[j]['alias']+".")
 	return fromStr, selectStr, tableDict
 
-def buildConditionString(gqlMgr, path, tableDict, vertexFilter, currVertex, verbose, debug):
+def buildConditionString(gqlMgr, path, tableDict, vertexFilter, currVertex, verbose, debug, currVertexIsKvp):
 	#----------------------------
 	# Building the where clause string
 	#----------------------------
@@ -694,17 +709,26 @@ def buildConditionString(gqlMgr, path, tableDict, vertexFilter, currVertex, verb
 				i += 1
 	if debug:
 		print ("Adding where clause entry for filtered vertex, filter = %s" % (vertexFilter))
-
-	if currVertex['table_name'] in tableDict:
-		currVertex['alias'] = tableDict[currVertex['table_name']]
-	idCol = currVertex['alias'] + "." + currVertex['table_name'] + "_id"
-	if i == 0:
-		conditionStr += " " + idCol + " in (" + ",".join(map(str, vertexFilter)) + ")"
-		i += 1
-	else:
-		conditionStr += " and " + idCol + " in (" + ",".join(map(str, vertexFilter)) + ")"
-		i += 1
+	if not currVertexIsKvp:
+		if currVertex['table_name'] in tableDict:
+			currVertex['alias'] = tableDict[currVertex['table_name']]
+		idCol = currVertex['alias'] + "." + currVertex['table_name'] + "_id"
+		if i == 0:
+			conditionStr += " " + idCol + " in (" + ",".join(map(str, vertexFilter)) + ")"
+			i += 1
+		else:
+			conditionStr += " and " + idCol + " in (" + ",".join(map(str, vertexFilter)) + ")"
+			i += 1
 	return conditionStr
+
+# VALID SYNTAX FOR PROP FIELDS FETCHING:
+# 	select * from project p
+# 	where p.props@>('{"'||getCvId('division', 'project_prop', 1)::text||'":"Sim_division"}')::jsonb;
+def buildPropConditionString(gqlMgr, propName, propGroup, propValue, tableAlias, verbose, debug):
+	print ("propval: %s" % propValue)
+	propConditionStr = tableAlias+"."+"props @> ('{\"'||getCvId('"
+	propConditionStr += propName+"', '"+propGroup+"', 1)::text||'\":\""+propValue+"\"}')::jsonb"
+	return propConditionStr
 
 
 if __name__ == "__main__":
