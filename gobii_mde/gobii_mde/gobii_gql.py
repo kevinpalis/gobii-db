@@ -231,6 +231,31 @@ def main(argv):
 						allPaths[currVertex['vertex_id']] = FilteredPath(vertexName, vertexFilter, pathToTarget)
 						if debug:
 							print ("Added the parent vertex '%s' for the kvp vertex '%s'." % (parentVertex['name'], currVertex['name']))
+					elif currVertex['type_id'] == vertexTypes['cv_subset']:
+						#get the cv_subset vertex's parent vertex (as all cv_subset vertices don't link to anything but their parent)
+						temp = currVertex['name'].split('_')[0]
+						print ("Parent vertex name: %s" % temp)
+						parentVertex = gqlMgr.getVertex(currVertex['name'].split('_')[0])
+						currVertexIsCvSubset = True
+						# >>>> YOU ARE HERE!
+						try:
+							pathStr += gqlMgr.getPath(parentVertex['vertex_id'], tvId)['path_string']
+							#parse the path string to an iterable object, removing empty strings
+							pathToTarget = [gqlMgr.getVertexById(col.strip()) for col in filter(None, pathStr.split('.'))]
+							#for KVPs, add a special jsonb where clause for each filter
+							#as of postgres 9.5, there is no "in" construct for jsonb columns of kvp format
+							for fil in vertexFilter:
+								propConditionStr = buildPropConditionString(gqlMgr, currVertex['name'], currVertex['table_name']+"_prop", fil, parentVertex['alias'], verbose, debug)
+								propConditions.append(propConditionStr)
+							if debug:
+								print (" pathStr=%s\n pathToTarget=%s" % (pathStr, pathToTarget))
+						except Exception as e:
+							traceback.print_exc()
+							print ("ERROR: No path found from vertex %s to %s. Message: %s" % (parentVertex['vertex_id'], tvId, e.message))
+							exitWithException(ReturnCodes.NO_PATH_FOUND, gqlMgr)
+						allPaths[currVertex['vertex_id']] = FilteredPath(vertexName, vertexFilter, pathToTarget)
+						if debug:
+							print ("Added the parent vertex '%s' for the kvp vertex '%s'." % (parentVertex['name'], currVertex['name']))
 					else:
 						# vertices[currVertex['vertex_id']] = FilteredVertex(key, value)
 						# pathToTarget = [currVertex['vertex_id']]  # TODO: Check if computing for the path to target in here is doable
@@ -243,6 +268,7 @@ def main(argv):
 							if debug:
 								print (" pathStr=%s\n pathToTarget=%s" % (pathStr, pathToTarget))
 						except Exception as e:
+							traceback.print_exc()
 							print ("ERROR: No path found from vertex %s to %s. Message: %s" % (currVertex['vertex_id'], tvId, e.message))
 							exitWithException(ReturnCodes.NO_PATH_FOUND, gqlMgr)
 						allPaths[currVertex['vertex_id']] = FilteredPath(vertexName, vertexFilter, pathToTarget)
