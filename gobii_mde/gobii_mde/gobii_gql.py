@@ -231,36 +231,41 @@ def main(argv):
 						allPaths[currVertex['vertex_id']] = FilteredPath(vertexName, vertexFilter, pathToTarget)
 						if debug:
 							print ("Added the parent vertex '%s' for the kvp vertex '%s'." % (parentVertex['name'], currVertex['name']))
-					elif currVertex['type_id'] == vertexTypes['cv_subset']:
-						#get the cv_subset vertex's parent vertex (as all cv_subset vertices don't link to anything but their parent)
-						temp = currVertex['name'].split('_')[0]
-						print ("Parent vertex name: %s" % temp)
-						parentVertex = gqlMgr.getVertex(currVertex['name'].split('_')[0])
-						currVertexIsCvSubset = True
-						# >>>> YOU ARE HERE!
-						try:
-							pathStr += gqlMgr.getPath(parentVertex['vertex_id'], tvId)['path_string']
-							#parse the path string to an iterable object, removing empty strings
-							pathToTarget = [gqlMgr.getVertexById(col.strip()) for col in filter(None, pathStr.split('.'))]
-							#for KVPs, add a special jsonb where clause for each filter
-							#as of postgres 9.5, there is no "in" construct for jsonb columns of kvp format
-							for fil in vertexFilter:
-								propConditionStr = buildPropConditionString(gqlMgr, currVertex['name'], currVertex['table_name']+"_prop", fil, parentVertex['alias'], verbose, debug)
-								propConditions.append(propConditionStr)
-							if debug:
-								print (" pathStr=%s\n pathToTarget=%s" % (pathStr, pathToTarget))
-						except Exception as e:
-							traceback.print_exc()
-							print ("ERROR: No path found from vertex %s to %s. Message: %s" % (parentVertex['vertex_id'], tvId, e.message))
-							exitWithException(ReturnCodes.NO_PATH_FOUND, gqlMgr)
-						allPaths[currVertex['vertex_id']] = FilteredPath(vertexName, vertexFilter, pathToTarget)
-						if debug:
-							print ("Added the parent vertex '%s' for the kvp vertex '%s'." % (parentVertex['name'], currVertex['name']))
+					# elif currVertex['type_id'] == vertexTypes['cv_subset']:
+					# 	#get the cv_subset vertex's parent vertex (as all cv_subset vertices don't link to anything but their parent)
+					# 	temp = currVertex['name'].split('_')[0]
+					# 	print ("Parent vertex name: %s" % temp)
+					# 	parentVertex = gqlMgr.getVertex(currVertex['name'].split('_')[0])
+					# 	currVertexIsCvSubset = True
+					# 	# >>>> YOU ARE HERE!
+					# 	try:
+					# 		pathStr += gqlMgr.getPath(parentVertex['vertex_id'], tvId)['path_string']
+					# 		#parse the path string to an iterable object, removing empty strings
+					# 		pathToTarget = [gqlMgr.getVertexById(col.strip()) for col in filter(None, pathStr.split('.'))]
+					# 		#for KVPs, add a special jsonb where clause for each filter
+					# 		#as of postgres 9.5, there is no "in" construct for jsonb columns of kvp format
+					# 		for fil in vertexFilter:
+					# 			propConditionStr = buildPropConditionString(gqlMgr, currVertex['name'], currVertex['table_name']+"_prop", fil, parentVertex['alias'], verbose, debug)
+					# 			propConditions.append(propConditionStr)
+					# 		if debug:
+					# 			print (" pathStr=%s\n pathToTarget=%s" % (pathStr, pathToTarget))
+					# 	except Exception as e:
+					# 		traceback.print_exc()
+					# 		print ("ERROR: No path found from vertex %s to %s. Message: %s" % (parentVertex['vertex_id'], tvId, e.message))
+					# 		exitWithException(ReturnCodes.NO_PATH_FOUND, gqlMgr)
+					# 	allPaths[currVertex['vertex_id']] = FilteredPath(vertexName, vertexFilter, pathToTarget)
+					# 	if debug:
+					# 		print ("Added the parent vertex '%s' for the kvp vertex '%s'." % (parentVertex['name'], currVertex['name']))
 					else:
 						# vertices[currVertex['vertex_id']] = FilteredVertex(key, value)
 						# pathToTarget = [currVertex['vertex_id']]  # TODO: Check if computing for the path to target in here is doable
 						try:
-							pathStr += gqlMgr.getPath(currVertex['vertex_id'], tvId)['path_string']
+							p = gqlMgr.getPath(currVertex['vertex_id'], tvId)
+							if p is None:
+								if verbose:
+									print ("No path from vertex %s to %s. Skipping." % (currVertex['name'], targetVertexName))
+								continue
+							pathStr += p['path_string']
 							#parse the path string to an iterable object, removing empty strings
 							pathToTarget = [gqlMgr.getVertexById(col.strip()) for col in filter(None, pathStr.split('.'))]
 							#remove duplicated adjacent entries
@@ -295,22 +300,37 @@ def main(argv):
 				conditionStr = "where"
 				if targetVertexName in goalVertices:
 					selectStr = "select distinct f1.*"
-				for q in subDynamicQueries:
-					# CTE part of the query
-					if f == 1:
-						dynamicQuery += " f" + str(f) + " as (" + q + ")"
-						fromStr += " f" + str(f)
+				totalSubQ = len(subDynamicQueries)
+				if debug:
+					print ("Total dynamic sub-queries: %s" % totalSubQ)
+				if totalSubQ == 0:
+					if not tvIsEntry:
+						#throw an exception to avoid possibly very big queries (ie. all marker and all dnarun)
+						exitWithException(ReturnCodes.NO_FILTERS_APPLIED_TO_TARGET, gqlMgr)
 					else:
-						dynamicQuery += ", f" + str(f) + " as (" + q + ")"
-						if isUnique:
-							#case: property field or -u flag set or a kvp
-							fromStr += " inner join f" + str(f) + " on f" + str(f-1) + "." + targetVertex['name'] + "=f" + str(f) + "." + targetVertex['name']
+						dynamicQuery = buildDynamicQueryForEntryVertex(gqlMgr, verbose, debug, isUnique, isKvpVertex, isDefaultDataLoc, targetVertex, tvDataLoc, limit)
+				else:
+					for q in subDynamicQueries:
+						# CTE part of the query
+						if f == 1:
+							dynamicQuery += " f" + str(f) + " as (" + q + ")"
+							fromStr += " f" + str(f)
 						else:
-							fromStr += " inner join f" + str(f) + " on f" + str(f-1) + ".id=f" + str(f) + ".id"
-					f += 1
-				dynamicQuery += " " + selectStr + " " + fromStr
-				if verbose:
-					print ("Dynamic Query: \n %s" % dynamicQuery)
+							dynamicQuery += ", f" + str(f) + " as (" + q + ")"
+							if isUnique:
+								#case: property field or -u flag set or a kvp
+								fromStr += " inner join f" + str(f) + " on f" + str(f-1) + "." + targetVertex['name'] + "=f" + str(f) + "." + targetVertex['name']
+							else:
+								fromStr += " inner join f" + str(f) + " on f" + str(f-1) + ".id=f" + str(f) + ".id"
+						f += 1
+					dynamicQuery += " " + selectStr + " " + fromStr
+					#apply the limit if set
+					if limit.isdigit():
+						if verbose:
+							print ("Limit is set to %s." % limit)
+						dynamicQuery += " limit "+limit
+					if verbose:
+						print ("Dynamic Query: \n %s" % dynamicQuery)
 				# exit(1)  # TEMP
 			except Exception as e:
 				print ("Exception occured while parsing subGraphPath and creating allPaths: %s" % e.message)
@@ -505,6 +525,28 @@ def buildPropConditionString(gqlMgr, propName, propGroup, propValue, tableAlias,
 	propConditionStr = tableAlias+"."+"props @> ('{\"'||getCvId('"
 	propConditionStr += propName+"', '"+propGroup+"', 1)::text||'\":\""+propValue+"\"}')::jsonb"
 	return propConditionStr
+
+def buildDynamicQueryForEntryVertex(gqlMgr, verbose, debug, isUnique, isKvpVertex, isDefaultDataLoc, targetVertex, tvDataLoc, limit):
+	conditionStr = "where"
+	fromStr = "from"
+	if verbose:
+		print ("Building dynamic query for an entry vertex.")
+		# print ("dataloc: %s" % tvDataLoc)
+	selectStr = buildSelectString(isUnique, isKvpVertex, isDefaultDataLoc, targetVertex['alias'], targetVertex['table_name'], tvDataLoc, targetVertex['name'], verbose, debug)
+	fromStr += " "+targetVertex['table_name']+" as "+targetVertex['alias']
+	# If there is a target vertex criterion, add it to the dynamic query, otherwise, end the sql on the from-clause.
+	if targetVertex['criterion'] is not None:
+		conditionStr += " "+targetVertex['criterion']
+		dynamicQuery = selectStr+" "+fromStr+" "+conditionStr
+	else:
+		dynamicQuery = selectStr+" "+fromStr
+
+	#apply the limit if set
+	if limit.isdigit():
+		if verbose:
+			print ("Limit is set to %s." % limit)
+		dynamicQuery += " limit "+limit
+	return dynamicQuery
 
 
 if __name__ == "__main__":
