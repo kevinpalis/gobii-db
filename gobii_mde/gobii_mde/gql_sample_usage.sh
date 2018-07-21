@@ -57,6 +57,7 @@ python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_que
 python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /Users/KevinPalis/temp/filter3.out -g '{"mapset_type":[60]}' -t analysis -v -d
 python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /Users/KevinPalis/temp/filter4.out -g '{ "division":["Sim_division","FQ_division"]}' -t mapset -v -d
 
+python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /Users/KevinPalis/temp/filter4.out -g '{ "marker":[1]}' -t marker_linkage_group -v -d
 
 # Props/KVP vertices in path TEST
 
