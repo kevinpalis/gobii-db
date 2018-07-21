@@ -40,7 +40,7 @@ python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_que
 python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /Users/KevinPalis/temp/filter2.out -g '{"principal_investigator":[67,69,70]}' -t project -f '["name"]' -v -d
 python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /Users/KevinPalis/temp/filter3.out -g '{"principal_investigator":[67,69,70], "project":[3,25,30]}' -t division -v -d
 python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /Users/KevinPalis/temp/filter3.out -g '{"principal_investigator":[67,69,70], "project":[3,25,30]}' -t experiment -f '["name"]' -v
-python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /Users/KevinPalis/temp/filter4.out -g '{"principal_investigator":[67,69,70], "project":[3,25,30], "division":[25,30]}' -t experiment -f '["name"]' -v -d
+python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /Users/KevinPalis/temp/filter4.out -g '{"principal_investigator":[67,69,70], "project":[3,25,30], "division":["Sim_division","FQ_division"]}' -t experiment -f '["name"]' -v -d
 python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /Users/KevinPalis/temp/filter3.out -g '{"principal_investigator":[67,69,70], "project":[3,25,30]}' -t dataset -v -d
 #sample goal vertex marker with subgraph only containing vertices with relevance=3 (ie. relevant to both markers and dnarun)
 python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /Users/KevinPalis/temp/filter3.out -g '{"principal_investigator":[67,69,70], "project":[3,25,30], "dataset":[1,2,3,4,5]}' -t marker -v -d
@@ -52,8 +52,10 @@ python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_que
 python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /Users/KevinPalis/temp/filter3.out -g '{"principal_investigator":[67,69,70], "mapset_type":[60], "platform":[1,2,3]}' -t protocol -v -d
 #sample non-entry vertex with subgraph but did not filter down the vertex = should error out
 python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /Users/KevinPalis/temp/filter3.out -g '{"mapset_type":[60]}' -t dnarun -v -d
+python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /Users/KevinPalis/temp/filter4.out -g '{ "trial_name":["testtrial1"]}' -t marker -v -d
 #sample entry vertex with subgraph that did not filter down the vertex = should proceed as if it's an entry vertex call
 python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /Users/KevinPalis/temp/filter3.out -g '{"mapset_type":[60]}' -t analysis -v -d
+python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /Users/KevinPalis/temp/filter4.out -g '{ "division":["Sim_division","FQ_division"]}' -t mapset -v -d
 
 
 # Props/KVP vertices in path TEST
@@ -100,6 +102,19 @@ python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_que
 # 1. There is no call to GQL for this step. The last set of files (filter3-markers.out and filter3-dnaruns.out) are going to be passed to the MDEs
 # 2. The markers and samples stats box remains at 9435 and 990 respectively
 # 3. The MDEs will extract the genotype for those 9435 markers and 990 dnaruns -- 2 calls to the MDE (one for each), post-processing needs to be done to intersect the extract-by-markers output and the extract-by-samples output, effectively making an extract-by-markers-AND-samples.
+
+
+#-----------------------------------------------------
+# CASE2: F1=Mapset_type, F2=Sampling_date, F3=Germplasm_species, Submit
+#-----------------------------------------------------
+#-------------------F1--------------------------------
+#User select mapset_type for F1 - displays all mapset_types. NOTE the -u flag as this is a kvp vertex.
+python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /Users/KevinPalis/temp/filter1.out -t mapset_type -v -d
+
+#User selects PIs with IDs 67, 69, and 70 from the F1 selection box, marker and sample stats get generated 
+#--> on my tests: markers=10080, dnaruns=4851
+python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /Users/KevinPalis/temp/filter1-markers.out -g '{"mapset_type":[60]}' -t marker -v -d
+python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /Users/KevinPalis/temp/filter1-markers.out -g '{"mapset_type":[60]}' -t dnarun -v -d
 
 ############################################################################
 # SAMPLE USAGE on FXN_TEST - dummy user creds need to be pre-provisioned
