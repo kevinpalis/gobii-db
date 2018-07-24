@@ -28,7 +28,7 @@ class ReturnCodes:
 		OUTPUT_FILE_CREATION_FAILED: "Creating the output file failed.",
 		FEATURE_NOT_IMPLEMENTED: "This feature is not implemented for this version of GQL.",
 		NO_PATH_FOUND: "No path can be derived between the two vertices given. Both direct descendants and common relative algorithms have been exhausted.",
-		NO_FILTERS_APPLIED_TO_TARGET: "The filters selected did not reduce a goal-vertex. Aborting to avoid a potentially huge query."
+		NO_FILTERS_APPLIED_TO_TARGET: "The filters selected did not reduce a non-entry vertex. Aborting to avoid a potentially huge query."
 	}
 
 

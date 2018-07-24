@@ -214,7 +214,12 @@ def main(argv):
 						# vertices[parentVertex['vertex_id']] = FilteredVertex(currVertex['table_name'], '')
 						#pathToTarget = [parentVertex['vertex_id']]  # TODO: Check if computing for the path to target in here is doable
 						try:
-							pathStr += gqlMgr.getPath(parentVertex['vertex_id'], tvId)['path_string']
+							p = gqlMgr.getPath(parentVertex['vertex_id'], tvId)
+							if p is None:
+								if verbose:
+									print ("No path from vertex %s to %s. Skipping." % (currVertex['name'], targetVertexName))
+								continue
+							pathStr += p['path_string']
 							#parse the path string to an iterable object, removing empty strings
 							pathToTarget = [gqlMgr.getVertexById(col.strip()) for col in filter(None, pathStr.split('.'))]
 							#for KVPs, add a special jsonb where clause for each filter
