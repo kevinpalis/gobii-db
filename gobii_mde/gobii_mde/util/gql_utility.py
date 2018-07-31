@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 from __future__ import print_function
+import sys
 
 class ReturnCodes:
 	"""
@@ -37,11 +38,10 @@ class GQLException(Exception):
 		self.code = code
 		self.message = ReturnCodes.MESSAGES[code]
 
-
-'''
-try:
-	raise GQLException(ReturnCodes.INCOMPLETE_PARAMETERS)
-except GQLException as e:
-	print e.message
-	sys.exit(e.code)
-'''
+class GQLUtility:
+	"""
+	This class provides general and common methods for all GQL classes or scripts.
+	"""
+	@staticmethod
+	def printError(*args, **kwargs):
+		print(*args, file=sys.stderr, **kwargs)

@@ -28,6 +28,7 @@ import json
 from collections import OrderedDict
 from util.gql_utility import ReturnCodes
 from util.gql_utility import GQLException
+from util.gql_utility import GQLUtility
 from db.graph_query_manager import GraphQueryManager
 from collections import namedtuple
 
@@ -45,7 +46,7 @@ def main(argv):
 		vertexColumnsToFetch = ""
 		limit = ""
 		vertexTypes = {}
-		vertices = OrderedDict()
+		# vertices = OrderedDict()
 		exitCode = ReturnCodes.SUCCESS
 		# FilteredVertex = namedtuple('FilteredVertex', 'name filter')  # TODO: Get rid of this once the new datastruct is in place
 		allPaths = OrderedDict()
@@ -120,7 +121,7 @@ def main(argv):
 						print ("Fetching column %s" % col)
 			except Exception as e:
 				traceback.print_exc()
-				print ("Exception occured while parsing vertexColumnsToFetch: %s" % e.message)
+				GQLUtility.printError("Exception occured while parsing vertexColumnsToFetch: %s" % e.message)
 				exitWithException(ReturnCodes.ERROR_PARSING_JSON, gqlMgr)
 
 		targetVertex = gqlMgr.getVertex(targetVertexName)
@@ -204,7 +205,7 @@ def main(argv):
 					pathStr = ""
 					propConditions = []
 					currVertexIsKvp = False
-					if verbose:
+					if debug:
 						print ("Building the dictionary entry for vertex %s with filter IDs %s" % (vertexName, vertexFilter))
 					currVertex = gqlMgr.getVertex(vertexName)
 					if currVertex['type_id'] == vertexTypes['key_value_pair']:
@@ -391,7 +392,7 @@ def exitWithException(eCode, gqlMgr):
 			gqlMgr.closeConnection()
 		raise GQLException(eCode)
 	except GQLException as e1:
-		print (e1.message)
+		GQLUtility.printError(e1.message)
 		traceback.print_exc()
 		sys.exit(eCode)
 
