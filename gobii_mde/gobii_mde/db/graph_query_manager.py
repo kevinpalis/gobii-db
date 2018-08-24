@@ -63,8 +63,10 @@ class GraphQueryManager:
 			res = self.cur.fetchone()
 			return res
 
+	#TODO: GET ONLY THE ONE WITH THE LEAST HOPS!!
+
 	def getPath(self, startVertex, endVertex):
-			self.cur.execute("select path_string from transitive_closure where start_vertex=%s and end_vertex=%s", (startVertex, endVertex))
+			self.cur.execute("select path_string from transitive_closure where start_vertex=%s and end_vertex=%s order by distance", (startVertex, endVertex))
 			res = self.cur.fetchone()
 			return res
 
