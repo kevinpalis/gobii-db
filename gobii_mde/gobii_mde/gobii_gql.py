@@ -267,7 +267,8 @@ def main(argv):
 							p = gqlMgr.getPath(currVertex['vertex_id'], tvId)
 							if p is None:
 								if verbose:
-									print ("No path from vertex %s to %s. Skipping." % (currVertex['name'], targetVertexName))
+									print ("No direct path from vertex %s to %s. Trying out common-relative path computation." % (currVertex['name'], targetVertexName))
+									#Common-relative path computation goes here
 								continue
 							pathStr += p['path_string']
 							#parse the path string to an iterable object, removing empty strings
