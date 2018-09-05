@@ -153,3 +153,14 @@ python gobii_gql.py -c postgresql://dummyuser:helloworld@cbsugobii03.tc.cornell.
 python gobii_gql.py -c postgresql://dummyuser:helloworld@cbsugobii03.tc.cornell.edu:5433/gobii_dev -o /Users/KevinPalis/temp/filter3.out -g '{"principal_investigator":[19,3,4], "project":[1,10,20]}' -t dataset -v -d
 python gobii_gql.py -c postgresql://dummyuser:helloworld@cbsugobii03.tc.cornell.edu:5433/gobii_dev -o /Users/KevinPalis/temp/filter3.out -g '{"principal_investigator":[19,3,4], "project":[1,10,20], "dataset":[1,2,3,4,5]}' -t marker -v -d
 python gobii_gql.py -c postgresql://dummyuser:helloworld@cbsugobii03.tc.cornell.edu:5433/gobii_dev -o /Users/KevinPalis/temp/filter3.out -g '{"principal_investigator":[19,3,4], "project":[1,10,20]}' -t dataset_type -v -d
+
+
+#COMMON-RELATIVE PATH TEST (aka the bottleneck)
+python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /Users/KevinPalis/temp/filter1.out -t platform -v -d
+python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /Users/KevinPalis/temp/filter2.out -g '{ "platform":[6]}' -t marker_linkage_group -v -d
+python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /Users/KevinPalis/temp/filter2.out -g '{ "mapset":[1]}' -t marker_linkage_group -v -d
+#ideal call
+python gobii_gql.py -c postgresql://dummyuser:helloworld@localhost:5432/flex_query_db2 -o /Users/KevinPalis/temp/filter2.out -g '{ "platform":[6]}' -t mapset -v -d
+
+
+

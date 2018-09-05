@@ -161,7 +161,7 @@ def main(argv):
 		conditionStr = "where"
 		dynamicQuery = ""
 		#----------------------------------------
-		# CASE: ENTRY VERTEX - No subgraph given
+		# CASE 1: ENTRY VERTEX - No subgraph given
 		#----------------------------------------
 		if subGraphPath == "" and tvIsEntry:
 			if verbose:
@@ -182,7 +182,7 @@ def main(argv):
 					print ("Limit is set to %s." % limit)
 				dynamicQuery += " limit "+limit
 		#--------------------------------------------------------------------------------------------------------
-		# CASE: WITH SUBGRAPH - FOR ALL V IN SUBGRAPH, COMPUTE THE PATH, THEN BUILD THE DYNAMIC NESTED SQL
+		# CASE 2: WITH SUBGRAPH - FOR ALL V IN SUBGRAPH, COMPUTE THE PATH, THEN BUILD THE DYNAMIC NESTED SQL
 		# MAIN DATA STRUCT: allPaths = {vertexId:FilteredPath(vertexName, userFilters, pathToTarget[Vertex()])}
 		#--------------------------------------------------------------------------------------------------------
 		else:
@@ -208,12 +208,11 @@ def main(argv):
 					if debug:
 						print ("Building the dictionary entry for vertex %s with filter IDs %s" % (vertexName, vertexFilter))
 					currVertex = gqlMgr.getVertex(vertexName)
+					# If vertex is a KVP, use the parent vertex for the path computation
 					if currVertex['type_id'] == vertexTypes['key_value_pair']:
 						#get the kvp vertex's parent vertex (as all kvp vertices are property entities)
 						parentVertex = gqlMgr.getVertex(currVertex['table_name'])
 						currVertexIsKvp = True
-						# vertices[parentVertex['vertex_id']] = FilteredVertex(currVertex['table_name'], '')
-						#pathToTarget = [parentVertex['vertex_id']]  # TODO: Check if computing for the path to target in here is doable
 						try:
 							p = gqlMgr.getPath(parentVertex['vertex_id'], tvId)
 							if p is None:
@@ -263,8 +262,7 @@ def main(argv):
 					# 	if debug:
 					# 		print ("Added the parent vertex '%s' for the kvp vertex '%s'." % (parentVertex['name'], currVertex['name']))
 					else:
-						# vertices[currVertex['vertex_id']] = FilteredVertex(key, value)
-						# pathToTarget = [currVertex['vertex_id']]  # TODO: Check if computing for the path to target in here is doable
+						# This case is for normal vertices (non-kvps)
 						try:
 							p = gqlMgr.getPath(currVertex['vertex_id'], tvId)
 							if p is None:
@@ -309,11 +307,16 @@ def main(argv):
 				totalSubQ = len(subDynamicQueries)
 				if debug:
 					print ("Total dynamic sub-queries: %s" % totalSubQ)
+
+				#--------------------------------
+				# DYNAMIC QUERY BUILDING START
+				#--------------------------------
 				if totalSubQ == 0:
 					if not tvIsEntry:
 						#throw an exception to avoid possibly very big queries (ie. all marker and all dnarun)
 						exitWithException(ReturnCodes.NO_FILTERS_APPLIED_TO_TARGET, gqlMgr)
 					else:
+						#case when all options have been exhausted and there is no path from the list of source vertices (aka subgraph) to the target -- treat it as an entry vertex
 						dynamicQuery = buildDynamicQueryForEntryVertex(gqlMgr, verbose, debug, isUnique, isKvpVertex, isDefaultDataLoc, targetVertex, tvDataLoc, limit)
 				else:
 					for q in subDynamicQueries:
