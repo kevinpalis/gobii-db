@@ -73,7 +73,7 @@ class GraphQueryManager:
 			res = self.cur.fetchone()
 			return res
 
-	def getAllEndVertices(self, startVertex):
-			self.cur.execute("select end_vertex from transitive_closure where start_vertex=%s", (startVertex,))
+	def getDescendants(self, startVertex):
+			self.cur.execute("select * from transitive_closure where start_vertex=%s", (startVertex,))
 			res = self.cur.fetchall()
 			return res
