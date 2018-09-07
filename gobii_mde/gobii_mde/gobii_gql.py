@@ -275,12 +275,25 @@ def main(argv):
 									des2 = gqlMgr.getDescendants(tvId)
 									if debug:
 										print ("des lists: \n %s \n %s" % (des1, des2))
-									#3. Find all the common end_vertices in both lists
-									#TO BE CONTINUED IN THE NEXT EPISODE OF... "KEVIN CRAMS!"
 									if des1 is None or des2 is None:
 										if verbose:
 											print ("Common-relative path computation did not yield any result.")
 										continue
+									#3. Find all the common end_vertices in both lists
+									currCommonRelative = ''
+									currRelationshipDist = -1
+									for v1 in des1:
+										for v2 in des2:
+											if debug:
+												print ("Comparing v1=%s and v2=%s" % (v1['end_vertex'], v2['end_vertex']))
+											if v1['end_vertex'] == v2['end_vertex']:
+												if verbose:
+													print ('Found a common relative. Vertex_id=%s, path=%s' % (v1['end_vertex'], v1['path_string']))
+												if currRelationshipDist == -1 or v1['distance'] < currRelationshipDist:
+													currCommonRelative = v1['end_vertex']
+													currRelationshipDist = v1['distance']
+													print ('Setting common relative.')
+									#TO BE CONTINUED IN THE NEXT EPISODE OF... "KEVIN CRAMS!"
 								#todo: remove this continue stmt when done with the new algo
 								continue
 							pathStr += p['path_string']
