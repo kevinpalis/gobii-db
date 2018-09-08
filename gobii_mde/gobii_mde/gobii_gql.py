@@ -281,7 +281,7 @@ def main(argv):
 											print ("Common-relative path computation did not yield any result.")
 										continue
 									#3. Find all the common end_vertices in both lists
-									currCommonRelative = ''
+									currCommonRelative = '-1'
 									currRelationshipDist = -1
 									path1 = ''
 									path2 = ''
@@ -300,17 +300,19 @@ def main(argv):
 													print ('Setting common relative. Relative=%s Distance=%s' % (currCommonRelative, currRelationshipDist))
 									if currRelationshipDist != -1:
 										#concatenate first path to the reverse of the second
-										path2Reversed = '.'.join(path2.split('.')[::-1])
+										print (path2.split('.'))
+										path2Reversed = '.'.join(path2.split('.')[-3::-1])
+										#print (path2Reversed)
 										pathStr = path1 + path2Reversed
 										if verbose:
 											print ("Combined the two paths to the common relative = %s" % pathStr)
-											continue
 									else:
 										if verbose:
 											print ("No common relative was found. Vertex will be skipped.")
 										continue
 									#TO BE CONTINUED IN THE NEXT EPISODE OF... "KEVIN CRAMS!"
-							pathStr += p['path_string']
+							else:
+								pathStr += p['path_string']
 							#parse the path string to an iterable object, removing empty strings
 							pathToTarget = [gqlMgr.getVertexById(col.strip()) for col in filter(None, pathStr.split('.'))]
 							#remove duplicated adjacent entries
@@ -324,7 +326,7 @@ def main(argv):
 						allPaths[currVertex['vertex_id']] = FilteredPath(vertexName, vertexFilter, pathToTarget)
 
 					selectStr = buildSelectString(isUnique, isKvpVertex, isDefaultDataLoc, targetVertex['alias'], targetVertex['table_name'], tvDataLoc, targetVertex['name'], verbose, debug)
-					fromStr, selectStr, tableDict = buildFromString(gqlMgr, pathToTarget, selectStr, tvAlias, verbose, debug)
+					fromStr, selectStr, tableDict = buildFromString(gqlMgr, pathToTarget, selectStr, tvAlias, verbose, debug, currCommonRelative)
 					conditionStr = buildConditionString(gqlMgr, pathToTarget, tableDict, vertexFilter, currVertex, verbose, debug, currVertexIsKvp)
 					for propCond in propConditions:
 						if conditionStr == "where":
@@ -468,8 +470,9 @@ def buildSelectString(isUnique, isKvpVertex, isDefaultDataLoc, tvAlias, tvTableN
 			selectStr += ", "+tvAlias+"."+col
 	return selectStr
 
-def buildFromString(gqlMgr, path, selectStr, tvAlias, verbose, debug):
+def buildFromString(gqlMgr, path, selectStr, tvAlias, verbose, debug, commonRelative):
 	#iterate through the path
+	isCommonRelative = False
 	totalVerticesInPath = len(path)
 	tableDict = {}
 	fromStr = "from"
@@ -482,7 +485,14 @@ def buildFromString(gqlMgr, path, selectStr, tvAlias, verbose, debug):
 	# Building the from clause string
 	#----------------------------
 	for i, j in zip(range(0, totalVerticesInPath), range(1, totalVerticesInPath)):
-		edge = gqlMgr.getEdge(path[i]['vertex_id'], path[j]['vertex_id'])
+		#YOU ARE HERE!!!
+		#Reverse i and j after the common-relative if the path was compounded as in the case of part 3
+		if int(path[i]['vertex_id']) == int(commonRelative):
+			isCommonRelative = True
+		if isCommonRelative:
+			edge = gqlMgr.getEdge(path[j]['vertex_id'], path[i]['vertex_id'])
+		else:
+			edge = gqlMgr.getEdge(path[i]['vertex_id'], path[j]['vertex_id'])
 		if debug:
 			# print ("i: %d, j: %d" % (i, j))
 			# print ("path[%d]['name']: %s" % (i, path[i]['name']))
@@ -516,13 +526,21 @@ def buildFromString(gqlMgr, path, selectStr, tvAlias, verbose, debug):
 				if '=' in edge['criterion']:
 					#todo: error checks
 					critList = edge['criterion'].split('=')
-					critList[0] = path[i]['alias']+"."+critList[0]
-					critList[1] = path[j]['alias']+"."+critList[1]
+					if isCommonRelative:
+						critList[0] = path[j]['alias']+"."+critList[0]
+						critList[1] = path[i]['alias']+"."+critList[1]
+					else:
+						critList[0] = path[i]['alias']+"."+critList[0]
+						critList[1] = path[j]['alias']+"."+critList[1]
 					qualifiedCriterion = "=".join(critList)
 				elif '?' in edge['criterion']:
 					critList = edge['criterion'].split('?')
-					critList[0] = path[j]['alias']+"."+critList[0]
-					critList[1] = path[i]['alias']+"."+critList[1]
+					if isCommonRelative:
+						critList[0] = path[i]['alias']+"."+critList[0]
+						critList[1] = path[j]['alias']+"."+critList[1]
+					else:
+						critList[0] = path[j]['alias']+"."+critList[0]
+						critList[1] = path[i]['alias']+"."+critList[1]
 					qualifiedCriterion = "?".join(critList)
 			#todo: handle: criterion==null
 			fromStr += " on "+qualifiedCriterion
