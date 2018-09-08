@@ -264,6 +264,7 @@ def main(argv):
 					else:
 						# This case is for normal vertices (non-kvps)
 						try:
+							pathStr = ''
 							p = gqlMgr.getPath(currVertex['vertex_id'], tvId)
 							if p is None:
 								if verbose:
@@ -282,20 +283,33 @@ def main(argv):
 									#3. Find all the common end_vertices in both lists
 									currCommonRelative = ''
 									currRelationshipDist = -1
+									path1 = ''
+									path2 = ''
 									for v1 in des1:
 										for v2 in des2:
 											if debug:
 												print ("Comparing v1=%s and v2=%s" % (v1['end_vertex'], v2['end_vertex']))
 											if v1['end_vertex'] == v2['end_vertex']:
 												if verbose:
-													print ('Found a common relative. Vertex_id=%s, path=%s' % (v1['end_vertex'], v1['path_string']))
-												if currRelationshipDist == -1 or v1['distance'] < currRelationshipDist:
+													print ('Found a common relative. Vertex_id=%s, path1=%s path2=%s' % (v1['end_vertex'], v1['path_string'], v2['path_string']))
+												if currRelationshipDist == -1 or (v1['distance']+v2['distance']) < currRelationshipDist:
 													currCommonRelative = v1['end_vertex']
-													currRelationshipDist = v1['distance']
-													print ('Setting common relative.')
+													currRelationshipDist = (v1['distance']+v2['distance'])
+													path1 = v1['path_string']
+													path2 = v2['path_string']
+													print ('Setting common relative. Relative=%s Distance=%s' % (currCommonRelative, currRelationshipDist))
+									if currRelationshipDist != -1:
+										#concatenate first path to the reverse of the second
+										path2Reversed = '.'.join(path2.split('.')[::-1])
+										pathStr = path1 + path2Reversed
+										if verbose:
+											print ("Combined the two paths to the common relative = %s" % pathStr)
+											continue
+									else:
+										if verbose:
+											print ("No common relative was found. Vertex will be skipped.")
+										continue
 									#TO BE CONTINUED IN THE NEXT EPISODE OF... "KEVIN CRAMS!"
-								#todo: remove this continue stmt when done with the new algo
-								continue
 							pathStr += p['path_string']
 							#parse the path string to an iterable object, removing empty strings
 							pathToTarget = [gqlMgr.getVertexById(col.strip()) for col in filter(None, pathStr.split('.'))]
