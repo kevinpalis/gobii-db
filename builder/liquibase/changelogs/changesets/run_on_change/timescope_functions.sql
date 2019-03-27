@@ -1,26 +1,39 @@
 --liquibase formatted sql
 
---Timescope Application Functions
+--Timescope Application Utility Functions
 
---changeset kpalis:createtimescoper_wbcrypt context:general splitStatements:false runOnChange:true
-CREATE OR REPLACE FUNCTION createTimescoper(_firstname text, _lastname text, _username text, _password text, _email text, _role integer, OUT id integer) RETURNS integer
+--NOTE: Do not make the mistake of adding another changeset tag in this file as it messes up the execution order in the changelog file.
+-- Just append new functions at the bottom of this file.
+-- This changeset is set to run on change. Liquibase will know when it needs to recreate these functions.
+
+--changeset kpalis:timescope_utility_functions context:general splitStatements:false runOnChange:true
+DROP FUNCTION IF EXISTS deleteDatasetMarkerIndices(integer);
+CREATE OR REPLACE FUNCTION deleteDatasetMarkerIndices(datasetId integer) RETURNS integer
     LANGUAGE plpgsql
-    AS $$
+  AS $$
+    DECLARE
+        i integer;
   BEGIN
-    INSERT INTO timescoper(firstname, lastname, username, password, email, role)
-  	VALUES (_firstname, _lastname, _username, crypt(_password, gen_salt('bf', 11)), _email, _role)
-  	ON conflict (username) DO NOTHING;
-    select lastval() into id;
+    update marker
+    set dataset_marker_idx = dataset_marker_idx - datasetId::text
+    where dataset_marker_idx ? datasetId::text;
+    GET DIAGNOSTICS i  = ROW_COUNT;
+    return i;
   END;
 $$;
 
 
---changeset kpalis:gettimescoper_wbcrypt context:general splitStatements:false runOnChange:true
-CREATE OR REPLACE FUNCTION getTimescoper(_username text, _password text) RETURNS TABLE(firstname text, lastname text, username text, email text, role integer)
-	LANGUAGE plpgsql
-	AS $$
-	BEGIN
-		RETURN QUERY
-		SELECT t.firstname, t.lastname, t.username, t.email, t.role FROM timescoper as t WHERE t.username = _username AND t.password = crypt(_password, t.password);
-	END;
+DROP FUNCTION IF EXISTS deleteDatasetDnarunIndices(integer);
+CREATE OR REPLACE FUNCTION deleteDatasetDnarunIndices(datasetId integer) RETURNS integer
+    LANGUAGE plpgsql
+  AS $$
+    DECLARE
+        i integer;
+  BEGIN
+    update dnarun
+    set dataset_dnarun_idx = dataset_dnarun_idx - datasetId::text
+    where dataset_dnarun_idx ? datasetId::text;
+    GET DIAGNOSTICS i  = ROW_COUNT;
+    return i;
+  END;
 $$;
