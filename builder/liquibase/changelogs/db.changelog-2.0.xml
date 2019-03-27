@@ -30,4 +30,6 @@
 	<include file="changelogs/changesets/run_on_change/timescope_functions.sql"/>
 	<include file="changelogs/changesets/flexquery/create_graph_schema.sql"/>
 	<include file="changelogs/changesets/run_on_change/flexquery_functions.sql"/>
+	<include file="changelogs/changesets/seed/create_timescoper_dbuser.sql"/>
+	<include file="changelogs/changesets/flexquery/fix_wrong_vertex_data.sql"/>
 </databaseChangeLog>
