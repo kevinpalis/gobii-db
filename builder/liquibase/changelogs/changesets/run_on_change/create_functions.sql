@@ -316,3 +316,15 @@ CREATE OR REPLACE FUNCTION createvendorprotocol(pname text, pvendorid integer, p
     select lastval() into id;
     END;
 $$;
+
+--changeset kpalis:dnasample_uuid_updated_fxns context:general splitStatements:false runOnChange:true
+--also, as much as I would like to switch to a more reasonable convention of param names starting with '_', I can't -- the me 2 years ago disagrees with 3000+ LOC. :(
+CREATE OR REPLACE FUNCTION creatednasample(dnasamplename text, dnasamplecode text, dnasampleplatename text, dnasamplenum text, wellrow text, wellcol text, projectid integer, germplasmid integer, createdby integer, createddate date, modifiedby integer, modifieddate date, dnasamplestatus integer, _uuid text, OUT id integer) RETURNS integer
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  insert into dnasample(name, code, platename, num, well_row, well_col, project_id, germplasm_id, created_by, created_date, modified_by, modified_date, status, uuid)
+  values(dnasamplename, dnasamplecode, dnasampleplatename, dnasamplenum, wellrow, wellcol, projectid, germplasmid, createdby, createddate, modifiedby, modifieddate, dnasamplestatus, _uuid);
+  select lastval() into id;
+END;
+$$;

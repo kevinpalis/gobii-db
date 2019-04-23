@@ -479,3 +479,13 @@ CREATE OR REPLACE FUNCTION updatevendorprotocol(pid integer, pname text, pvendor
       return i;
     END;
 $$;
+
+--changeset kpalis:dnasample_uuid_update context:general splitStatements:false runOnChange:true
+CREATE OR REPLACE FUNCTION updatednasample(id integer, dnasamplename text, dnasamplecode text, dnasampleplatename text, dnasamplenum text, wellrow text, wellcol text, projectid integer, germplasmid integer, createdby integer, createddate date, modifiedby integer, modifieddate date, dnasamplestatus integer, _uuid text) RETURNS void
+    LANGUAGE plpgsql
+    AS $$
+    BEGIN
+    update dnasample set name=dnaSampleName, code=dnaSampleCode, platename=dnaSamplePlateName, num=dnaSampleNum, well_row=wellRow, well_col=wellCol, project_id=projectId, germplasm_id=germplasmId, created_by=createdBy, created_date=createdDate, modified_by=modifiedBy, modified_date=modifiedDate, status=dnaSampleStatus, uuid=_uuid
+     where dnasample_id = id;
+    END;
+$$;
