@@ -37,3 +37,15 @@ CREATE OR REPLACE FUNCTION deleteDatasetDnarunIndices(datasetId integer) RETURNS
     return i;
   END;
 $$;
+
+DROP FUNCTION IF EXISTS getAllDatasetsByMarker(integer);
+CREATE OR REPLACE FUNCTION getAllDatasetsByMarker(_markerId integer) RETURNS TABLE(dataset_id integer, hdf5_index integer)
+    LANGUAGE plpgsql
+    AS $$
+  BEGIN
+    return query
+    select key::integer as dataset_id, value::integer as hdf5_index from
+     jsonb_each_text((select dataset_marker_idx from marker where marker_id=_markerId));
+  END;
+$$;
+ 

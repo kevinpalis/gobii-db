@@ -26,7 +26,9 @@ create or replace view v_dataset_summary as
 	left join job j on j.job_id=d.job_id;
 
 --#######!!!!
---NOTE: Do not make the mistake of adding another changeset tag in this file as it messes up the execution order in the changelog file. The above changesets show this mistake, although it is not affecting functionality since they are unrelated and both were delivered almost next to each other. However, there is the chance that adding changesets to any file meant to be ran 'onChange' on a much later date can render very unpredictable results on production systems.
+--NOTE: Do not make the mistake of adding another changeset tag in this file as it messes up the execution order in the changelog file. 
+--The above changesets show this mistake, although it is not affecting functionality since they are unrelated and both were delivered almost next to each other. 
+--However, there is the chance that adding changesets to any file meant to be ran 'onChange' on a much later date can render very unpredictable results on production systems.
 -- Just append new functions at the bottom of this file.
 -- This changeset is set to run on change. Liquibase will know when it needs to recreate these functions.
 
