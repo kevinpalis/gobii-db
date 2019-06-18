@@ -50,8 +50,9 @@ CREATE OR REPLACE FUNCTION getAllDatasetsByMarker(_markerId integer) RETURNS TAB
 $$;
 
 DROP FUNCTION IF EXISTS getLinkageGroupsByMarker(integer);
-CREATE OR REPLACE FUNCTION getLinkageGroupsByMarker(_markerId integer) RETURNS TABLE(linkage_group_id integer,
-  name text,
+CREATE OR REPLACE FUNCTION getLinkageGroupsByMarker(_markerId integer) RETURNS TABLE(
+  linkage_group_id integer,
+  name character varying,
   start integer,
   stop integer,
   map_id integer,
@@ -76,6 +77,37 @@ CREATE OR REPLACE FUNCTION getLinkageGroupsByMarker(_markerId integer) RETURNS T
     left join marker_linkage_group mlg on m.marker_id=mlg.marker_id
     left join linkage_group lg on mlg.linkage_group_id=lg.linkage_group_id
     where m.marker_id=_markerId;
+  END;
+$$;
+
+DROP FUNCTION IF EXISTS getMarkerGroupsByMarker(integer);
+CREATE OR REPLACE FUNCTION getMarkerGroupsByMarker(_markerId integer) RETURNS TABLE(
+  marker_group_id integer,
+  name text,
+  code text,
+  markers jsonb,
+  germplasm_group text,
+  created_by integer,
+  created_date date,
+  modified_by integer,
+  modified_date date,
+  status integer)
+    LANGUAGE plpgsql
+    AS $$
+  BEGIN
+    return query
+    select mg.marker_group_id,
+      mg.name,
+      mg.code,
+      mg.markers,
+      mg.germplasm_group,
+      mg.created_by,
+      mg.created_date,
+      mg.modified_by,
+      mg.modified_date,
+      mg.status
+    from marker_group mg
+    where mg.markers ? _markerId::text;
   END;
 $$;
 
