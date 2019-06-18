@@ -48,4 +48,35 @@ CREATE OR REPLACE FUNCTION getAllDatasetsByMarker(_markerId integer) RETURNS TAB
      jsonb_each_text((select dataset_marker_idx from marker where marker_id=_markerId));
   END;
 $$;
- 
+
+DROP FUNCTION IF EXISTS getLinkageGroupsByMarker(integer);
+CREATE OR REPLACE FUNCTION getLinkageGroupsByMarker(_markerId integer) RETURNS TABLE(linkage_group_id integer,
+  name text,
+  start integer,
+  stop integer,
+  map_id integer,
+  created_by integer,
+  created_date date,
+  modified_by integer,
+  modified_date date)
+    LANGUAGE plpgsql
+    AS $$
+  BEGIN
+    return query
+    select distinct lg.linkage_group_id,
+      lg.name,
+      lg.start,
+      lg.stop,
+      lg.map_id,
+      lg.created_by,
+      lg.created_date,
+      lg.modified_by,
+      lg.modified_date 
+    from marker m
+    left join marker_linkage_group mlg on m.marker_id=mlg.marker_id
+    left join linkage_group lg on mlg.linkage_group_id=lg.linkage_group_id
+    where m.marker_id=_markerId;
+  END;
+$$;
+
+

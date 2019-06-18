@@ -2,5 +2,4 @@
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
 	<include file="changelogs/changesets/2.1/job_status_functions.sql"/>
 	<include file="changelogs/changesets/2.1/add_sample_uuid.sql"/>
-	<!--include file="changelogs/changesets/2.1/timescope_views.sql"/-->
 </databaseChangeLog>
