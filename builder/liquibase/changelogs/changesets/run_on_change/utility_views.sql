@@ -36,11 +36,33 @@ create or replace view v_dataset_summary as
 
 drop view if exists v_marker_summary;
 create or replace view v_marker_summary as
-	SELECT m.marker_id, m.platform_id, p.name as platform_name, m.variant_id, m.name as marker_name, m.code, m.ref, m.alts, m.sequence, m.reference_id, r.name as reference_name, m.primers, m.strand_id, cv.term as strand_name, m.status, m.probsets, m.dataset_marker_idx, m.props, m.dataset_vendor_protocol
+	SELECT 
+		m.marker_id, 
+		m.name as marker_name,
+		m.platform_id, 
+		p.name as platform_name, 
+		m.ref, 
+		m.alts,
+		m.reference_id,
+		r.name as reference_name,
+		m.variant_id,  
+		m.code, 
+		m.sequence,
+		m.primers, 
+		m.strand_id, 
+		cv.term as strand_name, 
+		m.status, 
+		m.probsets, 
+		m.dataset_marker_idx, 
+		m.props,
+		m.dataset_vendor_protocol 
 	FROM marker m
 	left join platform p on m.platform_id=p.platform_id
 	left join reference r on m.reference_id=r.reference_id
 	left join cv on m.strand_id=cv.cv_id;
+
+
+
 
 
 
