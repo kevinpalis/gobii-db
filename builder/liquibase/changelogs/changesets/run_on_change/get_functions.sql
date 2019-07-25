@@ -271,12 +271,13 @@ CREATE OR REPLACE FUNCTION getallpropertiesofprotocol(protocolid integer) RETURN
     END;
 $$;
 
-CREATE OR REPLACE FUNCTION getallsamplemetadatabydataset(datasetid integer) RETURNS TABLE(dnarun_name text, sample_name text, germplasm_name text, external_code text, germplasm_type text, species text, platename text, num text, well_row text, well_col text)
+DROP FUNCTION getallsamplemetadatabydataset(integer);
+CREATE OR REPLACE FUNCTION getallsamplemetadatabydataset(datasetid integer) RETURNS TABLE(dnarun_name text, sample_name text, sample_uuid text, germplasm_name text, external_code text, germplasm_type text, species text, platename text, num text, well_row text, well_col text)
     LANGUAGE plpgsql
     AS $$
   BEGIN
 	return query
-	select dr.name as dnarun_name, ds.name as sample_name, g.name as germplasm_name, g.external_code, c1.term as germplasm_type, c2.term as species, ds.platename, ds.num, ds.well_row, ds.well_col
+	select dr.name as dnarun_name, ds.name as sample_name, ds.uuid as sample_uuid, g.name as germplasm_name, g.external_code, c1.term as germplasm_type, c2.term as species, ds.platename, ds.num, ds.well_row, ds.well_col
 	from dnarun dr
 	inner join dnasample ds on dr.dnasample_id = ds.dnasample_id 
 	inner join germplasm g on ds.germplasm_id = g.germplasm_id 
@@ -1153,7 +1154,8 @@ CREATE OR REPLACE FUNCTION getrolesofcontact(contactid integer) RETURNS SETOF ro
   END;
 $$;
 
-CREATE OR REPLACE FUNCTION getsampleqcmetadatabydataset(datasetid integer) RETURNS TABLE(dnarun_name text, germplasm_name text, germplasm_pedigree text, germplasm_type text, dnarun_barcode text, project_name text, project_pi_contact text, project_genotyping_purpose text, project_date_sampled text, project_division text, project_study_name text, experiment_name text, vendor_protocol_name text, vendor_name text, protocol_name text, dataset_name text, germplasm_external_code text, germplasm_species text, germplasm_id text, germplasm_seed_source_id text, germplasm_subsp text, germplasm_heterotic_group text, germplasm_par1 text, germplasm_par1_type text, germplasm_par2 text, germplasm_par2_type text, germplasm_par3 text, germplasm_par3_type text, germplasm_par4 text, germplasm_par4_type text, dnasample_name text, dnasample_platename text, dnasample_num text, dnasample_well_row text, dnasample_well_col text, dnasample_trial_name text, dnasample_sample_group text, dnasample_sample_group_cycle text, dnasample_sample_type text, dnasample_sample_parent text, dnasample_ref_sample text)
+DROP FUNCTION getsampleqcmetadatabydataset(datasetid integer);
+CREATE OR REPLACE FUNCTION getsampleqcmetadatabydataset(datasetid integer) RETURNS TABLE(dnarun_name text, germplasm_name text, germplasm_pedigree text, germplasm_type text, dnarun_barcode text, project_name text, project_pi_contact text, project_genotyping_purpose text, project_date_sampled text, project_division text, project_study_name text, experiment_name text, vendor_protocol_name text, vendor_name text, protocol_name text, dataset_name text, germplasm_external_code text, germplasm_species text, germplasm_id text, germplasm_seed_source_id text, germplasm_subsp text, germplasm_heterotic_group text, germplasm_par1 text, germplasm_par1_type text, germplasm_par2 text, germplasm_par2_type text, germplasm_par3 text, germplasm_par3_type text, germplasm_par4 text, germplasm_par4_type text, dnasample_name text, dnasample_platename text, dnasample_num text, dnasample_well_row text, dnasample_well_col text, dnasample_trial_name text, dnasample_sample_group text, dnasample_sample_group_cycle text, dnasample_sample_type text, dnasample_sample_parent text, dnasample_ref_sample text, dnasample_uuid text)
     LANGUAGE plpgsql
     AS $$
   BEGIN
@@ -1199,6 +1201,7 @@ CREATE OR REPLACE FUNCTION getsampleqcmetadatabydataset(datasetid integer) RETUR
                 ,(dns.props->>getPropertyIdByNamesAndType('dnasample_prop','sample_type',1)::text)
                 ,(dns.props->>getPropertyIdByNamesAndType('dnasample_prop','sample_parent_prop',1)::text)
                 ,(dns.props->>getPropertyIdByNamesAndType('dnasample_prop','ref_sample',1)::text)
+                ,dns.uuid
         from dnarun dr
         left join dnasample dns on dr.dnasample_id = dns.dnasample_id
         left join germplasm g on dns.germplasm_id = g.germplasm_id
@@ -1216,7 +1219,8 @@ CREATE OR REPLACE FUNCTION getsampleqcmetadatabydataset(datasetid integer) RETUR
   END;
 $$;
 
-CREATE OR REPLACE FUNCTION getsampleqcmetadatabymarkerlist(markerlist text) RETURNS TABLE(dnarun_name text, germplasm_name text, germplasm_pedigree text, germplasm_type text, dnarun_barcode text, project_name text, project_pi_contact text, project_genotyping_purpose text, project_date_sampled text, project_division text, project_study_name text, experiment_name text, vendor_protocol_name text, vendor_name text, protocol_name text, dataset_name text, germplasm_external_code text, germplasm_species text, germplasm_id text, germplasm_seed_source_id text, germplasm_subsp text, germplasm_heterotic_group text, germplasm_par1 text, germplasm_par1_type text, germplasm_par2 text, germplasm_par2_type text, germplasm_par3 text, germplasm_par3_type text, germplasm_par4 text, germplasm_par4_type text, dnasample_name text, dnasample_platename text, dnasample_num text, dnasample_well_row text, dnasample_well_col text, dnasample_trial_name text, dnasample_sample_group text, dnasample_sample_group_cycle text, dnasample_sample_type text, dnasample_sample_parent text, dnasample_ref_sample text)
+DROP FUNCTION getsampleqcmetadatabymarkerlist(markerlist text);
+CREATE OR REPLACE FUNCTION getsampleqcmetadatabymarkerlist(markerlist text) RETURNS TABLE(dnarun_name text, germplasm_name text, germplasm_pedigree text, germplasm_type text, dnarun_barcode text, project_name text, project_pi_contact text, project_genotyping_purpose text, project_date_sampled text, project_division text, project_study_name text, experiment_name text, vendor_protocol_name text, vendor_name text, protocol_name text, dataset_name text, germplasm_external_code text, germplasm_species text, germplasm_id text, germplasm_seed_source_id text, germplasm_subsp text, germplasm_heterotic_group text, germplasm_par1 text, germplasm_par1_type text, germplasm_par2 text, germplasm_par2_type text, germplasm_par3 text, germplasm_par3_type text, germplasm_par4 text, germplasm_par4_type text, dnasample_name text, dnasample_platename text, dnasample_num text, dnasample_well_row text, dnasample_well_col text, dnasample_trial_name text, dnasample_sample_group text, dnasample_sample_group_cycle text, dnasample_sample_type text, dnasample_sample_parent text, dnasample_ref_sample text, dnasample_uuid text)
     LANGUAGE plpgsql
     AS $$
   BEGIN
@@ -1227,7 +1231,7 @@ CREATE OR REPLACE FUNCTION getsampleqcmetadatabymarkerlist(markerlist text) RETU
                         left join marker m on ml.m_id = m.marker_id
                         order by ds_id
                 )
-        select t.dnarun_name,t.germplasm_name,t.gped,t.type, t.dnarun_barcode, t.project_name, t.project_pi_contact, t.project_genotyping_purpose, t.project_date_sampled, t.project_division, t.project_study_name, t.experiment_name, t.vp_name, t.v_name, t.pr_name, t.dataset_name,  t.exc, t.species,  t.gid, t.gssd, t.gs, t.ghg, t.gp1,t.gpt1, t.gp2,t.gpt2, t.gp3,t.gpt3, t.gp4,t.gpt4, t.dnasample_name, t.plate, t.dnum, t.wr, t.wc, t.dtn, t.dsg, t.dsgc, t.dst, t.dsp, t.drs
+        select t.dnarun_name,t.germplasm_name,t.gped,t.type, t.dnarun_barcode, t.project_name, t.project_pi_contact, t.project_genotyping_purpose, t.project_date_sampled, t.project_division, t.project_study_name, t.experiment_name, t.vp_name, t.v_name, t.pr_name, t.dataset_name,  t.exc, t.species,  t.gid, t.gssd, t.gs, t.ghg, t.gp1,t.gpt1, t.gp2,t.gpt2, t.gp3,t.gpt3, t.gp4,t.gpt4, t.dnasample_name, t.plate, t.dnum, t.wr, t.wc, t.dtn, t.dsg, t.dsgc, t.dst, t.dsp, t.drs, t.uuid
         from (
                 select distinct on (dl.ds_id, dr.dataset_dnarun_idx->>dl.ds_id::text)
                         dl.ds_id as did
@@ -1273,6 +1277,7 @@ CREATE OR REPLACE FUNCTION getsampleqcmetadatabymarkerlist(markerlist text) RETU
                         ,(dns.props->>getPropertyIdByNamesAndType('dnasample_prop','sample_type',1)::text) as dst
                         ,(dns.props->>getPropertyIdByNamesAndType('dnasample_prop','sample_parent',1)::text) as dsp
                         ,(dns.props->>getPropertyIdByNamesAndType('dnasample_prop','ref_sample',1)::text) as drs
+                        ,dns.uuid
                 from dataset_list dl
                 left join dnarun dr on dr.dataset_dnarun_idx ? dl.ds_id::text
                 left join dnasample dns on dr.dnasample_id = dns.dnasample_id
@@ -1291,7 +1296,8 @@ CREATE OR REPLACE FUNCTION getsampleqcmetadatabymarkerlist(markerlist text) RETU
   END;
 $$;
 
-CREATE OR REPLACE FUNCTION getsampleqcmetadatabymarkerlist(markerlist text, datasettypeid integer) RETURNS TABLE(dnarun_name text, germplasm_name text, germplasm_pedigree text, germplasm_type text, dnarun_barcode text, project_name text, project_pi_contact text, project_genotyping_purpose text, project_date_sampled text, project_division text, project_study_name text, experiment_name text, vendor_protocol_name text, vendor_name text, protocol_name text, dataset_name text, germplasm_external_code text, germplasm_species text, germplasm_id text, germplasm_seed_source_id text, germplasm_subsp text, germplasm_heterotic_group text, germplasm_par1 text, germplasm_par1_type text, germplasm_par2 text, germplasm_par2_type text, germplasm_par3 text, germplasm_par3_type text, germplasm_par4 text, germplasm_par4_type text, dnasample_name text, dnasample_platename text, dnasample_num text, dnasample_well_row text, dnasample_well_col text, dnasample_trial_name text, dnasample_sample_group text, dnasample_sample_group_cycle text, dnasample_sample_type text, dnasample_sample_parent text, dnasample_ref_sample text)
+DROP FUNCTION getsampleqcmetadatabymarkerlist(markerlist text, datasettypeid integer);
+CREATE OR REPLACE FUNCTION getsampleqcmetadatabymarkerlist(markerlist text, datasettypeid integer) RETURNS TABLE(dnarun_name text, germplasm_name text, germplasm_pedigree text, germplasm_type text, dnarun_barcode text, project_name text, project_pi_contact text, project_genotyping_purpose text, project_date_sampled text, project_division text, project_study_name text, experiment_name text, vendor_protocol_name text, vendor_name text, protocol_name text, dataset_name text, germplasm_external_code text, germplasm_species text, germplasm_id text, germplasm_seed_source_id text, germplasm_subsp text, germplasm_heterotic_group text, germplasm_par1 text, germplasm_par1_type text, germplasm_par2 text, germplasm_par2_type text, germplasm_par3 text, germplasm_par3_type text, germplasm_par4 text, germplasm_par4_type text, dnasample_name text, dnasample_platename text, dnasample_num text, dnasample_well_row text, dnasample_well_col text, dnasample_trial_name text, dnasample_sample_group text, dnasample_sample_group_cycle text, dnasample_sample_type text, dnasample_sample_parent text, dnasample_ref_sample text, dnasample_uuid text)
     LANGUAGE plpgsql
     AS $$
 
@@ -1303,7 +1309,7 @@ BEGIN
                         left join marker m on ml.m_id = m.marker_id
                         order by ds_id
                 )
-        select t.dnarun_name,t.germplasm_name,t.gped, t.type,  t.dnarun_barcode, t.project_name, t.project_pi_contact, t.project_genotyping_purpose, t.project_date_sampled, t.project_division, t.project_study_name, t.experiment_name, t.vp_name, t.v_name, t.pr_name, t.dataset_name,  t.exc, t.species, t.gid, t.gssd, t.gs, t.ghg, t.gp1,t.gpt1, t.gp2,t.gpt2, t.gp3,t.gpt3, t.gp4,t.gpt4, t.dnasample_name, t.plate, t.dnum, t.wr, t.wc, t.dtn, t.dsg, t.dsgc, t.dst, t.dsp, t.drs
+        select t.dnarun_name,t.germplasm_name,t.gped, t.type,  t.dnarun_barcode, t.project_name, t.project_pi_contact, t.project_genotyping_purpose, t.project_date_sampled, t.project_division, t.project_study_name, t.experiment_name, t.vp_name, t.v_name, t.pr_name, t.dataset_name,  t.exc, t.species, t.gid, t.gssd, t.gs, t.ghg, t.gp1,t.gpt1, t.gp2,t.gpt2, t.gp3,t.gpt3, t.gp4,t.gpt4, t.dnasample_name, t.plate, t.dnum, t.wr, t.wc, t.dtn, t.dsg, t.dsgc, t.dst, t.dsp, t.drs, t.uuid
         from (
                 select distinct on (dl.ds_id, dr.dataset_dnarun_idx->>dl.ds_id::text)
                         dl.ds_id as did
@@ -1349,6 +1355,7 @@ BEGIN
                         ,(dns.props->>getPropertyIdByNamesAndType('dnasample_prop','sample_type',1)::text) as dst
                         ,(dns.props->>getPropertyIdByNamesAndType('dnasample_prop','sample_parent',1)::text) as dsp
                         ,(dns.props->>getPropertyIdByNamesAndType('dnasample_prop','ref_sample',1)::text) as drs
+                        ,dns.uuid
                 from
                 (select ddl.ds_id, d.name from dataset_list ddl inner join dataset d on ddl.ds_id = d.dataset_id where d.type_id=datasetTypeId) dl
                 left join dnarun dr on dr.dataset_dnarun_idx ? dl.ds_id::text
@@ -1367,7 +1374,8 @@ BEGIN
   END;
 $$;
 
-CREATE OR REPLACE FUNCTION getsampleqcmetadatabymarkerlistx(markerlist text) RETURNS TABLE(ds_id integer, idx integer, dnarun_name text, dnarun_barcode text, project_name text, project_pi_contact text, project_genotyping_purpose text, project_date_sampled text, project_division text, project_study_name text, experiment_name text, vendor_protocol_name text, vendor_name text, protocol_name text, dataset_name text, germplasm_name text, germplasm_external_code text, germplasm_species text, germplasm_type text, germplasm_id text, germplasm_seed_source_id text, germplasm_subsp text, germplasm_heterotic_group text, germplasm_par1 text, germplasm_par1_type text, germplasm_par2 text, germplasm_par2_type text, germplasm_par3 text, germplasm_par3_type text, germplasm_par4 text, germplasm_par4_type text, germplasm_pedigree text, dnasample_name text, dnasample_platename text, dnasample_num text, dnasample_well_row text, dnasample_well_col text, dnasample_trial_name text, dnasample_sample_group text, dnasample_sample_group_cycle text, dnasample_sample_type text, dnasample_sample_parent text, dnasample_ref_sample text)
+DROP FUNCTION getsampleqcmetadatabymarkerlistx(markerlist text);
+CREATE OR REPLACE FUNCTION getsampleqcmetadatabymarkerlistx(markerlist text) RETURNS TABLE(ds_id integer, idx integer, dnarun_name text, dnarun_barcode text, project_name text, project_pi_contact text, project_genotyping_purpose text, project_date_sampled text, project_division text, project_study_name text, experiment_name text, vendor_protocol_name text, vendor_name text, protocol_name text, dataset_name text, germplasm_name text, germplasm_external_code text, germplasm_species text, germplasm_type text, germplasm_id text, germplasm_seed_source_id text, germplasm_subsp text, germplasm_heterotic_group text, germplasm_par1 text, germplasm_par1_type text, germplasm_par2 text, germplasm_par2_type text, germplasm_par3 text, germplasm_par3_type text, germplasm_par4 text, germplasm_par4_type text, germplasm_pedigree text, dnasample_name text, dnasample_platename text, dnasample_num text, dnasample_well_row text, dnasample_well_col text, dnasample_trial_name text, dnasample_sample_group text, dnasample_sample_group_cycle text, dnasample_sample_type text, dnasample_sample_parent text, dnasample_ref_sample text, dnasample_uuid text)
     LANGUAGE plpgsql
     AS $$
   BEGIN
@@ -1421,6 +1429,7 @@ CREATE OR REPLACE FUNCTION getsampleqcmetadatabymarkerlistx(markerlist text) RET
                         ,(dns.props->>getPropertyIdByNamesAndType('dnasample_prop','sample_type',1)::text)
                         ,(dns.props->>getPropertyIdByNamesAndType('dnasample_prop','sample_parent',1)::text)
                         ,(dns.props->>getPropertyIdByNamesAndType('dnasample_prop','ref_sample',1)::text)
+                        ,dns.uuid
                 from dataset_list dl
                 left join dnarun dr on dr.dataset_dnarun_idx ? dl.ds_id::text
                 left join dnasample dns on dr.dnasample_id = dns.dnasample_id
@@ -1440,7 +1449,8 @@ CREATE OR REPLACE FUNCTION getsampleqcmetadatabymarkerlistx(markerlist text) RET
   END;
 $$;
 
-CREATE OR REPLACE FUNCTION getsampleqcmetadatabymarkerlistx(markerlist text, datasettypeid integer) RETURNS TABLE(ds_id integer, idx integer, dnarun_name text, dnarun_barcode text, project_name text, project_pi_contact text, project_genotyping_purpose text, project_date_sampled text, project_division text, project_study_name text, experiment_name text, vendor_protocol_name text, vendor_name text, protocol_name text, dataset_name text, germplasm_name text, germplasm_external_code text, germplasm_species text, germplasm_type text, germplasm_id text, germplasm_seed_source_id text, germplasm_subsp text, germplasm_heterotic_group text, germplasm_par1 text, germplasm_par1_type text, germplasm_par2 text, germplasm_par2_type text, germplasm_par3 text, germplasm_par3_type text, germplasm_par4 text, germplasm_par4_type text, germplasm_pedigree text, dnasample_name text, dnasample_platename text, dnasample_num text, dnasample_well_row text, dnasample_well_col text, dnasample_trial_name text, dnasample_sample_group text, dnasample_sample_group_cycle text, dnasample_sample_type text, dnasample_sample_parent text, dnasample_ref_sample text)
+DROP FUNCTION getsampleqcmetadatabymarkerlistx(markerlist text, datasettypeid integer);
+CREATE OR REPLACE FUNCTION getsampleqcmetadatabymarkerlistx(markerlist text, datasettypeid integer) RETURNS TABLE(ds_id integer, idx integer, dnarun_name text, dnarun_barcode text, project_name text, project_pi_contact text, project_genotyping_purpose text, project_date_sampled text, project_division text, project_study_name text, experiment_name text, vendor_protocol_name text, vendor_name text, protocol_name text, dataset_name text, germplasm_name text, germplasm_external_code text, germplasm_species text, germplasm_type text, germplasm_id text, germplasm_seed_source_id text, germplasm_subsp text, germplasm_heterotic_group text, germplasm_par1 text, germplasm_par1_type text, germplasm_par2 text, germplasm_par2_type text, germplasm_par3 text, germplasm_par3_type text, germplasm_par4 text, germplasm_par4_type text, germplasm_pedigree text, dnasample_name text, dnasample_platename text, dnasample_num text, dnasample_well_row text, dnasample_well_col text, dnasample_trial_name text, dnasample_sample_group text, dnasample_sample_group_cycle text, dnasample_sample_type text, dnasample_sample_parent text, dnasample_ref_sample text, dnasample_uuid text)
     LANGUAGE plpgsql
     AS $$
   BEGIN
@@ -1494,6 +1504,7 @@ CREATE OR REPLACE FUNCTION getsampleqcmetadatabymarkerlistx(markerlist text, dat
                         ,(dns.props->>getPropertyIdByNamesAndType('dnasample_prop','sample_type',1)::text)
                         ,(dns.props->>getPropertyIdByNamesAndType('dnasample_prop','sample_parent',1)::text)
                         ,(dns.props->>getPropertyIdByNamesAndType('dnasample_prop','ref_sample',1)::text)
+                        ,dns.uuid
                 from
                 (select ddl.ds_id from dataset_list ddl inner join dataset d on ddl.ds_id = d.dataset_id where d.type_id=datasetTypeId) dl
                 left join dnarun dr on dr.dataset_dnarun_idx ? dl.ds_id::text
@@ -1515,7 +1526,8 @@ CREATE OR REPLACE FUNCTION getsampleqcmetadatabymarkerlistx(markerlist text, dat
 $$;
 
 --changeset kpalis:get_functions_part4 context:general splitStatements:false runOnChange:true
-CREATE OR REPLACE FUNCTION getsampleqcmetadatabysamplelist(samplelist text, datasettypeid integer) RETURNS TABLE(dnarun_name text, germplasm_name text, germplasm_pedigree text, germplasm_type text, dnarun_barcode text, project_name text, project_pi_contact text, project_genotyping_purpose text, project_date_sampled text, project_division text, project_study_name text, experiment_name text, vendor_protocol_name text, vendor_name text, protocol_name text, dataset_name text, germplasm_external_code text, germplasm_species text, germplasm_id text, germplasm_seed_source_id text, germplasm_subsp text, germplasm_heterotic_group text, germplasm_par1 text, germplasm_par1_type text, germplasm_par2 text, germplasm_par2_type text, germplasm_par3 text, germplasm_par3_type text, germplasm_par4 text, germplasm_par4_type text, dnasample_name text, dnasample_platename text, dnasample_num text, dnasample_well_row text, dnasample_well_col text, dnasample_trial_name text, dnasample_sample_group text, dnasample_sample_group_cycle text, dnasample_sample_type text, dnasample_sample_parent text, dnasample_ref_sample text)
+DROP FUNCTION getsampleqcmetadatabysamplelist(samplelist text, datasettypeid integer);
+CREATE OR REPLACE FUNCTION getsampleqcmetadatabysamplelist(samplelist text, datasettypeid integer) RETURNS TABLE(dnarun_name text, germplasm_name text, germplasm_pedigree text, germplasm_type text, dnarun_barcode text, project_name text, project_pi_contact text, project_genotyping_purpose text, project_date_sampled text, project_division text, project_study_name text, experiment_name text, vendor_protocol_name text, vendor_name text, protocol_name text, dataset_name text, germplasm_external_code text, germplasm_species text, germplasm_id text, germplasm_seed_source_id text, germplasm_subsp text, germplasm_heterotic_group text, germplasm_par1 text, germplasm_par1_type text, germplasm_par2 text, germplasm_par2_type text, germplasm_par3 text, germplasm_par3_type text, germplasm_par4 text, germplasm_par4_type text, dnasample_name text, dnasample_platename text, dnasample_num text, dnasample_well_row text, dnasample_well_col text, dnasample_trial_name text, dnasample_sample_group text, dnasample_sample_group_cycle text, dnasample_sample_type text, dnasample_sample_parent text, dnasample_ref_sample text, dnasample_uuid text)
     LANGUAGE plpgsql
     AS $$
 
@@ -1527,7 +1539,7 @@ CREATE OR REPLACE FUNCTION getsampleqcmetadatabysamplelist(samplelist text, data
                         left join dnarun d on sl.s_id = d.dnarun_id
                         order by ds_id
                 )
-        select t.dnarun_name,t.germplasm_name,t.gped,t.type  , t.dnarun_barcode, t.project_name, t.project_pi_contact, t.project_genotyping_purpose, t.project_date_sampled, t.project_division, t.project_study_name, t.experiment_name, t.vp_name, t.v_name, t.pr_name, t.dataset_name,  t.exc, t.species,  t.gid, t.gssd, t.gs, t.ghg, t.gp1,t.gpt1, t.gp2,t.gpt2, t.gp3,t.gpt3, t.gp4,t.gpt4,  t.dnasample_name, t.plate, t.dnum, t.wr, t.wc, t.dtn, t.dsg, t.dsgc, t.dst, t.dsp, t.drs
+        select t.dnarun_name,t.germplasm_name,t.gped,t.type  , t.dnarun_barcode, t.project_name, t.project_pi_contact, t.project_genotyping_purpose, t.project_date_sampled, t.project_division, t.project_study_name, t.experiment_name, t.vp_name, t.v_name, t.pr_name, t.dataset_name,  t.exc, t.species,  t.gid, t.gssd, t.gs, t.ghg, t.gp1,t.gpt1, t.gp2,t.gpt2, t.gp3,t.gpt3, t.gp4,t.gpt4,  t.dnasample_name, t.plate, t.dnum, t.wr, t.wc, t.dtn, t.dsg, t.dsgc, t.dst, t.dsp, t.drs, t.uuid
         from (
                 select distinct on (dl.ds_id, dr.dataset_dnarun_idx->>dl.ds_id::text)
                         dl.ds_id as did
@@ -1573,6 +1585,7 @@ CREATE OR REPLACE FUNCTION getsampleqcmetadatabysamplelist(samplelist text, data
                         ,(dns.props->>getPropertyIdByNamesAndType('dnasample_prop','sample_type',1)::text) as dst
                         ,(dns.props->>getPropertyIdByNamesAndType('dnasample_prop','sample_parent',1)::text) as dsp
                         ,(dns.props->>getPropertyIdByNamesAndType('dnasample_prop','ref_sample',1)::text) as drs
+                        ,dns.uuid
                 from
                 (select ddl.ds_id, d.name from dataset_list ddl inner join dataset d on ddl.ds_id = d.dataset_id where d.type_id=datasetTypeId) dl
                 inner join dnarun dr on dr.dataset_dnarun_idx ? dl.ds_id::text
