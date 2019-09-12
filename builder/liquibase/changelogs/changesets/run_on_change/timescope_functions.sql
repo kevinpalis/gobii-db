@@ -185,3 +185,39 @@ select * from getMarkersInExperiment(2);
 select * from v_marker_summary vms
 where vms.marker_id in (select marker_id from getMarkersInExperiment(2));
 */
+
+--by vendor_protocol
+DROP FUNCTION IF EXISTS getDatasetsInVendorProtocol(integer);
+CREATE OR REPLACE FUNCTION getDatasetsInVendorProtocol(_vendor_protocol_id integer) RETURNS TABLE(
+    dataset_id integer)
+    LANGUAGE plpgsql
+    AS $$
+  BEGIN
+    return query
+    select d.dataset_id
+  from vendor_protocol vp
+  left join experiment e on vp.vendor_protocol_id=e.vendor_protocol_id
+  left join dataset d on e.experiment_id=d.experiment_id
+  where vp.vendor_protocol_id=_vendor_protocol_id;
+  END;
+$$;
+
+DROP FUNCTION IF EXISTS getMarkersInVendorProtocol(integer);
+CREATE OR REPLACE FUNCTION getMarkersInVendorProtocol(_vendor_protocol_id integer) RETURNS TABLE(
+    marker_id integer)
+    LANGUAGE plpgsql
+    AS $$
+  BEGIN
+    return query
+    select m.marker_id
+  from marker m 
+  where m.dataset_marker_idx ?| (select array_agg(dataset_id::text) from getDatasetsInVendorProtocol(_vendor_protocol_id));
+  END;
+$$;
+
+--Sample Usage for Marker filtering: By VendorProtocol
+/*
+
+select * from v_marker_summary vms
+where vms.marker_id in (select marker_id from getMarkersInVendorProtocol(1));
+*/

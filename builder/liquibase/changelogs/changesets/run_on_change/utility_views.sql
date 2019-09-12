@@ -33,7 +33,8 @@ create or replace view v_dataset_summary as
 -- This changeset is set to run on change. Liquibase will know when it needs to recreate these functions.
 
 --changeset kpalis:utility_views_post1.4 context:general splitStatements:false runOnChange:true
-
+--update: reverted the addition to linkage groups and mapset because it ends up in duplication of rows as
+--marker_linkage_group is a many-to-many relationship table
 drop view if exists v_marker_summary;
 create or replace view v_marker_summary as
 	SELECT 
@@ -55,18 +56,18 @@ create or replace view v_marker_summary as
 		m.probsets, 
 		m.dataset_marker_idx, 
 		m.props,
-		m.dataset_vendor_protocol,
-		lg.linkage_group_id,
-		lg.name as linkage_group_name,
-		ms.mapset_id,
-		ms.name as mapset_name
+		m.dataset_vendor_protocol
+		--lg.linkage_group_id,
+		--lg.name as linkage_group_name,
+		--ms.mapset_id,
+		--ms.name as mapset_name
 	FROM marker m
 	left join platform p on m.platform_id=p.platform_id
 	left join reference r on m.reference_id=r.reference_id
-	left join cv on m.strand_id=cv.cv_id
-	left join marker_linkage_group mlg on m.marker_id=mlg.marker_id
-	left join linkage_group lg on mlg.linkage_group_id=lg.linkage_group_id
-	left join mapset ms on lg.map_id=ms.mapset_id;
+	left join cv on m.strand_id=cv.cv_id;
+	--left join marker_linkage_group mlg on m.marker_id=mlg.marker_id
+	--left join linkage_group lg on mlg.linkage_group_id=lg.linkage_group_id
+	--left join mapset ms on lg.map_id=ms.mapset_id;
 
 
 
