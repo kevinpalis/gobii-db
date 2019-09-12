@@ -276,7 +276,7 @@ CREATE OR REPLACE FUNCTION getMarkersInAnalysis(_analysis_id integer) RETURNS TA
 $$;
 
 --sample usage:
---/*
+/*
 select * from v_marker_summary vms
 where vms.marker_id in (select marker_id from getmarkersinproject(4));
 
@@ -297,7 +297,20 @@ where vms.marker_id in (select marker_id from getMarkersInCallingAnalysis(2));
 
 select * from v_marker_summary vms
 where vms.marker_id in (select marker_id from getMarkersInAnalysis(1));
---*/
+
+--a demonstration of how versatile this can be:
+select * from v_marker_summary vms
+where vms.marker_id in (select marker_id from getmarkersinproject(4))
+and vms.marker_id in (select marker_id from getMarkersInExperiment(2))
+and vms.marker_id in (select marker_id from getMarkersInVendorProtocol(1))
+and vms.marker_id in (select marker_id from getMarkersInLinkageGroup(5))
+and vms.marker_id in (select marker_id from getMarkersInMapset(3))
+and vms.marker_id in (select marker_id from getMarkersInCallingAnalysis(2))
+and vms.marker_id in (select marker_id from getMarkersInAnalysis(1))
+and vms.platform_name = 'KASP'
+and vms.strand_name = '+'
+and vms.status = 57;
+*/
 --duplicate check
 /*
 with dupTable as (
