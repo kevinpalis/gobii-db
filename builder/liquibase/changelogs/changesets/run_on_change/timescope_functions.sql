@@ -111,4 +111,77 @@ CREATE OR REPLACE FUNCTION getMarkerGroupsByMarker(_markerId integer) RETURNS TA
   END;
 $$;
 
+--utility functions added for Timescope's marker tab - but can be useful for a lot of 
+--different cases
 
+--by project
+DROP FUNCTION IF EXISTS getDatasetsInProject(integer);
+CREATE OR REPLACE FUNCTION getDatasetsInProject(_projectId integer) RETURNS TABLE(
+    dataset_id integer)
+    LANGUAGE plpgsql
+    AS $$
+  BEGIN
+    return query
+    select d.dataset_id
+  from project p
+  left join experiment e on p.project_id=e.project_id
+  left join dataset d on e.experiment_id=d.experiment_id
+  where p.project_id=_projectId;
+  END;
+$$;
+
+DROP FUNCTION IF EXISTS getMarkersInProject(integer);
+CREATE OR REPLACE FUNCTION getMarkersInProject(_projectId integer) RETURNS TABLE(
+    marker_id integer)
+    LANGUAGE plpgsql
+    AS $$
+  BEGIN
+    return query
+    select m.marker_id
+  from marker m 
+  where m.dataset_marker_idx ?| (select array_agg(dataset_id::text) from getDatasetsInProject(_projectId));
+  END;
+$$;
+
+--Sample Usage for Marker filtering: By Project
+/*
+select * from v_marker_summary vms
+where vms.marker_id in (select marker_id from getmarkersinproject(4));
+*/
+
+--by experiment
+DROP FUNCTION IF EXISTS getDatasetsInExperiment(integer);
+CREATE OR REPLACE FUNCTION getDatasetsInExperiment(_experimentId integer) RETURNS TABLE(
+    dataset_id integer)
+    LANGUAGE plpgsql
+    AS $$
+  BEGIN
+    return query
+    select d.dataset_id
+  from experiment e
+  left join dataset d on e.experiment_id=d.experiment_id
+  where e.experiment_id=_experimentId;
+  END;
+$$;
+
+
+DROP FUNCTION IF EXISTS getMarkersInExperiment(integer);
+CREATE OR REPLACE FUNCTION getMarkersInExperiment(_experimentId integer) RETURNS TABLE(
+    marker_id integer)
+    LANGUAGE plpgsql
+    AS $$
+  BEGIN
+    return query
+    select m.marker_id
+  from marker m 
+  where m.dataset_marker_idx ?| (select array_agg(dataset_id::text) from getDatasetsInExperiment(_experimentId));
+  END;
+$$;
+
+--Sample Usage for Marker filtering: By Experiment
+/*
+select * from getDatasetsInExperiment(2);
+select * from getMarkersInExperiment(2);
+select * from v_marker_summary vms
+where vms.marker_id in (select marker_id from getMarkersInExperiment(2));
+*/
