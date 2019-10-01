@@ -23,4 +23,4 @@ CREATE OR REPLACE FUNCTION setdatawarehouseversion(ver text) RETURNS integer
 
 
  --changeset kpalis:update_gobiidb_version_call context:general splitStatements:false runOnChange:true
-select * from setdatawarehouseversion('1.4');
+select * from setdatawarehouseversion('2.1');
