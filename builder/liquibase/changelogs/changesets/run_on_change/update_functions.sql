@@ -235,7 +235,7 @@ CREATE OR REPLACE FUNCTION updatejob(id integer, _name text, _type text, _payloa
     END;
 $$;
 
-CREATE OR REPLACE FUNCTION updatelinkagegroup(id integer, linkagegroupname text, linkagegroupstart integer, linkagegroupstop integer, mapid integer, createdby integer, createddate date, modifiedby integer, modifieddate date) RETURNS void
+CREATE OR REPLACE FUNCTION updatelinkagegroup(id integer, linkagegroupname text, linkagegroupstart numeric, linkagegroupstop numeric, mapid integer, createdby integer, createddate date, modifiedby integer, modifieddate date) RETURNS void
     LANGUAGE plpgsql
     AS $$
     BEGIN

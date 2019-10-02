@@ -18,7 +18,7 @@ CREATE OR REPLACE FUNCTION getallchrlenbydataset(datasetid integer) RETURNS TABL
     AS $$
   BEGIN
     return query
-    select distinct mlp.linkage_group_name, (mlp.linkage_group_stop - mlp.linkage_group_stop)::integer
+    select distinct mlp.linkage_group_name, (mlp.linkage_group_stop - mlp.linkage_group_start)::integer
     from marker m
     left join v_marker_linkage_physical mlp on m.marker_id = mlp.marker_id
     where m.dataset_marker_idx ? datasetId::text;
@@ -30,7 +30,7 @@ CREATE OR REPLACE FUNCTION getallchrlenbydatasetandmap(datasetid integer, mapid 
     AS $$
   BEGIN
   return query
-  select distinct mlp.linkage_group_name, (mlp.linkage_group_stop - mlp.linkage_group_stop)::integer
+  select distinct mlp.linkage_group_name, (mlp.linkage_group_stop - mlp.linkage_group_start)::integer
   from marker m
   left join v_marker_linkage_physical mlp on m.marker_id = mlp.marker_id
   where m.dataset_marker_idx ? datasetId::text
@@ -43,7 +43,7 @@ CREATE OR REPLACE FUNCTION getallchrlenbymarkerlist(markerlist text) RETURNS TAB
     AS $$
   BEGIN
     return query
-    select distinct mlp.linkage_group_name, (mlp.linkage_group_stop - mlp.linkage_group_stop)::integer
+    select distinct mlp.linkage_group_name, (mlp.linkage_group_stop - mlp.linkage_group_start)::integer
     from unnest(markerList::integer[]) ml(m_id) 
     left join marker m on ml.m_id = m.marker_id
     left join v_marker_linkage_physical mlp on m.marker_id = mlp.marker_id;
