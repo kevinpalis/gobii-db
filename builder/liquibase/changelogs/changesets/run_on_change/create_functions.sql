@@ -178,7 +178,7 @@ CREATE OR REPLACE FUNCTION createjob(_name text, _type text, _payload_type text,
     END;
 $$;
 
-CREATE OR REPLACE FUNCTION createlinkagegroup(linkagegroupname text, linkagegroupstart integer, linkagegroupstop integer, mapid integer, createdby integer, createddate date, modifiedby integer, modifieddate date, OUT id integer) RETURNS integer
+CREATE OR REPLACE FUNCTION createlinkagegroup(linkagegroupname text, linkagegroupstart numeric, linkagegroupstop numeric, mapid integer, createdby integer, createddate date, modifiedby integer, modifieddate date, OUT id integer) RETURNS integer
     LANGUAGE plpgsql
     AS $$
 	BEGIN

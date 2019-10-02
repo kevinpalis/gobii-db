@@ -53,8 +53,8 @@ DROP FUNCTION IF EXISTS getLinkageGroupsByMarker(integer);
 CREATE OR REPLACE FUNCTION getLinkageGroupsByMarker(_markerId integer) RETURNS TABLE(
   linkage_group_id integer,
   name character varying,
-  start integer,
-  stop integer,
+  start numeric,
+  stop numeric,
   map_id integer,
   created_by integer,
   created_date date,
