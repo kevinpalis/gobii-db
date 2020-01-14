@@ -969,7 +969,8 @@ CREATE OR REPLACE FUNCTION getmarkerqcmetadatabydataset(datasetid integer) RETUR
   END;
 $$;
 
-CREATE OR REPLACE FUNCTION getmarkerqcmetadatabymarkerlist(markerlist text) RETURNS TABLE(marker_name text, platform_name text, variant_id integer, variant_code text, marker_ref text, marker_alts text, marker_sequence text, marker_strand text, marker_primer_forw1 text, marker_primer_forw2 text, marker_primer_rev1 text, marker_primer_rev2 text, marker_probe1 text, marker_probe2 text, marker_polymorphism_type text, marker_synonym text, marker_source text, marker_gene_id text, marker_gene_annotation text, marker_polymorphism_annotation text, marker_marker_dom text, marker_clone_id_pos text, marker_genome_build text, marker_typeofrefallele_alleleorder text, marker_strand_data_read text)
+DROP FUNCTION IF EXISTS getmarkerqcmetadatabymarkerlist(markerlist text);
+CREATE OR REPLACE FUNCTION getmarkerqcmetadatabymarkerlist(markerlist text) RETURNS TABLE(marker_name text, platform_name text, variant_id integer, variant_code text, marker_ref text, marker_alts text, marker_sequence text, marker_strand text, marker_primer_forw1 text, marker_primer_forw2 text, marker_primer_rev1 text, marker_primer_rev2 text, marker_probe1 text, marker_probe2 text, marker_polymorphism_type text, marker_synonym text, marker_source text, marker_gene_id text, marker_gene_annotation text, marker_polymorphism_annotation text, marker_marker_dom text, marker_clone_id_pos text, marker_genome_build text, marker_typeofrefallele_alleleorder text, marker_strand_data_read text, marker_id integer, marker_clone_id text, marker_allele2 text, marker_allele3 text, user_properties text)
     LANGUAGE plpgsql
     AS $$
   BEGIN
@@ -992,11 +993,17 @@ CREATE OR REPLACE FUNCTION getmarkerqcmetadatabymarkerlist(markerlist text) RETU
 		,(m.props->>getPropertyIdByNamesAndType('marker_prop','genome_build',1)::text)
 		,(m.props->>getPropertyIdByNamesAndType('marker_prop','typeofrefallele_alleleorder',1)::text)
 		,(m.props->>getPropertyIdByNamesAndType('marker_prop','strand_data_read',1)::text)
+    ,m.marker_id as marker_id
+    ,(m.props->>getPropertyIdByNamesAndType('marker_prop','clone_id',1)::text)
+    ,(m.props->>getPropertyIdByNamesAndType('marker_prop','allele2',1)::text)
+    ,(m.props->>getPropertyIdByNamesAndType('marker_prop','allele3',1)::text)
+    ,up.user_properties as user_properties
 	from unnest(markerList::integer[]) ml(m_id) 
 	left join marker m on ml.m_id = m.marker_id
 	left join platform p on m.platform_id = p.platform_id
 	left join cv on m.strand_id = cv.cv_id 
 	left join variant v on m.variant_id = v.variant_id
+  left join getallUserPropertiesOfMarkerAsText(m.marker_id) up on m.marker_id = up.marker_id
 	order by m.marker_id;
   END;
 $$;
