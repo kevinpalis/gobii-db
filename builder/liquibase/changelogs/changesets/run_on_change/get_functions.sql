@@ -877,12 +877,14 @@ CREATE OR REPLACE FUNCTION getmarkerpropertybyname(id integer, propertyname text
   END;
 $$;
 
-CREATE OR REPLACE FUNCTION getmarkerqcmetadatabydataset(datasetid integer) RETURNS TABLE(marker_name text, platform_name text, variant_id integer, variant_code text, marker_ref text, marker_alts text, marker_sequence text, marker_strand text, marker_primer_forw1 text, marker_primer_forw2 text, marker_primer_rev1 text, marker_primer_rev2 text, marker_probe1 text, marker_probe2 text, marker_polymorphism_type text, marker_synonym text, marker_source text, marker_gene_id text, marker_gene_annotation text, marker_polymorphism_annotation text, marker_marker_dom text, marker_clone_id_pos text, marker_genome_build text, marker_typeofrefallele_alleleorder text, marker_strand_data_read text)
+DROP FUNCTION IF EXISTS getmarkerqcmetadatabydataset(integer);
+CREATE OR REPLACE FUNCTION getmarkerqcmetadatabydataset(datasetid integer) RETURNS TABLE(marker_name text, platform_name text, variant_id integer, variant_code text, marker_ref text, marker_alts text, marker_sequence text, marker_strand text, marker_primer_forw1 text, marker_primer_forw2 text, marker_primer_rev1 text, marker_primer_rev2 text, marker_probe1 text, marker_probe2 text, marker_polymorphism_type text, marker_synonym text, marker_source text, marker_gene_id text, marker_gene_annotation text, marker_polymorphism_annotation text, marker_marker_dom text, marker_clone_id_pos text, marker_genome_build text, marker_typeofrefallele_alleleorder text, marker_strand_data_read text, marker_id integer, marker_clone_id text, marker_allele2 text, marker_allele3 text)
     LANGUAGE plpgsql
     AS $$
   BEGIN
     return query
-    select m.name as marker_name, p.name as platform_name, v.variant_id, v.code, m.ref, array_to_string(m.alts, ',', '?'), m.sequence, cv.term as strand_name
+    select m.name as marker_name, p.name as platform_name, v.variant_id, v.code, m.ref
+    ,array_to_string(m.alts, ',', '?'), m.sequence, cv.term as strand_name
 		,(m.props->>getPropertyIdByNamesAndType('marker_prop','primer_forw1',1)::text)
 		,(m.props->>getPropertyIdByNamesAndType('marker_prop','primer_forw2',1)::text)
 		,(m.props->>getPropertyIdByNamesAndType('marker_prop','primer_rev1',1)::text)
@@ -900,6 +902,10 @@ CREATE OR REPLACE FUNCTION getmarkerqcmetadatabydataset(datasetid integer) RETUR
 		,(m.props->>getPropertyIdByNamesAndType('marker_prop','genome_build',1)::text)
 		,(m.props->>getPropertyIdByNamesAndType('marker_prop','typeofrefallele_alleleorder',1)::text)
 		,(m.props->>getPropertyIdByNamesAndType('marker_prop','strand_data_read',1)::text)
+    ,m.marker_id as marker_id
+    ,(m.props->>getPropertyIdByNamesAndType('marker_prop','clone_id',1)::text)
+    ,(m.props->>getPropertyIdByNamesAndType('marker_prop','allele2',1)::text)
+    ,(m.props->>getPropertyIdByNamesAndType('marker_prop','allele3',1)::text)
 	from marker m left join platform p on m.platform_id = p.platform_id
 	left join cv on m.strand_id = cv.cv_id 
 	left join variant v on m.variant_id = v.variant_id
