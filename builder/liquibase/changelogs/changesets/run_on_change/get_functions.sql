@@ -877,8 +877,60 @@ CREATE OR REPLACE FUNCTION getmarkerpropertybyname(id integer, propertyname text
   END;
 $$;
 
+CREATE OR REPLACE FUNCTION getAllSystemPropertiesOfMarker(id integer) RETURNS TABLE(marker_id integer, property_id integer, property_name text, property_value text)
+    LANGUAGE plpgsql
+    AS $$
+  BEGIN
+    return query
+    select id, p1.key::int as property_id, 'marker_'||cv.term as property_name, p1.value as property_value
+    from cv
+    inner join cvgroup cg on cv.cvgroup_id = cg.cvgroup_id
+    , (select (jsonb_each_text(props)).* from marker m where m.marker_id=id) as p1
+    where cg.name = 'marker_prop'
+    and cg.type = 1
+    and cv.cv_id = p1.key::int;
+    END;
+$$;
+
+CREATE OR REPLACE FUNCTION getAllUserPropertiesOfMarker(id integer) RETURNS TABLE(marker_id integer, property_id integer, property_name text, property_value text)
+    LANGUAGE plpgsql
+    AS $$
+  BEGIN
+    return query
+    select id, p1.key::int as property_id, 'user_marker_'||cv.term as property_name, p1.value as property_value
+    from cv
+    inner join cvgroup cg on cv.cvgroup_id = cg.cvgroup_id
+    , (select (jsonb_each_text(props)).* from marker m where m.marker_id=id) as p1
+    where cg.name = 'marker_prop'
+    and cg.type = 2
+    and cv.cv_id = p1.key::int;
+    END;
+$$;
+
+CREATE OR REPLACE FUNCTION getAllSystemPropertiesOfMarkerAsText(id integer) RETURNS TABLE(marker_id integer, system_properties text)
+    LANGUAGE plpgsql
+    AS $$
+  BEGIN
+    return query
+    select mp.marker_id, string_agg(mp.property_name || ':' || mp.property_value, ', ') AS user_properties
+    from   getallsystempropertiesofmarker(id) as mp
+    GROUP  BY 1;
+    END;
+$$;
+
+CREATE OR REPLACE FUNCTION getAllUserPropertiesOfMarkerAsText(id integer) RETURNS TABLE(marker_id integer, user_properties text)
+    LANGUAGE plpgsql
+    AS $$
+  BEGIN
+    return query
+    select mp.marker_id, string_agg(mp.property_name || ':' || mp.property_value, ', ') AS user_properties
+    from   getalluserpropertiesofmarker(id) as mp
+    GROUP  BY 1;
+    END;
+$$;
+
 DROP FUNCTION IF EXISTS getmarkerqcmetadatabydataset(integer);
-CREATE OR REPLACE FUNCTION getmarkerqcmetadatabydataset(datasetid integer) RETURNS TABLE(marker_name text, platform_name text, variant_id integer, variant_code text, marker_ref text, marker_alts text, marker_sequence text, marker_strand text, marker_primer_forw1 text, marker_primer_forw2 text, marker_primer_rev1 text, marker_primer_rev2 text, marker_probe1 text, marker_probe2 text, marker_polymorphism_type text, marker_synonym text, marker_source text, marker_gene_id text, marker_gene_annotation text, marker_polymorphism_annotation text, marker_marker_dom text, marker_clone_id_pos text, marker_genome_build text, marker_typeofrefallele_alleleorder text, marker_strand_data_read text, marker_id integer, marker_clone_id text, marker_allele2 text, marker_allele3 text)
+CREATE OR REPLACE FUNCTION getmarkerqcmetadatabydataset(datasetid integer) RETURNS TABLE(marker_name text, platform_name text, variant_id integer, variant_code text, marker_ref text, marker_alts text, marker_sequence text, marker_strand text, marker_primer_forw1 text, marker_primer_forw2 text, marker_primer_rev1 text, marker_primer_rev2 text, marker_probe1 text, marker_probe2 text, marker_polymorphism_type text, marker_synonym text, marker_source text, marker_gene_id text, marker_gene_annotation text, marker_polymorphism_annotation text, marker_marker_dom text, marker_clone_id_pos text, marker_genome_build text, marker_typeofrefallele_alleleorder text, marker_strand_data_read text, marker_id integer, marker_clone_id text, marker_allele2 text, marker_allele3 text, user_properties text)
     LANGUAGE plpgsql
     AS $$
   BEGIN
@@ -906,9 +958,12 @@ CREATE OR REPLACE FUNCTION getmarkerqcmetadatabydataset(datasetid integer) RETUR
     ,(m.props->>getPropertyIdByNamesAndType('marker_prop','clone_id',1)::text)
     ,(m.props->>getPropertyIdByNamesAndType('marker_prop','allele2',1)::text)
     ,(m.props->>getPropertyIdByNamesAndType('marker_prop','allele3',1)::text)
-	from marker m left join platform p on m.platform_id = p.platform_id
+    ,up.user_properties as user_properties
+	from marker m 
+  left join platform p on m.platform_id = p.platform_id
 	left join cv on m.strand_id = cv.cv_id 
 	left join variant v on m.variant_id = v.variant_id
+  left join getallUserPropertiesOfMarkerAsText(m.marker_id) up on m.marker_id = up.marker_id
 	where m.dataset_marker_idx ? datasetId::text
 	order by (m.dataset_marker_idx->>datasetId::text)::integer; 
   END;
@@ -1643,3 +1698,6 @@ CREATE OR REPLACE FUNCTION gettotalprojects() RETURNS integer
     return total;
   END;
 $$;
+
+
+
