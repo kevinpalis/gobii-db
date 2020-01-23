@@ -120,6 +120,18 @@ def main(isVerbose, connectionStr, datasetId, outputFile, allMeta, namesOnly, ma
 				MDEUtility.printError('ERROR: Extraction type is required.')
 				sys.exit(12)
 
+		##START: expanding the user properties column (key:value) to individual columns
+		with open(outputFile, 'r') as markerMeta:
+			if isVerbose:
+				print("\tStarting expansion of user properties column...")
+				markerReader = csv.reader(markerMeta, delimiter='\t')
+				for markerRow in markerReader:
+					print("\tLast column: %s" % markerRow[-1])
+				markerMeta.seek(0)  # reset the read position of the file object
+				for markerRow in markerReader:
+					print("\tSecond read - Last column: %s" % markerRow[-1])
+		##END: expanding user properties
+
 		if displayMapId != -1:
 			if mapsetOutputFile == '':
 				MDEUtility.printError('ERROR: Mapset output file path is not set.')
