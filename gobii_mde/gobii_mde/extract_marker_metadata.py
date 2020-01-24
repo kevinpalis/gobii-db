@@ -16,6 +16,8 @@ import csv
 import traceback
 from util.mde_utility import MDEUtility
 from db.extract_metadata_manager import ExtractMetadataManager
+from collections import OrderedDict
+from pprint import pprint
 
 def main(isVerbose, connectionStr, datasetId, outputFile, allMeta, namesOnly, mapId, includeChrLen, displayMapId, markerList, sampleList, mapsetOutputFile, extractionType, datasetType, markerNames, platformList, piId, projectId, sampleType, sampleNames, markerGroupList):
 	MAPID_COL_POS = 2
@@ -124,12 +126,36 @@ def main(isVerbose, connectionStr, datasetId, outputFile, allMeta, namesOnly, ma
 		with open(outputFile, 'r') as markerMeta:
 			if isVerbose:
 				print("\tStarting expansion of user properties column...")
-				markerReader = csv.reader(markerMeta, delimiter='\t')
-				for markerRow in markerReader:
-					print("\tLast column: %s" % markerRow[-1])
-				markerMeta.seek(0)  # reset the read position of the file object
-				for markerRow in markerReader:
-					print("\tSecond read - Last column: %s" % markerRow[-1])
+			markerReader = csv.reader(markerMeta, delimiter='\t')
+			userPropsRows = []
+			propNames = set()
+			headerRow = next(markerReader)
+			for markerRow in markerReader:
+				userProps = OrderedDict()
+				#properties are comma-delimited
+				for prop in markerRow[-1].split(','):
+					#key-value-pairs are colon-delimited
+					key, value = prop.split(':')
+					#store properties to a dictionary
+					userProps[key.strip()] = value.strip()
+					#keep a unique list of property names
+					propNames.add(key.strip())
+				#keep all rows in a list to maintain order
+				userPropsRows.append(userProps)
+				#pprint(userProps)
+			pprint(userPropsRows)
+			pprint(propNames)
+			markerMeta.seek(0)  # reset the read position of the file object
+			#sort the set alphabetically and convert to list for ease of concatenation
+			propNamesSorted = sorted(propNames)
+			with open(outputFile+'.tmp', 'w') as markerMetaTmp:
+				markerTmpWriter = csv.writer(markerMetaTmp, delimiter='\t')
+				headerRow = next(markerReader)[0:-1] + propNamesSorted
+				markerTmpWriter.writerow(headerRow)
+				if isVerbose:
+					print("Created %s.tmp file for writing extended user props." % outputFile)
+			for markerRow in markerReader:
+				print("\tSecond read - Last column: %s" % markerRow[-1])
 		##END: expanding user properties
 
 		if displayMapId != -1:
