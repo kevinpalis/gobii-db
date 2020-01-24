@@ -16,7 +16,6 @@ import csv
 import traceback
 from util.mde_utility import MDEUtility
 from db.extract_metadata_manager import ExtractMetadataManager
-from collections import OrderedDict
 from pprint import pprint
 
 
@@ -132,9 +131,16 @@ def main(isVerbose, connectionStr, datasetId, outputFile, allMeta, namesOnly, ma
 			propNames = set()
 			headerRow = next(markerReader)
 			for markerRow in markerReader:
-				userProps = OrderedDict()
+				userProps = {}
 				#properties are comma-delimited
 				for prop in markerRow[-1].split(','):
+					#print("markerRow[-1]: %s" % markerRow[-1])
+					#print(type(markerRow[-1]))
+					#print("prop: %s" % prop)
+					#print(type(prop))
+					#prop is empty
+					if not prop:
+						continue
 					#key-value-pairs are colon-delimited
 					key, value = prop.split(':')
 					#store properties to a dictionary
@@ -144,11 +150,13 @@ def main(isVerbose, connectionStr, datasetId, outputFile, allMeta, namesOnly, ma
 				#keep all rows in a list to maintain order
 				userPropsRows.append(userProps)
 				#pprint(userProps)
-			pprint(userPropsRows)
-			pprint(propNames)
+			if isVerbose:
+				pprint(userPropsRows)
+				pprint(propNames)
 			markerMeta.seek(0)  # reset the read position of the file object
 			#sort the set alphabetically and convert to list for ease of concatenation
 			propNamesSorted = sorted(propNames)
+			#create a file with the expanded user properties
 			with open(outputFile+'.tmp', 'w') as markerMetaTmp:
 				markerTmpWriter = csv.writer(markerMetaTmp, delimiter='\t')
 				headerRow = next(markerReader)[0:-1] + propNamesSorted
@@ -159,7 +167,7 @@ def main(isVerbose, connectionStr, datasetId, outputFile, allMeta, namesOnly, ma
 					#print("\tSecond read - Last column: %s" % markerRow[-1])
 					expandedProps = []
 					for propName in propNamesSorted:
-						expandedProps.append(userProps[propName])
+						expandedProps.append(userProps.get(propName, ""))
 					newRow = markerRow[0:-1] + expandedProps
 					markerTmpWriter.writerow(newRow)
 		##END: expanding user properties
