@@ -19,6 +19,7 @@ from db.extract_metadata_manager import ExtractMetadataManager
 from collections import OrderedDict
 from pprint import pprint
 
+
 def main(isVerbose, connectionStr, datasetId, outputFile, allMeta, namesOnly, mapId, includeChrLen, displayMapId, markerList, sampleList, mapsetOutputFile, extractionType, datasetType, markerNames, platformList, piId, projectId, sampleType, sampleNames, markerGroupList):
 	MAPID_COL_POS = 2
 	MARKERNAME_COL_POS_1 = 0
@@ -154,8 +155,13 @@ def main(isVerbose, connectionStr, datasetId, outputFile, allMeta, namesOnly, ma
 				markerTmpWriter.writerow(headerRow)
 				if isVerbose:
 					print("Created %s.tmp file for writing extended user props." % outputFile)
-			for markerRow in markerReader:
-				print("\tSecond read - Last column: %s" % markerRow[-1])
+				for markerRow, userProps in zip(markerReader, userPropsRows):
+					#print("\tSecond read - Last column: %s" % markerRow[-1])
+					expandedProps = []
+					for propName in propNamesSorted:
+						expandedProps.append(userProps[propName])
+					newRow = markerRow[0:-1] + expandedProps
+					markerTmpWriter.writerow(newRow)
 		##END: expanding user properties
 
 		if displayMapId != -1:
