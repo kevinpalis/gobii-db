@@ -13,6 +13,7 @@
 from __future__ import print_function
 import sys
 import csv
+import os
 import traceback
 from util.mde_utility import MDEUtility
 from db.extract_metadata_manager import ExtractMetadataManager
@@ -170,6 +171,14 @@ def main(isVerbose, connectionStr, datasetId, outputFile, allMeta, namesOnly, ma
 						expandedProps.append(userProps.get(propName, ""))
 					newRow = markerRow[0:-1] + expandedProps
 					markerTmpWriter.writerow(newRow)
+		# Although the rename function overwrites destination file silently on UNIX if the user has sufficient permission, it raises an OSError on Windows. So just to get maximum portability, I'm removing the old file before renaming the new one.
+		try:
+			os.remove(outputFile)
+		except OSError as e:  # if for any reason, the old file cannot be deleted, stop MDE execution
+			MDEUtility.printError('Failed to delete non-expanded marker metadata file. Error: %s - %s.' % (e.filename, e.strerror))
+			sys.exit(16)
+		os.rename(outputFile+'.tmp', outputFile)
+
 		##END: expanding user properties
 
 		if displayMapId != -1:
