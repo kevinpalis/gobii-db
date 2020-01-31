@@ -16,18 +16,26 @@ class MDEUtility:
 	def generateRandomString(length):
 		"""
 		This function generates a random alphanumeric string given of a given length.
-		:args: length - the length of the random string to generate
-		:returns: A connection object - This class also stores it as an instance variable for your convenience.
+		:param length: the length of the random string to generate
+		:return random_string: a random alphanumeric string
 		"""
 		chars = string.ascii_uppercase + string.digits
 		return ''.join(random.choice(chars) for _ in range(length))
 
 	@staticmethod
-	def printError(*args, **kwargs):
-		print(*args, file=sys.stderr, **kwargs)
+	def printError(*param, **kwparam):
+		"""
+		Print message to stderr
+		"""
+		print(*param, file=sys.stderr, **kwparam)
 
 	@staticmethod
 	def getFileLineCount(fname):
+		"""
+		Gets the total number of lines for a given file using Linux wc utility
+		:param fname: the file to check the line count of.
+		:return line_count: an integer indicating the number of lines of file fname
+		"""
 		p = subprocess.Popen(['wc', '-l', fname], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 		result, err = p.communicate()
 		if p.returncode != 0:
@@ -37,9 +45,11 @@ class MDEUtility:
 	@staticmethod
 	def expandKeyValuePairColumn(colIdx, inFile, outFile, isVerbose):
 		"""
-		Expands the user properties column (key:value) to individual columns
-		:args: tbd
-		:returns: tbd
+		Expands the user properties column (key:value) of inFile to individual columns and write the results as outFile.
+		:param colIdx: The index of the column to expand. This supports python's slicing indices.
+		:param inFile: The input file path.
+		:param outFile: The output file path.
+		:param isVerbose: (boolean) Sets the verbosity.
 		"""
 		##START: expanding the user properties column (key:value) to individual columns
 		with open(inFile, 'r') as metaFile:
@@ -72,26 +82,34 @@ class MDEUtility:
 			#sort the set alphabetically and convert to list for ease of concatenation
 			propNamesSorted = sorted(propNames)
 			#create a file with the expanded user properties
+			# headerRow = next(metaReader)
+			# print(type(headerRow))
+			# totalCols = len(headerRow)
+			# print(totalCols)
+			# print("%s ?= %s" % (headerRow[totalCols-1], headerRow[-1]))
+
 			with open(outFile, 'w') as metaFileOut:
 				outWriter = csv.writer(metaFileOut, delimiter='\t')
-				######YOU ARE HERE######
-				headerRow = next(metaReader)[0:-1] + propNamesSorted
+				oldHeader = next(metaReader)
+				totalCols = len(oldHeader)
+				# this is needed to cover the case when slicing index start is -1, otherwise we can get rid of the entire if-else block
+				# as oldHeader[colIdx+1:] will simply return None if out of range, but -1+1 is not out of range.
+				if (colIdx == -1) or (colIdx == totalCols-1):
+					headerRow = oldHeader[:colIdx] + propNamesSorted
+				else:
+					headerRow = oldHeader[:colIdx] + propNamesSorted + oldHeader[colIdx+1:]
+				print ("\n\tHeader row = %s" % headerRow)
+				print(totalCols)
 				outWriter.writerow(headerRow)
 				if isVerbose:
-					print("Created %s.tmp file for writing extended user props." % outputFile)
+					print("Created %s file for writing expanded user props." % outFile)
 				for row, userProps in zip(metaReader, userPropsRows):
 					#print("\tSecond read - Last column: %s" % row[-1])
 					expandedProps = []
 					for propName in propNamesSorted:
 						expandedProps.append(userProps.get(propName, ""))
-					newRow = row[0:-1] + expandedProps
+					if (colIdx == -1) or (colIdx == totalCols-1):
+						newRow = row[:colIdx] + expandedProps
+					else:
+						newRow = row[:colIdx] + expandedProps + row[colIdx+1:]
 					outWriter.writerow(newRow)
-		# Although the rename function overwrites destination file silently on UNIX if the user has sufficient permission, it raises an OSError on Windows. So just to get maximum portability, I'm removing the old file before renaming the new one.
-		try:
-			os.remove(outputFile)
-		except OSError as e:  # if for any reason, the old file cannot be deleted, stop MDE execution
-			MDEUtility.printError('Failed to delete non-expanded marker metadata file. Error: %s - %s.' % (e.filename, e.strerror))
-			sys.exit(16)
-		os.rename(outputFile+'.tmp', outputFile)
-
-		##END: expanding user properties

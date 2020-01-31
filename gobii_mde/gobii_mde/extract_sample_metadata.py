@@ -37,6 +37,19 @@ def main(isVerbose, connectionStr, datasetId, outputFile, allMeta, namesOnly, ma
 			else:
 				MDEUtility.printError('ERROR: Extraction type is required.')
 				sys.exit(21)
+
+		MDEUtility.expandKeyValuePairColumn(-3, outputFile, outputFile+'.tmp1', isVerbose)
+		MDEUtility.expandKeyValuePairColumn(-2, outputFile+'.tmp1', outputFile+'.tmp2', isVerbose)
+		MDEUtility.expandKeyValuePairColumn(-1, outputFile+'.tmp2', outputFile+'.tmp3', isVerbose)
+
+		# Although the rename function overwrites destination file silently on UNIX if the user has sufficient permission, it raises an OSError on Windows. So just to get maximum portability, I'm removing the old file before renaming the new one.
+		# try:
+		# 	os.remove(outputFile)
+		# except OSError as e:  # if for any reason, the old file cannot be deleted, stop MDE execution
+		# 	MDEUtility.printError('Failed to delete non-expanded marker metadata file. Error: %s - %s.' % (e.filename, e.strerror))
+		# 	sys.exit(16)
+		# os.rename(outputFile+'.tmp', outputFile)
+
 		exMgr.commitTransaction()
 		exMgr.closeConnection()
 		''' These don't make sense anymore. Requirements keep changing, I may need to reorganize.

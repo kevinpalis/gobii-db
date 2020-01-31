@@ -256,7 +256,7 @@ def main(isVerbose, connectionStr, datasetId, outputFile, allMeta, namesOnly, ma
 								newRow = markerRow + fillerList
 								markerWriter.writerow(newRow)
 		if includeChrLen:
-					exMgr.createChrLenFile(outputFile, datasetId, mapId, markerList, sampleList)
+			exMgr.createChrLenFile(outputFile, datasetId, mapId, markerList, sampleList)
 		exMgr.commitTransaction()
 		exMgr.closeConnection()
 		''' These things don't make sense anymore
