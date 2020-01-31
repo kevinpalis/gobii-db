@@ -17,7 +17,6 @@ import os
 import traceback
 from util.mde_utility import MDEUtility
 from db.extract_metadata_manager import ExtractMetadataManager
-from pprint import pprint
 
 
 def main(isVerbose, connectionStr, datasetId, outputFile, allMeta, namesOnly, mapId, includeChrLen, displayMapId, markerList, sampleList, mapsetOutputFile, extractionType, datasetType, markerNames, platformList, piId, projectId, sampleType, sampleNames, markerGroupList):
@@ -123,63 +122,16 @@ def main(isVerbose, connectionStr, datasetId, outputFile, allMeta, namesOnly, ma
 				MDEUtility.printError('ERROR: Extraction type is required.')
 				sys.exit(12)
 
-		##START: expanding the user properties column (key:value) to individual columns
-		with open(outputFile, 'r') as markerMeta:
-			if isVerbose:
-				print("\tStarting expansion of user properties column...")
-			markerReader = csv.reader(markerMeta, delimiter='\t')
-			userPropsRows = []
-			propNames = set()
-			headerRow = next(markerReader)
-			for markerRow in markerReader:
-				userProps = {}
-				#properties are comma-delimited
-				for prop in markerRow[-1].split(','):
-					#print("markerRow[-1]: %s" % markerRow[-1])
-					#print(type(markerRow[-1]))
-					#print("prop: %s" % prop)
-					#print(type(prop))
-					#prop is empty
-					if not prop:
-						continue
-					#key-value-pairs are colon-delimited
-					key, value = prop.split(':')
-					#store properties to a dictionary
-					userProps[key.strip()] = value.strip()
-					#keep a unique list of property names
-					propNames.add(key.strip())
-				#keep all rows in a list to maintain order
-				userPropsRows.append(userProps)
-				#pprint(userProps)
-			if isVerbose:
-				pprint(userPropsRows)
-				pprint(propNames)
-			markerMeta.seek(0)  # reset the read position of the file object
-			#sort the set alphabetically and convert to list for ease of concatenation
-			propNamesSorted = sorted(propNames)
-			#create a file with the expanded user properties
-			with open(outputFile+'.tmp', 'w') as markerMetaTmp:
-				markerTmpWriter = csv.writer(markerMetaTmp, delimiter='\t')
-				headerRow = next(markerReader)[0:-1] + propNamesSorted
-				markerTmpWriter.writerow(headerRow)
-				if isVerbose:
-					print("Created %s.tmp file for writing extended user props." % outputFile)
-				for markerRow, userProps in zip(markerReader, userPropsRows):
-					#print("\tSecond read - Last column: %s" % markerRow[-1])
-					expandedProps = []
-					for propName in propNamesSorted:
-						expandedProps.append(userProps.get(propName, ""))
-					newRow = markerRow[0:-1] + expandedProps
-					markerTmpWriter.writerow(newRow)
+		#Expand the marker user props column
+		MDEUtility.expandKeyValuePairColumn(-1, outputFile, outputFile+'.tmp', isVerbose)
+
 		# Although the rename function overwrites destination file silently on UNIX if the user has sufficient permission, it raises an OSError on Windows. So just to get maximum portability, I'm removing the old file before renaming the new one.
 		try:
 			os.remove(outputFile)
+			os.rename(outputFile+'.tmp', outputFile)
 		except OSError as e:  # if for any reason, the old file cannot be deleted, stop MDE execution
 			MDEUtility.printError('Failed to delete non-expanded marker metadata file. Error: %s - %s.' % (e.filename, e.strerror))
 			sys.exit(16)
-		os.rename(outputFile+'.tmp', outputFile)
-
-		##END: expanding user properties
 
 		if displayMapId != -1:
 			if mapsetOutputFile == '':

@@ -51,7 +51,6 @@ class MDEUtility:
 		:param outFile: The output file path.
 		:param isVerbose: (boolean) Sets the verbosity.
 		"""
-		##START: expanding the user properties column (key:value) to individual columns
 		with open(inFile, 'r') as metaFile:
 			if isVerbose:
 				print("\tStarting expansion of user properties column(s)...")
@@ -74,20 +73,12 @@ class MDEUtility:
 					propNames.add(key.strip())
 				#keep all rows in a list to maintain order
 				userPropsRows.append(userProps)
-				#pprint(userProps)
 			if isVerbose:
-				pprint(userPropsRows)
 				pprint(propNames)
 			metaFile.seek(0)  # reset the read position of the file object
 			#sort the set alphabetically and convert to list for ease of concatenation
 			propNamesSorted = sorted(propNames)
 			#create a file with the expanded user properties
-			# headerRow = next(metaReader)
-			# print(type(headerRow))
-			# totalCols = len(headerRow)
-			# print(totalCols)
-			# print("%s ?= %s" % (headerRow[totalCols-1], headerRow[-1]))
-
 			with open(outFile, 'w') as metaFileOut:
 				outWriter = csv.writer(metaFileOut, delimiter='\t')
 				oldHeader = next(metaReader)
@@ -98,13 +89,14 @@ class MDEUtility:
 					headerRow = oldHeader[:colIdx] + propNamesSorted
 				else:
 					headerRow = oldHeader[:colIdx] + propNamesSorted + oldHeader[colIdx+1:]
-				print ("\n\tHeader row = %s" % headerRow)
-				print(totalCols)
+				if isVerbose:
+					print ("\n\tHeader row =")
+					pprint(headerRow)
+					print("Total number of columns = %s" % totalCols)
 				outWriter.writerow(headerRow)
 				if isVerbose:
 					print("Created %s file for writing expanded user props." % outFile)
 				for row, userProps in zip(metaReader, userPropsRows):
-					#print("\tSecond read - Last column: %s" % row[-1])
 					expandedProps = []
 					for propName in propNamesSorted:
 						expandedProps.append(userProps.get(propName, ""))
