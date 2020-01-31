@@ -38,9 +38,14 @@ def main(isVerbose, connectionStr, datasetId, outputFile, allMeta, namesOnly, ma
 				MDEUtility.printError('ERROR: Extraction type is required.')
 				sys.exit(21)
 
+		#expand project user-defined properties
 		MDEUtility.expandKeyValuePairColumn(-3, outputFile, outputFile+'.tmp1', isVerbose)
+		#expand germplasm user-defined properties
 		MDEUtility.expandKeyValuePairColumn(-2, outputFile+'.tmp1', outputFile+'.tmp2', isVerbose)
+		#expand dnasample user-defined properties
 		MDEUtility.expandKeyValuePairColumn(-1, outputFile+'.tmp2', outputFile+'.tmp3', isVerbose)
+
+		#TODO: Replace main sample meta file and delete all temp files
 
 		# Although the rename function overwrites destination file silently on UNIX if the user has sufficient permission, it raises an OSError on Windows. So just to get maximum portability, I'm removing the old file before renaming the new one.
 		# try:

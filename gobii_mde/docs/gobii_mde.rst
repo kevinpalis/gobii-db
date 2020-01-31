@@ -36,6 +36,14 @@ gobii_mde.extract_sample_metadata module
     :undoc-members:
     :show-inheritance:
 
+gobii_mde.gobii_gql module
+--------------------------
+
+.. automodule:: gobii_mde.gobii_gql
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 gobii_mde.gobii_mde module
 --------------------------
 
