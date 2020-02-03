@@ -13,9 +13,11 @@
 from __future__ import print_function
 import sys
 import csv
+import os
 import traceback
 from util.mde_utility import MDEUtility
 from db.extract_metadata_manager import ExtractMetadataManager
+
 
 def main(isVerbose, connectionStr, datasetId, outputFile, allMeta, namesOnly, mapId, includeChrLen, displayMapId, markerList, sampleList, mapsetOutputFile, extractionType, datasetType, markerNames, platformList, piId, projectId, sampleType, sampleNames, markerGroupList):
 	MAPID_COL_POS = 2
@@ -120,6 +122,17 @@ def main(isVerbose, connectionStr, datasetId, outputFile, allMeta, namesOnly, ma
 				MDEUtility.printError('ERROR: Extraction type is required.')
 				sys.exit(12)
 
+		#Expand the marker user props column
+		MDEUtility.expandKeyValuePairColumn(-1, outputFile, outputFile+'.tmp', isVerbose)
+
+		# Although the rename function overwrites destination file silently on UNIX if the user has sufficient permission, it raises an OSError on Windows. So just to get maximum portability, I'm removing the old file before renaming the new one.
+		try:
+			os.remove(outputFile)
+			os.rename(outputFile+'.tmp', outputFile)
+		except OSError as e:  # if for any reason, the old file cannot be deleted, stop MDE execution
+			MDEUtility.printError('Failed to delete non-expanded marker metadata file. Error: %s - %s.' % (e.filename, e.strerror))
+			sys.exit(16)
+
 		if displayMapId != -1:
 			if mapsetOutputFile == '':
 				MDEUtility.printError('ERROR: Mapset output file path is not set.')
@@ -195,7 +208,7 @@ def main(isVerbose, connectionStr, datasetId, outputFile, allMeta, namesOnly, ma
 								newRow = markerRow + fillerList
 								markerWriter.writerow(newRow)
 		if includeChrLen:
-					exMgr.createChrLenFile(outputFile, datasetId, mapId, markerList, sampleList)
+			exMgr.createChrLenFile(outputFile, datasetId, mapId, markerList, sampleList)
 		exMgr.commitTransaction()
 		exMgr.closeConnection()
 		''' These things don't make sense anymore

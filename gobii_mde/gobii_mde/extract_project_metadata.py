@@ -26,7 +26,8 @@ def main(isVerbose, connectionStr, datasetId, outputFile, allMeta):
 		'''
 		exMgr.commitTransaction()
 		exMgr.closeConnection()
-		print("Created full project metadata file successfully.")
+		if isVerbose:
+			print("Created full project metadata file successfully.")
 		'''
 		if allMeta:
 			print("Created full project metadata file successfully.")
@@ -39,6 +40,8 @@ def main(isVerbose, connectionStr, datasetId, outputFile, allMeta):
 		exMgr.rollbackTransaction()
 		traceback.print_exc(file=sys.stderr)
 		sys.exit(8)
+
+
 if __name__ == "__main__":
 	if len(sys.argv) < 5:
 		print("Please supply the parameters. \nUsage: extract_project_metadata <db_connection_string> <dataset_id> <output_file_abs_path> <all_meta>")

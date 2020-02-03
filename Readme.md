@@ -3,7 +3,8 @@ What you'll find here:
 1. Intermediate File Loader scripts
 2. Database Design
 3. Builder scripts
-#Hello to Roy!
+
+TODO: Update project hierarchy description.
 Project Hierarchy:
 ```
 	+- GOBII_IFL     //The Intermediate File Loaders. Python project for loading the digester's output (intermediate files) directly to their corresponding database modules

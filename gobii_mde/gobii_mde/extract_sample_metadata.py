@@ -8,6 +8,7 @@
 from __future__ import print_function
 import sys
 import traceback
+import os
 from util.mde_utility import MDEUtility
 from db.extract_metadata_manager import ExtractMetadataManager
 
@@ -37,6 +38,28 @@ def main(isVerbose, connectionStr, datasetId, outputFile, allMeta, namesOnly, ma
 			else:
 				MDEUtility.printError('ERROR: Extraction type is required.')
 				sys.exit(21)
+
+		#expand project user-defined properties
+		MDEUtility.expandKeyValuePairColumn(-3, outputFile, outputFile+'.tmp1', isVerbose)
+		#expand germplasm user-defined properties
+		MDEUtility.expandKeyValuePairColumn(-2, outputFile+'.tmp1', outputFile+'.tmp2', isVerbose)
+		#expand dnasample user-defined properties
+		MDEUtility.expandKeyValuePairColumn(-1, outputFile+'.tmp2', outputFile+'.tmp3', isVerbose)
+
+		# Replace main sample meta file
+		# Although the rename function overwrites destination file silently on UNIX if the user has sufficient permission, it raises an OSError on Windows. So just to get maximum portability, I'm removing the old file before renaming the new one.
+		try:
+			os.remove(outputFile)
+			os.rename(outputFile+'.tmp3', outputFile)
+		except OSError as e:  # if for any reason, the old file cannot be deleted, stop MDE execution
+			MDEUtility.printError('Failed to delete non-expanded sample metadata file. Error: %s - %s.' % (e.filename, e.strerror))
+			sys.exit(22)
+		#delete all temp files
+		try:
+			os.remove(outputFile+'.tmp1')
+			os.remove(outputFile+'.tmp2')
+		except OSError as e:  # if for any reason, the temp files cannot be deleted, print the error message but continue execution
+			MDEUtility.printError('Failed to delete temp file. Error: %s - %s.' % (e.filename, e.strerror))
 		exMgr.commitTransaction()
 		exMgr.closeConnection()
 		''' These don't make sense anymore. Requirements keep changing, I may need to reorganize.

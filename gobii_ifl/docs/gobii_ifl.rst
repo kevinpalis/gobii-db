@@ -13,6 +13,14 @@ Subpackages
 Submodules
 ----------
 
+gobii_ifl.deduplicate_ifile module
+----------------------------------
+
+.. automodule:: gobii_ifl.deduplicate_ifile
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 gobii_ifl.gobii_ifl module
 --------------------------
 
