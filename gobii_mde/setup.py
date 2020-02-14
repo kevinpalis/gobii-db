@@ -19,12 +19,12 @@ test_requirements = [
 
 setup(
     name='gobii_mde',
-    version='0.1.0',
+    version='2.1.0',
     description="The MetaData Extractors. Python project for extracting metadata information to tab-delimited files.",
     long_description=readme + '\n\n' + history,
     author="Kevin Palis",
     author_email='kdp44@cornell.edu',
-    url='http://cbsugobii05.tc.cornell.edu:6083/scm/gm/data-warehouse-postgresql',
+    url='http://gobiin1.bti.cornell.edu:6083/projects/GM/repos/data-warehouse-postgresql',
     packages=[
         'gobii_mde', 'gobii_mde.db', 'gobii_mde.util'
     ],
@@ -37,7 +37,7 @@ setup(
     zip_safe=False,
     keywords='gobii_mde',
     classifiers=[
-        'Development Status :: 2 - Pre-Alpha',
+        'Development Status :: 2.1.0',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: GNU General Public License',
         'Natural Language :: English',

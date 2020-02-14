@@ -1,6 +1,6 @@
 --liquibase formatted sql
 
 --changeset kpalis:add_fingermillet_contacts context:seed_fingermillet splitStatements:false
-select * from createcontact('Rathore','Abhishek','contact_code_Rathore','a.rathore@cgiar.org',( select array_agg(role_id) from role where role_name in ('Admin', 'PI', 'Curator')),1,current_date,NULL,NULL,(select organization_id from organization where name = 'International Crops Research Institute for the Semi-Arid Tropics (ICRISAT)' ),'arathore');
-select * from createcontact('Vemula','Anilkumar','contact_code_Vemula','anil.kumar@cgiar.org',( select array_agg(role_id) from role where role_name in ('PI', 'Curator')),1,current_date,NULL,NULL,(select organization_id from organization where name = 'International Crops Research Institute for the Semi-Arid Tropics (ICRISAT)' ),'anilkumar');
-select * from createcontact('Das','Roma','contact_code_Das','r.das@cgiar.org',( select array_agg(role_id) from role where role_name in ('PI', 'Curator')),1,current_date,NULL,NULL,(select organization_id from organization where name = 'International Crops Research Institute for the Semi-Arid Tropics (ICRISAT)' ),'rdas');
+--this change, unfortunately, will (gently) break migration path for this particular context, but I got no choice as people don't want publicly accessible email addresses be deep in a database source code.
+--and I cannot just delete this file because then the migration path will not just gently break, it will go crashing down for existing instances.
+select * from createContact('Palis','Kevin','contact_7','kdp44@cornell.edu',( select array_agg(role_id) from role where role_name in ('PI','Curator','Admin')),1,current_date,NULL,NULL,(select organization_id from organization where name = 'GOBII Cornell Team'),'kpalis' );
