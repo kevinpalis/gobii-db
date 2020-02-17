@@ -1,4 +1,6 @@
-### This is the Postgresql Data Warehouse Repository 
+![Alt text](http://cbsugobii05.biohpc.cornell.edu/wordpress/wp-content/uploads/2018/03/GOBII-tm.png "GOBii Project")
+
+### This is the GOBii Data Warehouse Repository 
 What you'll find here:
 1. Intermediate File Loader scripts
 2. Database Design
