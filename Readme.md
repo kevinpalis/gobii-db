@@ -66,3 +66,9 @@ Python library that provides fast bulk loading of huge amounts of data.
 * [IFL Mapping Files](https://gobiiproject.atlassian.net/wiki/spaces/GDW/pages/257589483/IFL+Mapping+Files)
 * [IFL User Guide](https://gobiiproject.atlassian.net/wiki/spaces/GDW/pages/257589524/IFL+User+Guide)
 
+#### GOBII_MDE (MetaData Extractor)
+
+Python library that provides fast bulk extraction of huge amounts of data.
+
+* [MDE User Guide](https://gobiiproject.atlassian.net/wiki/spaces/GDW/pages/260178249/MDE+User+Guide)
+
