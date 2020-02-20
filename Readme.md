@@ -22,14 +22,16 @@ For the rest of this readme, I will be talking about the data warehouse in its o
 
 ## The ERD
 
-You'll find an interactive HTML5 diagram of the data model here: https://gobiiproject.atlassian.net/wiki/spaces/GDW/pages/249200646/Entity+Relationship+Diagram
+You'll find an interactive HTML5 diagram of the data model here: [GOBii ERD](https://gobiiproject.atlassian.net/wiki/spaces/GDW/pages/249200646/Entity+Relationship+Diagram)
 
 
 ## Database Versioning and Change Control Management
 
 When we first started this project we only used raw SQL files and git for version control. We quickly found out it wasn't sufficient, especially when there are multiple contexts involved (add to that the complexity of managing seed data). So we decided to use [Liquibase](https://www.liquibase.org/) in tandem with git. 
 
-There are too many ways you can use Liquibase for database versioning and change control, I have written a Confluence page on how we use it: [Liquibase in GOBii](https://gobiiproject.atlassian.net/wiki/spaces/GDW/pages/248545594/Liquibase). If you are contributing to this repository, it is **imperative that you read the linked document above and conform to the standards we've put in place.**
+#### Liquibase in GOBii
+
+There are too many ways you can use Liquibase for database versioning and change control, I have written [a Confluence page on how we use it](https://gobiiproject.atlassian.net/wiki/spaces/GDW/pages/248545594/Liquibase). If you are contributing to this repository, it is **imperative that you read the linked document and conform to the standards we've put in place.**
 
 
 ## Contents of this repository
@@ -46,4 +48,8 @@ This directory contains all the files we use to design the schema as well as the
 
 This contains everything you need to build the schema from scratch. Note that if you are using one of our pre-configured containers, all these scripts were already ran for you.
 
-* **Rawbase** - raw SQL files that will build the schema from an empty database. Running this will create a schema synonymous to the first stable build of the data warehouse. 
+If you need to create an instance of our database (ex. for development or testing), follow this guide: [Setting a Database for Development](https://gobiiproject.atlassian.net/wiki/spaces/GDW/pages/257523864/Setting+Up+a+Database+for+Development)
+
+
+* **Rawbase** - raw SQL files that will build the schema from an empty database. Running this will create GOBii's foundation schema.
+* **Liquibase** - as mentioned in the "Database Versioning" section above, this directory contains all the Liquibase changelogs and changesets.
