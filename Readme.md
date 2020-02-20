@@ -31,7 +31,7 @@ When we first started this project we only used raw SQL files and git for versio
 
 #### Liquibase in GOBii
 
-There are too many ways you can use Liquibase for database versioning and change control, I have written [a Confluence page on how we use it](https://gobiiproject.atlassian.net/wiki/spaces/GDW/pages/248545594/Liquibase). If you are contributing to this repository, it is **imperative that you read the linked document and conform to the standards we've put in place.**
+There are too many ways you can use Liquibase for database versioning and change control, I have written [a Confluence page on how we use it](https://gobiiproject.atlassian.net/wiki/spaces/GDW/pages/248545594/Liquibase). If you are contributing to this repository, it is imperative that you read the linked document and conform to the standards we've put in place.
 
 
 ## Contents of this repository
@@ -53,3 +53,16 @@ If you need to create an instance of our database (ex. for development or testin
 
 * **Rawbase** - raw SQL files that will build the schema from an empty database. Running this will create GOBii's foundation schema.
 * **Liquibase** - as mentioned in the "Database Versioning" section above, this directory contains all the Liquibase changelogs and changesets.
+
+### Data Access Layer
+
+To satisfy big data requirements, we implemented a thin data access layer (written in Python) that handle bulk loading and extraction with high speed and data volume.
+
+#### GOBII_IFL (Intermmediate File Loader)
+
+Python library that provides fast bulk loading of huge amounts of data.
+
+* [IFL Architecture](https://gobiiproject.atlassian.net/wiki/spaces/GDW/pages/257589467/IFL+Architecture)
+* [IFL Mapping Files](https://gobiiproject.atlassian.net/wiki/spaces/GDW/pages/257589483/IFL+Mapping+Files)
+* [IFL User Guide](https://gobiiproject.atlassian.net/wiki/spaces/GDW/pages/257589524/IFL+User+Guide)
+
