@@ -5,6 +5,7 @@
 */
 
 --changeset kpalis:fixGetSampleQCMetadataByMarkerListDS context:general splitStatements:false
+--validCheckSum: 7:4b5cf8f5312e231368886a1ba7bf7dcc
 DROP FUNCTION public.getsampleqcmetadatabymarkerlist(text, integer);
 CREATE OR REPLACE FUNCTION public.getsampleqcmetadatabymarkerlist(
 	markerlist text,
@@ -85,11 +86,10 @@ BEGIN
   END;
 $BODY$;
 
-ALTER FUNCTION public.getsampleqcmetadatabymarkerlist(text, integer)
-    OWNER TO appuser;
 
 
 --changeset kpalis:fixGetSampleQCMetadataBySampleListDS context:general splitStatements:false
+--validCheckSum 7:7b68577ba4a39c3a458a4fc62687725b
 DROP FUNCTION public.getsampleqcmetadatabysamplelist(text, integer);
 CREATE OR REPLACE FUNCTION public.getsampleqcmetadatabysamplelist(
 	samplelist text,
@@ -171,7 +171,5 @@ AS $BODY$
   END;
 $BODY$;
 
-ALTER FUNCTION public.getsampleqcmetadatabysamplelist(text, integer)
-    OWNER TO appuser;
 
 
