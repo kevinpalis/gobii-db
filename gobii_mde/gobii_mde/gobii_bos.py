@@ -16,8 +16,37 @@ from util.bos_utility import BOSException
 from util.bos_utility import BOSUtility
 
 def main(argv):
-		goalVertices = ['marker', 'dnarun']
+		verbose = False
+		debug = False
 
+		####################################################
+		# START: GET PARAMETERS/ARGUMENTS
+		####################################################
+		try:
+			opts, args = getopt.getopt(argv, "hc:o:vd", ["connectionString=", "outputFilePath=", "verbose", "debug"])
+			#print (opts, args)
+			# No arguments supplied, show help
+			if len(args) < 2 and len(opts) < 2:
+				printUsageHelp(ReturnCodes.SUCCESS)
+		except getopt.GetoptError:
+			# print ("OptError: %s" % (str(e1)))
+			exitWithException(ReturnCodes.INVALID_OPTIONS, None)
+		for opt, arg in opts:
+			if opt == '-h':
+				printUsageHelp(ReturnCodes.SUCCESS)
+			elif opt in ("-c", "--connectionString"):
+				connectionStr = arg
+			elif opt in ("-o", "--outputFilePath"):
+				outputFilePath = arg
+			elif opt in ("-v", "--verbose"):
+				verbose = True
+			elif opt in ("-d", "--debug"):
+				debug = True
+
+		####################################################
+		# END: GET PARAMETERS/ARGUMENTS
+		# START: INITIAL VALIDATIONS AND PARAMETERS PARSING
+		####################################################
 
 def printUsageHelp(eCode):
 	print (eCode)
@@ -36,8 +65,8 @@ def printUsageHelp(eCode):
 	if eCode == ReturnCodes.SUCCESS:
 		sys.exit(eCode)
 	try:
-		raise GQLException(eCode)
-	except GQLException as e1:
+		raise BOSException(eCode)
+	except BOSException as e1:
 		print (e1.message)
 		traceback.print_exc()
 		sys.exit(eCode)
