@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
-	<include file="changelogs/changesets/marker_group_fxns.sql"/>
-	<include file="changelogs/changesets/create_job_module.sql"/>
-	<include file="changelogs/changesets/fix_samplemetadata_wrongdatasets.sql"/>
-	<include file="changelogs/changesets/fix_wgrs_protocol_seed_data.sql"/>
-	<include file="changelogs/changesets/jobs_summary_view.sql"/>
-	<include file="changelogs/changesets/functions_cleanup.sql"/>
+	<include file="changelogs/changesets/pre-2.1/marker_group_fxns.sql"/>
+	<include file="changelogs/changesets/pre-2.1/create_job_module.sql"/>
+	<include file="changelogs/changesets/pre-2.1/pre-2.1/fix_samplemetadata_wrongdatasets.sql"/>
+	<include file="changelogs/changesets/pre-2.1/fix_wgrs_protocol_seed_data.sql"/>
+	<include file="changelogs/changesets/pre-2.1/jobs_summary_view.sql"/>
+	<include file="changelogs/changesets/pre-2.1/functions_cleanup.sql"/>
 	<include file="changelogs/changesets/run_on_change/append_functions.sql"/>
 	<include file="changelogs/changesets/run_on_change/create_functions.sql"/>
 	<include file="changelogs/changesets/run_on_change/delete_functions.sql"/>
@@ -14,15 +14,15 @@
 	<include file="changelogs/changesets/run_on_change/update_functions.sql"/>
 	<include file="changelogs/changesets/run_on_change/update_gobiidb_version.sql"/>
 	<include file="changelogs/changesets/run_on_change/upsert_functions.sql"/>
-	<include file="changelogs/changesets/create_timescoper_module.sql"/>
-	<include file="changelogs/changesets/fix_old_datasets_job_ids.sql"/>
+	<include file="changelogs/changesets/pre-2.1/create_timescoper_module.sql"/>
+	<include file="changelogs/changesets/pre-2.1/fix_old_datasets_job_ids.sql"/>
 	<include file="changelogs/changesets/seed/pigeonpea_contacts.sql"/>
 	<include file="changelogs/changesets/seed/pearlmillet_contacts.sql"/>
 	<include file="changelogs/changesets/seed/groundnut_contacts.sql"/>
 	<include file="changelogs/changesets/seed/fingermillet_contacts.sql"/>
-	<include file="changelogs/changesets/fix_createcontacts_on_conflict.sql"/>
+	<include file="changelogs/changesets/pre-2.1/fix_createcontacts_on_conflict.sql"/>
 	<include file="changelogs/changesets/seed/add_gadm_to_contacts.sql"/>
-	<include file="changelogs/changesets/set_dataset_modifiedcols_null.sql"/>
+	<include file="changelogs/changesets/pre-2.1/set_dataset_modifiedcols_null.sql"/>
 	<include file="changelogs/changesets/seed/add_pgcrypto.sql"/>
 	<include file="changelogs/changesets/run_on_change/timescope_functions_prereq.sql"/>
 	<include file="changelogs/changesets/seed/add_tadm_to_timescoper.sql"/>
