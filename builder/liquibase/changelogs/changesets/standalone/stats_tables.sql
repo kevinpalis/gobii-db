@@ -299,7 +299,7 @@ DECLARE
 BEGIN
     FOREACH d_id IN ARRAY ARRAY(SELECT JSONB_OBJECT_KEYS(OLD.dataset_marker_idx)) LOOP
         UPDATE dataset_stats SET marker_count = marker_count - 1
-        WHERE dataset_id = d_id;
+        WHERE dataset_id = d_id::INTEGER;
 
         -- update experiment_stats
         UPDATE experiment_stats SET marker_count = marker_count - 1
