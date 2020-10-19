@@ -241,6 +241,88 @@ CREATE TRIGGER experiment_count_inc_trig AFTER INSERT ON experiment FOR EACH ROW
 CREATE TRIGGER experiment_count_dec_trig AFTER DELETE ON experiment FOR EACH ROW EXECUTE PROCEDURE experiment_decrement();
 
 
+-- create stored procedure to update marker/dnarun stats
+CREATE OR REPLACE FUNCTION update_marker_stats(d_id integer, amt integer) RETURNS void
+LANGUAGE plpgsql
+AS $$
+BEGIN 
+    UPDATE dataset_stats SET marker_count = marker_count + amt
+    WHERE dataset_id = d_id;
+
+    IF NOT FOUND AND amt > 0 THEN
+        INSERT INTO dataset_stats(dataset_id, marker_count)
+        VALUES(d_id, 1);
+    END IF;
+
+    -- update experiment_stats
+    UPDATE experiment_stats SET marker_count = marker_count + amt
+    FROM dataset
+    WHERE experiment_stats.experiment_id = dataset.experiment_id
+    AND dataset.dataset_id = d_id;
+
+    IF NOT FOUND AND amt > 0 THEN
+        INSERT INTO experiment_stats(experiment_id, marker_count)
+        SELECT experiment_id, 1 FROM dataset WHERE dataset_id = d_id;
+    END IF;
+
+    -- update project stats
+    UPDATE project_stats SET marker_count = marker_count + amt
+    FROM experiment, dataset
+    WHERE project_stats.project_id = experiment.project_id
+    AND experiment.experiment_id = dataset.experiment_id
+    AND dataset.dataset_id = d_id;
+
+    IF NOT FOUND AND amt > 0 THEN
+        INSERT INTO project_stats(project_id, marker_count)
+        SELECT project.project_id, 1 FROM project, experiment, dataset 
+        WHERE project.project_id = experiment.project_id
+        AND experiment.experiment_id = dataset.experiment_id
+        AND dataset.dataset_id = d_id;
+    END IF;
+END;
+$$;
+
+
+CREATE OR REPLACE FUNCTION update_dnarun_stats(d_id integer, amt integer) RETURNS void
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    UPDATE dataset_stats SET dnarun_count = dnarun_count + amt
+    WHERE dataset_id = d_id;
+
+    IF NOT FOUND AND amt > 0 THEN
+        INSERT INTO dataset_stats(dataset_id, dnarun_count)
+        VALUES(d_id, 1);
+    END IF;
+
+    -- update experiment_stats
+    UPDATE experiment_stats SET dnarun_count = dnarun_count + amt
+    FROM dataset
+    WHERE experiment_stats.experiment_id = dataset.experiment_id
+    AND dataset.dataset_id = d_id;
+
+    IF NOT FOUND AND amt > 0 THEN
+        INSERT INTO experiment_stats(experiment_id, dnarun_count)
+        SELECT experiment_id, 1 FROM dataset WHERE dataset_id = d_id;
+    END IF;
+
+    -- update project stats
+    UPDATE project_stats SET dnarun_count = dnarun_count + amt
+    FROM experiment, dataset
+    WHERE project_stats.project_id = experiment.project_id
+    AND experiment.experiment_id = dataset.experiment_id
+    AND dataset.dataset_id = d_id;
+
+    IF NOT FOUND AND amt > 0 THEN
+        INSERT INTO project_stats(project_id, dnarun_count)
+        SELECT project.project_id, 1 FROM project, experiment, dataset 
+        WHERE project.project_id = experiment.project_id
+        AND experiment.experiment_id = dataset.experiment_id
+        AND dataset.dataset_id = d_id;
+    END IF;
+END;
+$$;
+
 -- create functions for dataset
 CREATE OR REPLACE FUNCTION marker_increment()
     RETURNS TRIGGER
@@ -251,39 +333,7 @@ DECLARE
 BEGIN
     -- get the dataset ids of the marker
     FOREACH d_id IN ARRAY ARRAY(SELECT JSONB_OBJECT_KEYS(NEW.dataset_marker_idx)) LOOP
-        UPDATE dataset_stats SET marker_count = marker_count + 1
-        WHERE dataset_id = d_id::INTEGER;
-
-        IF NOT FOUND THEN
-            INSERT INTO dataset_stats(dataset_id, marker_count)
-            VALUES(d_id, 1);
-        END IF;
-
-        -- update experiment_stats
-        UPDATE experiment_stats SET marker_count = marker_count + 1
-        FROM dataset
-        WHERE experiment_stats.experiment_id = dataset.experiment_id
-        AND dataset.dataset_id = d_id::INTEGER;
-
-        IF NOT FOUND THEN
-            INSERT INTO experiment_stats(experiment_id, marker_count)
-            SELECT experiment_id, 1 FROM dataset WHERE dataset_id = d_id;
-        END IF;
-
-        -- update project stats
-        UPDATE project_stats SET marker_count = marker_count + 1
-        FROM experiment, dataset
-        WHERE project_stats.project_id = experiment.project_id
-        AND experiment.experiment_id = dataset.experiment_id
-        AND dataset.dataset_id = d_id::INTEGER;
-
-        IF NOT FOUND THEN
-            INSERT INTO project_stats(project_id, marker_count)
-            SELECT project.project_id, 1 FROM project, experiment, dataset 
-            WHERE project.project_id = experiment.project_id
-            AND experiment.experiment_id = dataset.experiment_id
-            AND dataset.dataset_id = d_id::INTEGER;
-        END IF;
+        PERFORM update_marker_stats(d_id::integer, 1);
     END LOOP;
 
     RETURN NEW;
@@ -298,22 +348,7 @@ DECLARE
     d_id varchar;
 BEGIN
     FOREACH d_id IN ARRAY ARRAY(SELECT JSONB_OBJECT_KEYS(OLD.dataset_marker_idx)) LOOP
-        UPDATE dataset_stats SET marker_count = marker_count - 1
-        WHERE dataset_id = d_id::INTEGER;
-
-        -- update experiment_stats
-        UPDATE experiment_stats SET marker_count = marker_count - 1
-        FROM dataset
-        WHERE experiment_stats.experiment_id = dataset.experiment_id
-        AND dataset.dataset_id = d_id::INTEGER;
-
-         -- update project stats
-        UPDATE project_stats SET marker_count = marker_count - 1
-        FROM experiment, dataset
-        WHERE project_stats.project_id = experiment.project_id
-        AND experiment.experiment_id = dataset.experiment_id
-        AND dataset.dataset_id = d_id::INTEGER;
-
+        PERFORM update_marker_stats(d_id::integer, -1);
     END LOOP;
     RETURN NEW;
 END;
@@ -333,39 +368,7 @@ DECLARE
 BEGIN
     -- get the dataset ids of the marker
     FOREACH d_id IN ARRAY ARRAY(SELECT JSONB_OBJECT_KEYS(NEW.dataset_dnarun_idx)) LOOP
-        UPDATE dataset_stats SET dnarun_count = dnarun_count + 1
-        WHERE dataset_id = d_id::INTEGER;
-
-        IF NOT FOUND THEN
-            INSERT INTO dataset_stats(dataset_id, dnarun_count)
-            VALUES(d_id, 1);
-        END IF;
-
-        -- update experiment_stats
-        UPDATE experiment_stats SET dnarun_count = dnarun_count + 1
-        FROM dataset
-        WHERE experiment_stats.experiment_id = dataset.experiment_id
-        AND dataset.dataset_id = d_id::INTEGER;
-
-        IF NOT FOUND THEN
-            INSERT INTO experiment_stats(experiment_id, dnarun_count)
-            SELECT experiment_id, 1 FROM dataset WHERE dataset_id = d_id;
-        END IF;
-
-        -- update project stats
-        UPDATE project_stats SET dnarun_count = dnarun_count + 1
-        FROM experiment, dataset
-        WHERE project_stats.project_id = experiment.project_id
-        AND experiment.experiment_id = dataset.experiment_id
-        AND dataset.dataset_id = d_id::INTEGER;
-
-        IF NOT FOUND THEN
-            INSERT INTO project_stats(project_id, dnarun_count)
-            SELECT project.project_id, 1 FROM project, experiment, dataset 
-            WHERE project.project_id = experiment.project_id
-            AND experiment.experiment_id = dataset.experiment_id
-            AND dataset.dataset_id = d_id::INTEGER;
-        END IF;
+        PERFORM update_dnarun_stats(d_id::integer, 1);
     END LOOP;
 
     RETURN NEW;
@@ -380,22 +383,7 @@ DECLARE
     d_id varchar;
 BEGIN
     FOREACH d_id IN ARRAY ARRAY(SELECT JSONB_OBJECT_KEYS(OLD.dataset_dnarun_idx)) LOOP
-        UPDATE dataset_stats SET dnarun_count = dnarun_count - 1
-        WHERE dataset_id = d_id::INTEGER;
-
-        -- update experiment_stats
-        UPDATE experiment_stats SET dnarun_count = dnarun_count - 1
-        FROM dataset
-        WHERE experiment_stats.experiment_id = dataset.experiment_id
-        AND dataset.dataset_id = d_id::INTEGER;
-
-         -- update project stats
-        UPDATE project_stats SET dnarun_count = dnarun_count - 1
-        FROM experiment, dataset
-        WHERE project_stats.project_id = experiment.project_id
-        AND experiment.experiment_id = dataset.experiment_id
-        AND dataset.dataset_id = d_id::INTEGER;
-
+        PERFORM update_dnarun_stats(d_id::integer, -1);
     END LOOP;
     RETURN NEW;
 END;
