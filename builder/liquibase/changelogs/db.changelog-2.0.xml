@@ -2,7 +2,7 @@
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
 	<include file="changelogs/changesets/pre-2.1/marker_group_fxns.sql"/>
 	<include file="changelogs/changesets/pre-2.1/create_job_module.sql"/>
-	<include file="changelogs/changesets/pre-2.1/pre-2.1/fix_samplemetadata_wrongdatasets.sql"/>
+	<include file="changelogs/changesets/pre-2.1/fix_samplemetadata_wrongdatasets.sql"/>
 	<include file="changelogs/changesets/pre-2.1/fix_wgrs_protocol_seed_data.sql"/>
 	<include file="changelogs/changesets/pre-2.1/jobs_summary_view.sql"/>
 	<include file="changelogs/changesets/pre-2.1/functions_cleanup.sql"/>
