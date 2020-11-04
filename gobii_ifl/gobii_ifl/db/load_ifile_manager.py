@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 from __future__ import print_function
 
-from connection_manager import ConnectionManager
-from foreign_data_manager import ForeignDataManager
+from .connection_manager import ConnectionManager
+from .foreign_data_manager import ForeignDataManager
 
 class LoadIfileManager:
 	WORK_MEM = 10240
@@ -55,13 +55,14 @@ class LoadIfileManager:
 
 	def upsertKVPFromForeignTable(self, fTableName, sourceKey, sourceValue, targetTable, targetId, targetJsonb):
 		kvpSql = "select * from upsertKVPFromForeignTable('"+fTableName.lower()+"', '"+sourceKey+"', '"+sourceValue+"', '"+targetTable+"', '"+targetId+"', '"+targetJsonb+"');"
-		#print ("kvpSQL: %s" % kvpSql)
+		print ("kvpSQL: %s" % kvpSql)
 		self.cur.execute(kvpSql)
 		rowsLoaded = self.cur.fetchone()
-		if rowsLoaded is not None:
+		if rowsLoaded:
 			return rowsLoaded[0]
-		else:
-			return rowsLoaded
+		
+		return rowsLoaded
+
 
 	def updateSerialSequence(self, tableName, primaryKeyColumnName):
 		updateSeqSql = "SELECT pg_catalog.setval(pg_get_serial_sequence('"+tableName+"', '"+primaryKeyColumnName+"'), MAX("+primaryKeyColumnName+")) FROM "+tableName+";"

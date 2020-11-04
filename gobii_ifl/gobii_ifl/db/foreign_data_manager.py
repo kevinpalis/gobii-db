@@ -37,6 +37,7 @@ class ForeignDataManager:
 		'''
 		dataFile = open(inputFile, 'r')
 		reader = csv.reader(dataFile, delimiter=self.delim)
-		header = reader.next()
+		header = reader.next()   #python 2 
+		#header = next(reader)   #python 3
 		dataFile.close()
 		return header

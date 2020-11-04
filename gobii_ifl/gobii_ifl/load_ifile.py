@@ -26,6 +26,7 @@ import csv
 import traceback
 from os.path import basename
 from os.path import splitext
+#import codecs
 from db.load_ifile_manager import LoadIfileManager
 from pkg_resources import resource_stream
 from util.ifl_utility import IFLUtility
@@ -55,6 +56,8 @@ def main(isVerbose, connectionStr, iFile, outputPath):
 
 	dupMappingFile = resource_stream('res.map', tableName+'.dupmap')
 	kvpMapFile = resource_stream('res.map', 'kvp.map')
+	#utf8_reader = codecs.getreader("utf-8")
+	#kvpReader = csv.reader(utf8_reader(kvpMapFile), delimiter='\t')
 	kvpReader = csv.reader(kvpMapFile, delimiter='\t')
 	kvpTablesList = [i[0] for i in kvpReader]
 	kvpMapFile.seek(0)
