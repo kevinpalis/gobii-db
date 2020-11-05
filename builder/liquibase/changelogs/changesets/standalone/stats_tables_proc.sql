@@ -11,7 +11,7 @@ BEGIN
         stat_name, stat_name, delta, dataset_id
     );
 
-	GET DIAGNOSTICS rcount = ROW_COUNT;
+    GET DIAGNOSTICS rcount = ROW_COUNT;
 	
     IF rcount = 0 THEN
         EXECUTE format('INSERT INTO dataset_stats(dataset_id, %I) VALUES (%s, %s)',
