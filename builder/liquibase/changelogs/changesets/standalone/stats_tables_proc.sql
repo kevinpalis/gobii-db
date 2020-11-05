@@ -23,7 +23,7 @@ BEGIN
         stat_name, stat_name, delta, dataset_id
     );
 	
-	GET DIAGNOSTICS rcount = ROW_COUNT;
+    GET DIAGNOSTICS rcount = ROW_COUNT;
 
     IF rcount = 0 THEN
         EXECUTE format('INSERT INTO experiment_stats(experiment_id, %I) SELECT a.experiment_id, %s FROM experiment a, dataset b WHERE b.dataset_id = %s AND b.experiment_id = a.experiment_id',
@@ -35,7 +35,7 @@ BEGIN
         stat_name, stat_name, delta, dataset_id
     );
 
-	GET DIAGNOSTICS rcount = ROW_COUNT;
+    GET DIAGNOSTICS rcount = ROW_COUNT;
     IF rcount = 0 THEN
         EXECUTE format('INSERT INTO project_stats(project_id, %I) SELECT a.project_id, %s FROM project a, experiment b, dataset c WHERE c.dataset_id = %s AND c.experiment_id = b.experiment_id AND b.project_id = a.project_id',
             stat_name, delta, dataset_id
