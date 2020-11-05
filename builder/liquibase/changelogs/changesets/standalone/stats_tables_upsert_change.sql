@@ -28,7 +28,7 @@ BEGIN
 
         GET DIAGNOSTICS i = ROW_COUNT;
         total = total + i;
-        IF targetTable = 'marker' OR targetTable = 'dnarun' THEN
+        IF i > 0 AND (targetTable = 'marker' OR targetTable = 'dnarun') THEN
             PERFORM update_dataset_stats(rec.key::int, format('%s_count', targetTable), i);
         END IF;
     end loop;
