@@ -41,5 +41,8 @@ BEGIN
             stat_name, delta, dataset_id
         );
 	END IF;
+EXCEPTION
+    WHEN OTHERS THEN
+        NULL;
 END;
 $$
