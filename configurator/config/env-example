@@ -1,0 +1,7 @@
+database=ADD-YOUR-DETAILS-HERE
+user=ADD-YOUR-DETAILS-HERE
+password=ADD-YOUR-DETAILS-HERE
+host=ADD-YOUR-DETAILS-HERE
+port=ADD-YOUR-DETAILS-HERE
+logging_path=../logs/sastre.log
+sastre_sh_path=ADD-YOUR-DETAILS-HERE
