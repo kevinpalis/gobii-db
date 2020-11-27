@@ -136,7 +136,7 @@ def main(isVerbose, connectionStr, iFile, outputPath):
 	print(connectionStr)
 	ppMgr = PreprocessIfileManager(connectionStr)
 
-	#ppMgr.dropForeignTable(fTableName)
+	ppMgr.dropForeignTable(fTableName)
 	header = ""
 	if isProp:
 		header = ppMgr.createForeignTable(longPropFilename, fTableName)
@@ -230,7 +230,7 @@ def main(isVerbose, connectionStr, iFile, outputPath):
 		if IS_VERBOSE:
 			print ("\nderiveIdSql: %s \n" % deriveIdSql)
 		ppMgr.createFileWithDerivedIds(outputFile, deriveIdSql)
-		#ppMgr.dropForeignTable(fTableName)
+		ppMgr.dropForeignTable(fTableName)
 		ppMgr.commitTransaction()
 		ppMgr.closeConnection()
 		if IS_VERBOSE:
