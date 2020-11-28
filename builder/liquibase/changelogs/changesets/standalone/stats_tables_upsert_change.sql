@@ -29,7 +29,7 @@ BEGIN
         GET DIAGNOSTICS i = ROW_COUNT;
         total = total + i;
         IF i > 0 AND (targetTable = 'marker' OR targetTable = 'dnarun') THEN
-            PERFORM update_dataset_stats(rec.key::int, format('%s_count', targetTable), i);
+            PERFORM upsert_dataset_stats(rec.key::int, targetTable, targetJsonbCol);
         END IF;
     end loop;
     return total;
