@@ -7,7 +7,7 @@
 DROP TABLE IF EXISTS dataset_stats;
 
 CREATE TABLE  dataset_stats(
-    dataset_id INTEGER PRIMARY KEY REFERENCES dataset(dataset_id),
+    dataset_id INTEGER PRIMARY KEY REFERENCES dataset(dataset_id) ON DELETE CASCADE,
     marker_count BIGINT DEFAULT 0,
     dnarun_count BIGINT DEFAULT 0
 );
@@ -15,7 +15,7 @@ CREATE TABLE  dataset_stats(
 
 DROP TABLE IF EXISTS experiment_stats;
 CREATE TABLE IF NOT EXISTS experiment_stats(
-    experiment_id INTEGER PRIMARY KEY REFERENCES experiment(experiment_id),
+    experiment_id INTEGER PRIMARY KEY REFERENCES experiment(experiment_id) ON DELETE CASCADE,
     dataset_count BIGINT DEFAULT 0,
     marker_count BIGINT DEFAULT 0,
     dnarun_count BIGINT DEFAULT 0
@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS experiment_stats(
 
 DROP TABLE IF EXISTS project_stats;
 CREATE TABLE project_stats(
-    project_id INTEGER PRIMARY KEY REFERENCES project(project_id),
+    project_id INTEGER PRIMARY KEY REFERENCES project(project_id) ON DELETE CASCADE,
     experiment_count BIGINT DEFAULT 0,
     dataset_count BIGINT DEFAULT 0,
     marker_count BIGINT DEFAULT 0,

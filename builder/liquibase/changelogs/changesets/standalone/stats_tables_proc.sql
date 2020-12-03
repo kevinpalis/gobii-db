@@ -61,6 +61,8 @@ BEGIN
         AND experiment.experiment_id = %s', stat_name, e_id
     ) INTO icount;
    
+    IF icount IS NULL THEN icount := 0;
+    END IF;
 
     EXECUTE format(
         'UPDATE experiment_stats SET %I = %s WHERE experiment_id = %s',
@@ -89,6 +91,9 @@ BEGIN
         AND experiment.project_id = project.project_id
         AND project.project_id = %s', stat_name, p_id
     ) INTO icount;
+
+    IF icount IS NULL THEN icount := 0;
+    END IF;
    
     EXECUTE format(
         'UPDATE project_stats SET %I = %s WHERE project_id = %s', stat_name, icount, p_id
@@ -114,6 +119,9 @@ declare
 BEGIN
 
     EXECUTE format('SELECT count(%s->''%s'') FROM %s',targetJsonbCol, d_id, targetTable) INTO icount;
+    
+    IF icount IS NULL THEN icount := 0;
+    END IF;
     
     stat_name := format('%s_count', targetTable);
 

@@ -38,6 +38,8 @@ CREATE OR REPLACE FUNCTION dataset_decrement()
     RETURNS TRIGGER
     LANGUAGE plpgsql
     AS $$
+DECLARE
+    p_id int;
 BEGIN
     UPDATE experiment_stats SET dataset_count = dataset_count - 1 WHERE experiment_id = OLD.experiment_id; 
 
@@ -46,6 +48,16 @@ BEGIN
     FROM experiment
     WHERE project_stats.project_id = experiment.project_id
     AND experiment.experiment_id = OLD.experiment_id;
+    
+    -- also update the stats
+    PERFORM upsert_experiment_stats(OLD.experiment_id, 'dnarun_count');
+    PERFORM upsert_experiment_stats(OLD.experiment_id, 'marker_count');
+
+    SELECT experiment.project_id INTO p_id FROM  experiment WHERE experiment.experiment_id = OLD.experiment_id;
+
+    PERFORM upsert_project_stats(p_id, 'dnarun_count');
+    PERFORM upsert_project_stats(p_id, 'marker_count');
+ 
     RETURN NEW;
 END;
 $$;
@@ -84,6 +96,9 @@ BEGIN
     UPDATE project_stats
     SET experiment_count = experiment_count - 1
     WHERE project_id = OLD.project_id;
+
+    PERFORM upsert_project_stats(OLD.project_id, 'dnarun_count');
+    PERFORM upsert_project_stats(OLD.project_id, 'marker_count');
     RETURN NEW;
 END;
 $$;
