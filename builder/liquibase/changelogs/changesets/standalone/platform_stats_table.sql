@@ -1,6 +1,6 @@
 --liquibase formatted sql
 
---changeset rduldulao:init_plat_stats_tables splitStatements:false runOnChange:false
+--changeset rduldulao:plat_stats_tables splitStatements:false runOnChange:false
 -- initialize tables
 
 DROP TABLE IF EXISTS platform_stats;
