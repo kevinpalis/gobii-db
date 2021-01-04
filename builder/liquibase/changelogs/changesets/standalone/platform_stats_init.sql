@@ -19,10 +19,10 @@ WITH protocol_count_as AS (
     GROUP BY platform_id
     ORDER BY platform_id
 )
-UPDATE protocol_stats
-SET protocol_stats.protocol_count  = c.protocol_count
+UPDATE platform_stats
+SET protocol_count  = c.protocol_count
 FROM protocol_count_as c
-WHERE protocol_stats.platform_id = c.platform_id;
+WHERE platform_stats.platform_id = c.platform_id;
 
 -- initial vendor_protocol_count
 WITH vendor_protocol_count_as AS (
@@ -31,10 +31,10 @@ WITH vendor_protocol_count_as AS (
     WHERE platform.platform_id = p.platform_id AND p.protocol_id = vp.protocol_id
     GROUP BY platform.platform_id
 )
-UPDATE protocol_stats
-SET protocol_stats.vendor_protocol_count = c.vendor_protocol_count
+UPDATE platform_stats
+SET vendor_protocol_count = c.vendor_protocol_count
 FROM vendor_protocol_count_as c
-WHERE protocol_stats.platform_id = c.platform_id;
+WHERE platform_stats.platform_id = c.platform_id;
 
 -- initial experiment_count
 
@@ -44,12 +44,12 @@ WITH experiment_count_as  AS (
     WHERE experiment.vendor_protocol_id = vendor_protocol.vendor_protocol_id
     AND vendor_protocol.protocol_id = protocol.protocol_id
     AND protocol.platform_id = platform.platform_id
-    GROUP BY platform.platform_id;
+    GROUP BY platform.platform_id
 )
-UPDATE protocol_stats
-SET protocol_stats.experiment_count = c.experiment_count
+UPDATE platform_stats
+SET experiment_count = c.experiment_count
 FROM experiment_count_as c
-WHERE protocol_stats.platform_id = c.platform_id;
+WHERE platform_stats.platform_id = c.platform_id;
 
 -- initial marker_count
 
@@ -58,7 +58,7 @@ WITH marker_count_as AS (
    FROM marker
    GROUP BY platform_id
 )
-UPDATE protocol_stats
-SET protocol_stats.marker_count = c.marker_count
+UPDATE platform_stats
+SET marker_count = c.marker_count
 FROM marker_count_as c
-WHERE protocol_stats.platform_id = c.platform_id;
+WHERE platform_stats.platform_id = c.platform_id;

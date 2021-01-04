@@ -6,4 +6,9 @@
 	<include file="changelogs/changesets/standalone/stats_tables_proc.sql"/>
 	<include file="changelogs/changesets/standalone/stats_tables_triggers.sql"/>
 	<include file="changelogs/changesets/standalone/stats_tables_upsert_change.sql"/>
+	<include file="changelogs/changesets/standalone/platform_stats_table.sql"/>
+	<include file="changelogs/changesets/standalone/platform_stats_init.sql"/>
+	<include file="changelogs/changesets/standalone/platform_stats_table_proc.sql"/>
+	<include file="changelogs/changesets/standalone/platform_stats_triggers.sql"/>
+	<include file="changelogs/changesets/standalone/platform_stats_table_upsert_change.sql"/>
 </databaseChangeLog>
