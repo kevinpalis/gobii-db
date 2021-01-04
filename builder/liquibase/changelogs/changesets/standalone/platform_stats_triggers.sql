@@ -352,3 +352,29 @@ $$;
 
 DROP TRIGGER IF EXISTS experiment_platform_update_trig ON experiment;
 CREATE TRIGGER experiment_platform_update_trig AFTER UPDATE ON experiment FOR EACH ROW EXECUTE PROCEDURE experiment_platform_update();
+
+-- create trigger for experiment stats for DNA run count
+CREATE OR REPLACE FUNCTION experiment_stats_update()
+    RETURNS TRIGGER
+    LANGUAGE plpgsql
+    AS $$
+    DECLARE plat_id integer;
+BEGIN
+    SELECT protocol.platform_id INTO plat_id FROM protocol, vendor_protocol, experiment
+    WHERE experiment_id = NEW.experiment_id
+    AND experiment.vendor_protocol_id = vendor_protocol.vendor_protocol_id
+    AND vendor_protocol.protocol_id = protocol.protocol_id;
+
+    UPDATE platform_stats SET dnarun_count =  NEW.dnarun_count WHERE platform_id = plat_id;
+    IF NOT FOUND THEN
+        INSERT INTO platform_stats(platform_id, dnarun_count) VALUES (plat_id, NEW.dnarun_count);
+    END IF;
+    RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS experiment_stats_inc_trig ON experiment_stats;
+CREATE TRIGGER experiment_stats_inc_trig AFTER INSERT ON experiment_stats FOR EACH ROW EXECUTE PROCEDURE experiment_stats_update();
+
+DROP TRIGGER IF EXISTS experiment_stats_update_trig ON experiment_stats;
+CREATE TRIGGER experiment_stats_update_trig AFTER UPDATE ON experiment_stats FOR EACH ROW EXECUTE PROCEDURE experiment_stats_update();

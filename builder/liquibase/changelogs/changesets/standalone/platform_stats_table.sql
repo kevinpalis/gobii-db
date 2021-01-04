@@ -9,7 +9,8 @@ CREATE TABLE platform_stats(
     protocol_count BIGINT DEFAULT 0,
     vendor_protocol_count BIGINT DEFAULT 0,
     experiment_count BIGINT DEFAULT 0,
-    marker_count BIGINT DEFAULT 0
+    marker_count BIGINT DEFAULT 0,
+    dnarun_count BIGINT DEFAULT 0
 );
 
 

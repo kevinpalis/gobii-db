@@ -62,3 +62,18 @@ UPDATE platform_stats
 SET marker_count = c.marker_count
 FROM marker_count_as c
 WHERE platform_stats.platform_id = c.platform_id;
+
+-- initial dnarun_count
+
+WITH dnarun_count_as AS (
+    SELECT protocol.platform_id, count(1) AS dnarun_count
+    FROM dnarun, experiment, vendor_protocol, protocol
+    WHERE dnarun.experiment_id = experiment.experiment_id
+    AND experiment.vendor_protocol_id = vendor_protocol.vendor_protocol_id
+    AND vendor_protocol.protocol_id = protocol.protocol_id
+    GROUP BY protocol.platform_id
+)
+UPDATE platform_stats
+SET dnarun_count = c.dnarun_count
+FROM dnarun_count_as c
+WHERE platform_stats.platform_id = c.platform_id;
