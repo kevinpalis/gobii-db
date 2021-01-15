@@ -110,6 +110,11 @@ def main(isVerbose, connectionStr, iFile, outputPath):
 				print("Removed duplicates successfully.")
 			#primary key column assumed to be tablename_id --> needs to be configurable(?) (would've been better if everything's just 'id' as usual!)
 			rowsLoaded = loadMgr.loadData(tableName, header, outputFile, tableName+"_id")
+			#process stats
+			if rowsLoaded and tableName == 'marker_linkage_group':
+				if IS_VERBOSE:
+					print('Processing marker_linkage_group stats...')
+				loadMgr.processMarkerLinkageGroupStats(fTableName)
 		else:  # KVP file
 			for kvpRow in kvpReader:
 				if kvpRow[0].startswith("#") or kvpRow[0] != tableName:

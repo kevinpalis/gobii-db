@@ -77,3 +77,8 @@ class LoadIfileManager:
 
 	def closeConnection(self):
 		self.connMgr.disconnectFromDatabase()
+
+	def processMarkerLinkageGroupStats(self, fTable):
+		updateSql = "SELECT * FROM upsertMapsetTableStats('"+fTable.lower()+"')"
+		self.cur.execute(updateSql)
+		return
