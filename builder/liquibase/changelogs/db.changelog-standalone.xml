@@ -11,4 +11,8 @@
 	<include file="changelogs/changesets/standalone/platform_stats_table_proc.sql"/>
 	<include file="changelogs/changesets/standalone/platform_stats_triggers.sql"/>
 	<include file="changelogs/changesets/standalone/platform_stats_table_upsert_change.sql"/>
+	<include file="changelogs/changesets/standalone/mapset_stats_table.sql"/>
+	<include file="changelogs/changesets/standalone/mapset_stats_init.sql"/>
+	<include file="changelogs/changesets/standalone/mapset_stats_proc.sql"/>
+	<include file="changelogs/changesets/standalone/mapset_stats_triggers.sql"/>
 </databaseChangeLog>
