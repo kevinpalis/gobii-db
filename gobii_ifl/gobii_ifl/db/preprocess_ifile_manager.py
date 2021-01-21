@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 from __future__ import print_function
 
-from .connection_manager import ConnectionManager
-from .foreign_data_manager import ForeignDataManager
+from connection_manager import ConnectionManager
+from foreign_data_manager import ForeignDataManager
 
 class PreprocessIfileManager:
 	WORK_MEM = 10240

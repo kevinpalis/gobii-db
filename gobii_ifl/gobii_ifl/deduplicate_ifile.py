@@ -10,7 +10,6 @@ import csv
 import traceback
 import itertools
 import pandas as pd
-import codecs
 from os.path import basename
 from os.path import splitext
 from pkg_resources import resource_stream
@@ -29,8 +28,6 @@ def main(isVerbose,preprocessedFile,outputPath, tableName):
         print("Getting info from dupmap file: ", tableName+'.dupmap')
     dupMapFile = resource_stream('res.map',tableName+'.dupmap')
     ## get columns from dupmap
-    #utf8_reader = codecs.getreader("utf-8")
-    #dreader = csv.reader(utf8_reader(dupMapFile),delimiter='\t')
     dreader = csv.reader(dupMapFile,delimiter='\t')
     dupMapColList = [i[0].split(",")[0] for i in dreader if not i[0].startswith("#")]
     

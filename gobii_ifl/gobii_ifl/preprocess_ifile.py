@@ -34,11 +34,9 @@ import sys
 import csv
 import traceback
 import itertools
-import codecs
 from os.path import basename
 from os.path import splitext
 from pkg_resources import resource_stream
-import codecs
 from db.preprocess_ifile_manager import PreprocessIfileManager
 from util.ifl_utility import IFLUtility
 
@@ -70,8 +68,7 @@ def main(isVerbose, connectionStr, iFile, outputPath):
 	isProp = tableName.endswith('_prop')
 	nameMappingFile = resource_stream('res.map', tableName+'.nmap')
 	kvpMapFile = resource_stream('res.map', 'kvp.map')
-	utf8_reader = codecs.getreader("utf-8")
-	kvpReader = csv.reader(utf8_reader(kvpMapFile), delimiter='\t')
+	kvpReader = csv.reader(kvpMapFile, delimiter='\t')
 	kvpTablesList = [i[0] for i in kvpReader]
 	kvpMapFile.seek(0)
 	#print ("kvpTablesList: %s" % kvpTablesList)
@@ -133,7 +130,6 @@ def main(isVerbose, connectionStr, iFile, outputPath):
 							traceback.print_exc(file=sys.stderr)
 							return outputFile, exitCode
 	#instantiating this initializes a database connection
-	print(connectionStr)
 	ppMgr = PreprocessIfileManager(connectionStr)
 
 	ppMgr.dropForeignTable(fTableName)
@@ -153,8 +149,6 @@ def main(isVerbose, connectionStr, iFile, outputPath):
 	if IS_VERBOSE and not isKVP:
 		print("Got targetTableColumnList = %s" % targetTableColumnList)
 	try:
-		#utf8_reader = codecs.getreader("utf-8")
-		#reader = csv.reader(utf8_reader(nameMappingFile), delimiter='\t')
 		reader = csv.reader(nameMappingFile, delimiter='\t')
 		mappedColList = [i[0].split(",")[0] for i in reader]
 		nameMappingFile.seek(0)
@@ -195,7 +189,6 @@ def main(isVerbose, connectionStr, iFile, outputPath):
 			mainFileCol = ""
 			#print("File Columns: %s \nTable Columns: %s" % (fileColumns, tableColumns))
 			for fileCol, tableCol in itertools.izip(fileColumns, tableColumns):
-			#for fileCol, tableCol in zip(fileColumns, tableColumns): #Python 3
 				if IS_VERBOSE:
 					print("\nProcessing column mapping file.%s = %s.%s" % (fileCol, table_name, tableCol))
 				if fileCol not in header:
