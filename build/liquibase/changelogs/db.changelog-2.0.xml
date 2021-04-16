@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
+	<include file="changesets/pre-2.1/marker_group_fxns.sql"/>
+	<include file="changesets/pre-2.1/create_job_module.sql"/>
+	<include file="changesets/pre-2.1/fix_samplemetadata_wrongdatasets.sql"/>
+	<include file="changesets/pre-2.1/fix_wgrs_protocol_seed_data.sql"/>
+	<include file="changesets/pre-2.1/jobs_summary_view.sql"/>
+	<include file="changesets/pre-2.1/functions_cleanup.sql"/>
+	<include file="changesets/run_on_change/append_functions.sql"/>
+	<include file="changesets/run_on_change/create_functions.sql"/>
+	<include file="changesets/run_on_change/delete_functions.sql"/>
+	<include file="changesets/run_on_change/get_functions.sql"/>
+	<include file="changesets/run_on_change/remove_functions.sql"/>
+	<include file="changesets/run_on_change/update_functions.sql"/>
+	<include file="changesets/run_on_change/update_gobiidb_version.sql"/>
+	<include file="changesets/run_on_change/upsert_functions.sql"/>
+	<include file="changesets/pre-2.1/create_timescoper_module.sql"/>
+	<include file="changesets/pre-2.1/fix_old_datasets_job_ids.sql"/>
+	<include file="changesets/seed/pigeonpea_contacts.sql"/>
+	<include file="changesets/seed/pearlmillet_contacts.sql"/>
+	<include file="changesets/seed/groundnut_contacts.sql"/>
+	<include file="changesets/seed/fingermillet_contacts.sql"/>
+	<include file="changesets/pre-2.1/fix_createcontacts_on_conflict.sql"/>
+	<include file="changesets/seed/add_gadm_to_contacts.sql"/>
+	<include file="changesets/pre-2.1/set_dataset_modifiedcols_null.sql"/>
+	<include file="changesets/seed/add_pgcrypto.sql"/>
+	<include file="changesets/run_on_change/timescope_functions_prereq.sql"/>
+	<include file="changesets/seed/add_tadm_to_timescoper.sql"/>
+	<include file="changesets/run_on_change/utility_views.sql"/>
+	<include file="changesets/run_on_change/timescope_functions.sql"/>
+	<include file="changesets/flexquery/create_graph_schema.sql"/>
+	<include file="changesets/run_on_change/flexquery_functions.sql"/>
+	<include file="changesets/seed/create_timescoper_dbuser.sql"/>
+	<include file="changesets/flexquery/fix_wrong_vertex_data.sql"/>
+</databaseChangeLog>

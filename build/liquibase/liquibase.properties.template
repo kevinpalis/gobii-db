@@ -1,5 +1,5 @@
 driver: org.postgresql.Driver
-classpath: drivers/postgresql-9.4.1209.jar
+classpath: bin/drivers/postgresql-42.2.10.jar
 url: jdbc:postgresql://localhost:5432/gobii_main_test
 username: appuser
 password: appuser
