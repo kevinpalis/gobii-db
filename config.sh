@@ -31,7 +31,7 @@ echo "SELECT 'CREATE DATABASE $db_name OWNER $db_user' WHERE NOT EXISTS (SELECT 
 #create the meta schema - this is a fixed name schema that serves as the meta database regardless of the number of crops deployed to this instance
 #creates the database ONLY if it doesn't exist
 echo "Creating the META database..."
-echo "SELECT 'CREATE DATABASE gobii_meta OWNER $db_user' WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = gobii_meta)\gexec" | sudo -u postgres psql
+echo "SELECT 'CREATE DATABASE gobii_meta OWNER $db_user' WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'gobii_meta')\gexec" | sudo -u postgres psql
 
 #create the foundation database
 echo 'Creating the CROP foundation schema...'
