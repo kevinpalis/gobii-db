@@ -34,19 +34,13 @@ echo "Creating the META database..."
 echo "SELECT 'CREATE DATABASE gobii_meta OWNER $db_user' WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = '$db_name')\gexec" | sudo -u postgres psql
 
 #create the foundation database
-echo 'Creating the foundation schema...';
-cd builder/rawbase/;
+echo 'Creating the CROP foundation schema...'
+cd /build/rawbase/
 sudo -u postgres psql $db_name -f build_gobii_pg.sql
 
 
-echo "Creating database $1..."
-psql -h "$3" -p $4 -U $2 postgres -c "create database $1 owner $2;"
-echo "Populating database $1..."
-psql -h "$3" -p $4 -U $2 $1 -f build_gobii_pg.sql
-
-
 echo "Starting liquibase migration..."
-cd build/liquibase
+cd /build/liquibase
 #meta database
 java -jar liquibase.jar --username=$db_user --password=$db_pass --url=jdbc:postgresql://localhost:5432/gobii_meta --driver=org.postgresql.Driver --classpath="bin/drivers/$pg_driver" --changeLogFile=changelogs/db.changelog-master.xml --contexts=meta_general update;
 #crop database
