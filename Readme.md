@@ -143,11 +143,11 @@ Typically, for general usage, you do not need to modify any database scripts or 
 
 * Persist data across docker runs:
 ```bash
-docker run --detach --name gobii-db -h gobii-db -p 5434:5432 --health-cmd="pg_isready -U postgres || exit 1" -e "db_name=gobii_db" -e "db_user=kevin" -e "lq_contexts=general,seed_general,seed_cornell" -v gobii_postgres_etc:/etc/postgresql -v gobii_postgres_log:/var/log/postgresql -v gobii_postgres_lib:/var/lib/postgresql -it ebsproject/gobii-db:latest
+docker run --detach --name gobii-db -h gobii-db -p 5434:5432 --health-cmd="pg_isready -U postgres || exit 1" -e "db_name=gobii_db" -e "db_user=kevin" -e "lq_contexts=general,seed_general,seed_cornell" -v gobii_postgres_etc:/etc/postgresql -v gobii_postgres_log:/var/log/postgresql -v gobii_postgres_lib:/var/lib/postgresql -it ebsproject/gobii-db:dev
 ```
 * Do not persist data (whenever container is removed via `docker rm`, the data goes away with it): 
 ```bash
-docker run --detach --name gobii-db -h gobii-db -p 5434:5432 --health-cmd="pg_isready -U postgres || exit 1" -e "db_name=gobii_db" -e "db_user=kevin" -e "lq_contexts=general,seed_general,seed_cornell" -it ebsproject/gobii-db:latest
+docker run --detach --name gobii-db -h gobii-db -p 5434:5432 --health-cmd="pg_isready -U postgres || exit 1" -e "db_name=gobii_db" -e "db_user=kevin" -e "lq_contexts=general,seed_general,seed_cornell" -it ebsproject/gobii-db:dev
 ```
 * Wait a minute or two. Feel free to check the status of the schema migration via `docker logs gobii-db`.
 
