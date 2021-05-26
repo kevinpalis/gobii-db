@@ -1,0 +1,79 @@
+#########################################################################################################################################################
+# author: Kevin Palis <kdp44@cornell.edu>
+#
+# This YML file is flexible enough to run both in swarm mode or compose. We opted to write this for 2 reasons:
+# 1. Help developers who don't want to bother with docker run commands and just want a simple "docker compose up" to get the database container
+# 2. Serve as a reference for the DevOps team to integrate this container in the EBS Swarm stack - this should show you all the available variables 
+#    and how the service should be declared, particularly the volumes, healthcheck, constraints (labels), etc.
+#
+# NOTE: Docker compose, unlike swarm, automatically picks up the .env file (it must be named ".env"!).
+#########################################################################################################################################################
+version: "3.7"
+
+services:
+  
+  # BA DB
+  gobii-db:
+    image: ${GOBII_DB_IMAGE}:${GOBII_DB_IMAGE_TAG}
+    ports:
+      - target: ${GOBII_DB_TARGET_PORT}
+        published: ${GOBII_DB_PUBLISHED_PORT}
+        protocol: tcp
+        mode: ingress
+    environment:
+      - postgres_local_auth_method=${POSTGRES_LOCAL_AUTH_METHOD}
+      - postgres_host_auth_method=${POSTGRES_HOST_AUTH_METHOD}
+      - postgres_listen_address=${POSTGRES_LISTEN_ADDRESS}
+      - db_user=${GOBII_DB_USER}
+      - db_pass=${GOBII_DB_PASSWORD}
+      - db_name=${GOBII_DB_NAME}
+      - pg_driver=${PG_DRIVER}
+      - lq_contexts=${LIQUIBASE_CONTEXTS}
+      - lq_labels=${LIQUIBASE_LABELS}
+      - default_statistigobii_target=${DEFAULT_STATISTIGOBII_TARGET}
+      - random_page_cost=${RANDOM_PAGE_COST}
+      - effective_cache_size=${EFFECTIVE_CACHE_SIZE}
+      - max_parallel_workers_per_gather=${MAX_PARALLEL_WORKERS_PER_GATHER}
+      - max_parallel_workers=${MAX_PARALLEL_WORKERS}
+    networks: 
+      - ${EBS_DOCKER_NETWORK_NAME}
+    volumes: 
+      - ${POSTGRES_ETC}:/etc/postgresql
+      - ${POSTGRES_LOG}:/var/log/postgresql
+      - ${POSTGRES_LIB}:/var/lib/postgresql
+    #allocates a pseudo-tty (equal to -t)
+    tty: true
+    #we can modify the healthcheck to check the actual BA schema later on (like in gobiiprop)
+    healthcheck:
+      test: pg_isready -U postgres || exit 1
+      interval: 50s
+      timeout: 20s
+      retries: 3
+    #these are simply ignored by docker if ran in compose - but are important to swarm mode!
+    deploy:
+      placement:
+        constraints:
+          - node.labels.type == gobii_db_node
+      mode: replicated
+      replicas: 1
+      endpoint_mode: vip
+      labels:
+        org.ebs.service.description: "This is the GOBII DB Node"
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 180s
+
+networks:
+  ebs_network:
+    #driver: overlay #uncomment if in swarm mode, for compose, this will cause errors as overlay requires swarm
+    name: ${EBS_DOCKER_NETWORK_NAME}
+#when using local DB volumes - comment out if using mounted host volumes
+volumes:
+  gobii_postgres_etc:
+    external: false
+  gobii_postgres_log:
+    external: false
+  gobii_postgres_lib:
+    external: false
