@@ -26,6 +26,11 @@ ENV lq_labels=''
 ENV os_user=gadm
 ENV os_pass=g0b11Admin
 ENV os_group=gobii
+ENV default_statistics_target=100
+ENV random_page_cost=1.1
+ENV effective_cache_size=32GB
+ENV max_parallel_workers_per_gather=4
+ENV max_parallel_workers=10
 
 #Create default user and group. NOTE: change the gadm password on a production system
 RUN useradd $os_user -s /bin/bash -m --password $(echo $os_pass | openssl passwd -1 -stdin) && adduser $os_user sudo && \
@@ -45,7 +50,6 @@ RUN chmod 755 /root/config.sh
 RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 0xB1998361219BD9C9 && \
 apt-add-repository 'deb http://repos.azulsystems.com/ubuntu stable main' && \
 apt install -y zulu-13
-
 
 #Create the file repository configuration
 #Import the repository signing key
