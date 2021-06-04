@@ -2,7 +2,7 @@
 
 --changeset kpalis:create_config_template_module context:meta_general splitStatements:false runOnChange:false
 
-#Create the checksum table
+--Create the checksum table
 CREATE SEQUENCE "public".checksum_id_seq START WITH 1;
 
 CREATE  TABLE "public".checksum ( 
@@ -21,14 +21,14 @@ COMMENT ON COLUMN "public".checksum.md5_hash IS 'The md5 checksum of the file. T
 
 COMMENT ON COLUMN "public".checksum.load_date IS 'The date the file was loaded to the system.';
 
-#Modifications to the job table
+--Modifications to the job table
 ALTER TABLE "public".job ADD checksum_id integer;
 
 COMMENT ON COLUMN "public".job.checksum_id IS 'For jobs that include files, this is a foreign key to the checksum table.';
 
 ALTER TABLE "public".job ADD CONSTRAINT fk_job_checksum FOREIGN KEY ( checksum_id ) REFERENCES "public".checksum( id );
 
-#Modifications to the template table
+--Modifications to the template table
 ALTER TABLE "public"."template" ADD aspect jsonb DEFAULT '{}'::jsonb;
 
 COMMENT ON COLUMN "public"."template".aspect IS 'This is the json aspect file.';

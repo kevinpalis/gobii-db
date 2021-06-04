@@ -4,7 +4,7 @@
 		<comment><![CDATA[standard public schema]]></comment>
 		<table name="checksum" generator_rows="100" >
 			<comment><![CDATA[This table stores MD5 checksums for easy and efficient duplicate checks. The checksums are updated every time a file is loaded to the system.]]></comment>
-			<column name="id" type="integer" jt="4" mandatory="y" regexp="" sequence="checksum_id_seq" >
+			<column name="id" type="integer" jt="4" mandatory="y" regexp="sequence:from=1;step=1;" sequence="checksum_id_seq" >
 				<defo><![CDATA[nextval('checksum_id_seq'::regclass)]]></defo>
 			</column>
 			<column name="file_name" type="text" length="100" jt="12" mandatory="y" regexp="[a-z]{3,10}.(bmp|doc|xls|txt|ini|php|asm|pdf)" >
@@ -247,6 +247,9 @@ COMMENT ON COLUMN "public".crop.creation_date IS 'This is the date the crop was 
 			<entity schema="public" name="crop" />
 			<entity schema="public" name="template" />
 		</group>
+		<script name="SQL_Editor" id="Editor_22e4" language="SQL" >
+			<string><![CDATA[select * from checksum_id_seq;]]></string>
+		</script>
 		<script name="Sample SQL Editor" id="Editor_9e8" language="SQL" >
 			<string><![CDATA[SELECT id, name, crop_id, type_id, status, message, creation_date
 FROM
@@ -258,6 +261,9 @@ FROM
 					<browse_table schema="public" entity="template" fk="template_crop_fkey" x="960" y="20" width="500" height="350" />
 				</browse_table>
 			</browse_table>
+		</browser>
+		<browser id="Browse_2d5" name="checksum" confirm_updates="y" >
+			<browse_table schema="public" entity="checksum" x="20" y="20" width="400" height="300" />
 		</browser>
 		<browser id="Browse_c73" name="crop" confirm_updates="y" >
 			<browse_table schema="public" entity="crop" x="20" y="20" width="526" height="294" />
