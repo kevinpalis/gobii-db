@@ -22,6 +22,7 @@ ENV db_pass=3nt3rpr1SE!
 ENV db_name=gobii_dev
 ENV pg_driver=postgresql-42.2.10.jar
 ENV lq_contexts=general,seed_general,seed_cornell
+ENV lq_meta_contexts=meta_general
 ENV lq_labels=''
 ENV os_user=gadm
 ENV os_pass=g0b11Admin

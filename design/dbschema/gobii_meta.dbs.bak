@@ -2,12 +2,12 @@
 <project name="EBS-GOBii-META" id="Project_1877" database="PostgreSQL" >
 	<schema name="public" >
 		<comment><![CDATA[standard public schema]]></comment>
-		<table name="checksum" generator_rows="100" >
+		<table name="checksum" >
 			<comment><![CDATA[This table stores MD5 checksums for easy and efficient duplicate checks. The checksums are updated every time a file is loaded to the system.]]></comment>
-			<column name="id" type="integer" jt="4" mandatory="y" regexp="" sequence="checksum_id_seq" >
+			<column name="id" type="integer" jt="4" mandatory="y" sequence="checksum_id_seq" >
 				<defo><![CDATA[nextval('checksum_id_seq'::regclass)]]></defo>
 			</column>
-			<column name="file_name" type="text" length="100" jt="12" mandatory="y" regexp="[a-z]{3,10}.(bmp|doc|xls|txt|ini|php|asm|pdf)" >
+			<column name="file_name" type="text" length="100" jt="12" mandatory="y" >
 				<comment><![CDATA[Name of the file that was loaded to the system.]]></comment>
 			</column>
 			<column name="md5_hash" prior="md5" type="uuid" jt="1111" mandatory="y" >
@@ -124,7 +124,7 @@
 				<column name="id" />
 			</index>
 		</table>
-		<table name="status" generator_rows="100" >
+		<table name="status" >
 			<comment><![CDATA[This table contains all the possible status of a job, for example: in_progress, success, failed.]]></comment>
 			<column name="id" type="integer" length="10" decimal="0" jt="4" mandatory="y" >
 				<defo><![CDATA[nextval('status_id_seq'::regclass)]]></defo>
@@ -260,8 +260,7 @@ FROM
 			</browse_table>
 		</browser>
 		<browser id="Browse_c73" name="crop" confirm_updates="y" >
-			<browse_table schema="public" entity="crop" x="20" y="20" width="526" height="294" />
-			<browse_table schema="public" entity="template" x="572" y="24" width="1056" height="356" />
+			<browse_table schema="public" entity="crop" x="20" y="20" width="908" height="299" />
 		</browser>
 		<query id="Query_aa8" name="Sample Query Builder" >
 			<query_table schema="public" name="job" alias="j" x="48" y="48" >
