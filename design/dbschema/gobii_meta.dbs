@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<project name="EBS-GOBii-META" id="Project_1877" database="PostgreSQL" >
+	<schema name="public" >
+		<comment><![CDATA[standard public schema]]></comment>
+		<table name="crop" >
+			<comment><![CDATA[This table keeps track of all the crops in this GDM instance.]]></comment>
+			<column name="id" type="integer" length="10" decimal="0" jt="4" mandatory="y" >
+				<defo><![CDATA[nextval('crop_id_seq'::regclass)]]></defo>
+			</column>
+			<column name="name" type="text" decimal="0" jt="12" mandatory="y" >
+				<comment><![CDATA[The name of the crop. Ex: maize]]></comment>
+			</column>
+			<column name="database_name" type="text" decimal="0" jt="12" mandatory="y" >
+				<comment><![CDATA[The postgres database name for this crop. The convention is gobii_<crop_name>.]]></comment>
+			</column>
+			<column name="owner" type="text" decimal="0" jt="12" mandatory="y" >
+				<comment><![CDATA[The postgres user that owns the crop database, typically, appuser.]]></comment>
+			</column>
+			<column name="creation_date" type="timestamptz" decimal="6" jt="93" mandatory="y" >
+				<defo><![CDATA[now()]]></defo>
+				<comment><![CDATA[This is the date the crop was created - it gets auto-filled by the current date when the row was inserted.]]></comment>
+			</column>
+			<index name="pk_crop_id" unique="PRIMARY_KEY" >
+				<column name="id" />
+			</index>
+		</table>
+		<table name="databasechangelog" >
+			<column name="id" type="varchar" length="255" decimal="0" jt="12" mandatory="y" />
+			<column name="author" type="varchar" length="255" decimal="0" jt="12" mandatory="y" />
+			<column name="filename" type="varchar" length="255" decimal="0" jt="12" mandatory="y" />
+			<column name="dateexecuted" type="timestamp" length="0" decimal="6" jt="93" mandatory="y" />
+			<column name="orderexecuted" type="integer" length="10" decimal="0" jt="4" mandatory="y" />
+			<column name="exectype" type="varchar" length="10" decimal="0" jt="12" mandatory="y" />
+			<column name="md5sum" type="varchar" length="35" decimal="0" jt="12" />
+			<column name="description" type="varchar" length="255" decimal="0" jt="12" />
+			<column name="comments" type="varchar" length="255" decimal="0" jt="12" />
+			<column name="tag" type="varchar" length="255" decimal="0" jt="12" />
+			<column name="liquibase" type="varchar" length="20" decimal="0" jt="12" />
+			<column name="contexts" type="varchar" length="255" decimal="0" jt="12" />
+			<column name="labels" type="varchar" length="255" decimal="0" jt="12" />
+			<column name="deployment_id" type="varchar" length="10" decimal="0" jt="12" />
+		</table>
+		<table name="databasechangeloglock" >
+			<column name="id" type="integer" length="10" decimal="0" jt="4" mandatory="y" />
+			<column name="locked" type="boolean" length="1" decimal="0" jt="-7" mandatory="y" />
+			<column name="lockgranted" type="timestamp" length="0" decimal="6" jt="93" />
+			<column name="lockedby" type="varchar" length="255" decimal="0" jt="12" />
+			<index name="databasechangeloglock_pkey" unique="PRIMARY_KEY" >
+				<column name="id" />
+			</index>
+		</table>
+		<table name="job" >
+			<comment><![CDATA[This table contains all jobs in the system along with their origin and status.]]></comment>
+			<column name="id" type="integer" length="10" decimal="0" jt="4" mandatory="y" >
+				<defo><![CDATA[nextval('job_id_seq'::regclass)]]></defo>
+			</column>
+			<column name="name" type="text" decimal="0" jt="12" mandatory="y" >
+				<comment><![CDATA[The name of the job. This can reflect the name of the job from an external system (ex. rabbitMQ) if needed.]]></comment>
+			</column>
+			<column name="crop_id" type="integer" length="10" decimal="0" jt="4" mandatory="y" >
+				<comment><![CDATA[This identifies the crop this job is on.]]></comment>
+			</column>
+			<column name="type_id" type="integer" length="10" decimal="0" jt="4" mandatory="y" >
+				<comment><![CDATA[This identifies the type of job, ex: loading, extraction, etc.]]></comment>
+			</column>
+			<column name="status" type="integer" length="10" decimal="0" jt="4" mandatory="y" >
+				<comment><![CDATA[The current state of this job, ex: in_progress, success, fail.]]></comment>
+			</column>
+			<column name="message" type="text" decimal="0" jt="12" >
+				<comment><![CDATA[A freetext field the application can use to store any custom status message. Ex. Failed with error code 123, Data loaded successfully at 11-11-21 19:00:01.]]></comment>
+			</column>
+			<column name="creation_date" type="timestamptz" decimal="6" jt="93" mandatory="y" >
+				<defo><![CDATA[now()]]></defo>
+				<comment><![CDATA[The date this job was created.]]></comment>
+			</column>
+			<index name="pk_job_id" unique="PRIMARY_KEY" >
+				<column name="id" />
+			</index>
+			<fk name="job_crop_fkey" to_schema="public" to_table="crop" >
+				<fk_column name="crop_id" pk="id" />
+			</fk>
+			<fk name="job_type_fkey" to_schema="public" to_table="job_type" >
+				<fk_column name="type_id" pk="id" />
+			</fk>
+			<fk name="job_status_fkey" to_schema="public" to_table="status" >
+				<fk_column name="status" pk="id" />
+			</fk>
+		</table>
+		<table name="job_type" >
+			<comment><![CDATA[This table contains all job types in the system, for example: data_loading, data_extraction.]]></comment>
+			<column name="id" type="integer" length="10" decimal="0" jt="4" mandatory="y" >
+				<defo><![CDATA[nextval('job_type_id_seq'::regclass)]]></defo>
+			</column>
+			<column name="name" type="text" decimal="0" jt="12" mandatory="y" >
+				<comment><![CDATA[The name of the job type, ex: loading, extraction]]></comment>
+			</column>
+			<column name="description" type="text" decimal="0" jt="12" />
+			<index name="pk_job_type_id" unique="PRIMARY_KEY" >
+				<column name="id" />
+			</index>
+		</table>
+		<table name="status" >
+			<comment><![CDATA[This table contains all the possible status of a job, for example: in_progress, success, failed.]]></comment>
+			<column name="id" type="integer" length="10" decimal="0" jt="4" mandatory="y" >
+				<defo><![CDATA[nextval('status_id_seq'::regclass)]]></defo>
+			</column>
+			<column name="name" type="text" decimal="0" jt="12" mandatory="y" >
+				<comment><![CDATA[The name of the status, ex: fail, success, in_progress, etc.]]></comment>
+			</column>
+			<column name="description" type="text" decimal="0" jt="12" />
+			<index name="pk_status_id" unique="PRIMARY_KEY" >
+				<column name="id" />
+			</index>
+		</table>
+		<table name="template" >
+			<comment><![CDATA[This table contains the templates for all the types of files we support.]]></comment>
+			<column name="id" type="integer" length="10" decimal="0" jt="4" mandatory="y" >
+				<defo><![CDATA[nextval('template_id_seq'::regclass)]]></defo>
+			</column>
+			<column name="name" type="text" decimal="0" jt="12" mandatory="y" >
+				<comment><![CDATA[The name of the template. This should be descriptive enough to identify the kind of data it applies to.]]></comment>
+			</column>
+			<column name="crop_id" type="integer" length="10" decimal="0" jt="4" >
+				<comment><![CDATA[This identifies the crop this template applies to. Leave it empty if the template is generic and applies to all crops.]]></comment>
+			</column>
+			<column name="template" type="jsonb" decimal="0" jt="2000" >
+				<defo><![CDATA['{}'::jsonb]]></defo>
+				<comment><![CDATA[This is the json template.]]></comment>
+			</column>
+			<column name="description" type="text" decimal="0" jt="12" />
+			<column name="creation_date" type="timestamptz" decimal="6" jt="93" mandatory="y" >
+				<defo><![CDATA[now()]]></defo>
+				<comment><![CDATA[The date this template was created.]]></comment>
+			</column>
+			<index name="pk_template_id" unique="PRIMARY_KEY" >
+				<column name="id" />
+			</index>
+			<fk name="template_crop_fkey" to_schema="public" to_table="crop" >
+				<fk_column name="crop_id" pk="id" />
+			</fk>
+		</table>
+		<sequence name="crop_id_seq" options="START WITH 1" />
+		<sequence name="job_id_seq" options="START WITH 1" />
+		<sequence name="job_type_id_seq" options="START WITH 1" />
+		<sequence name="status_id_seq" options="START WITH 1" />
+		<sequence name="template_id_seq" options="START WITH 1" />
+	</schema>
+	<connector name="EBS-GOBii-META" database="PostgreSQL" driver_class="org.postgresql.Driver" driver_jar="postgresql-42.2.18.jar" driver_desc="Standard" host="localhost" port="5433" instance="gobii_meta" user="ebsuser" passwd="M250M3JwcjFTRSE=" />
+	<layout name="Default Layout" id="Layout_1033" show_relation="columns" >
+		<entity schema="public" name="crop" color="BED3F4" x="272" y="176" />
+		<entity schema="public" name="databasechangelog" color="3986C1" x="768" y="176" />
+		<entity schema="public" name="databasechangeloglock" color="3986C1" x="1008" y="176" />
+		<entity schema="public" name="job" color="BED3F4" x="48" y="176" />
+		<entity schema="public" name="job_type" color="BED3F4" x="272" y="432" />
+		<entity schema="public" name="status" color="BED3F4" x="48" y="432" />
+		<entity schema="public" name="template" color="BED3F4" x="512" y="176" />
+		<callout x="48" y="80" pointer="Round" >
+			<comment><![CDATA[Double-click table headers, columns, or foreign keys to edit. 
+Create multiple layouts (diagrams) with the same or different tables. 
+Saving the model to file will also save the layouts.]]></comment>
+		</callout>
+		<group name="job" color="ECF0F7" >
+			<entity schema="public" name="job" />
+			<entity schema="public" name="crop" />
+			<entity schema="public" name="job_type" />
+			<entity schema="public" name="status" />
+			<entity schema="public" name="template" />
+		</group>
+	</layout>
+	<layout name="Sample Layout with Tools" id="Layout_154f" show_column_type="y" show_relation="columns" >
+		<entity schema="public" name="crop" color="BED3F4" x="352" y="48" />
+		<entity schema="public" name="databasechangelog" color="3986C1" x="992" y="48" />
+		<entity schema="public" name="databasechangeloglock" color="3986C1" x="1312" y="48" />
+		<entity schema="public" name="job" color="BED3F4" x="48" y="48" />
+		<entity schema="public" name="job_type" color="BED3F4" x="352" y="304" />
+		<entity schema="public" name="status" color="BED3F4" x="48" y="304" />
+		<entity schema="public" name="template" color="BED3F4" x="656" y="48" />
+		<script name="Sample SQL Editor" id="Editor_9e8" language="SQL" >
+			<string><![CDATA[SELECT id, name, crop_id, type_id, status, message, creation_date
+FROM
+	"public".job b;]]></string>
+		</script>
+		<browser id="Browse_715" name="Sample Relational Data Explorer" confirm_updates="y" >
+			<browse_table schema="public" entity="job" x="20" y="20" width="400" height="300" >
+				<browse_table schema="public" entity="crop" fk="job_crop_fkey" x="440" y="20" width="500" height="350" record_view="y" >
+					<browse_table schema="public" entity="template" fk="template_crop_fkey" x="960" y="20" width="500" height="350" />
+				</browse_table>
+			</browse_table>
+		</browser>
+		<query id="Query_aa8" name="Sample Query Builder" >
+			<query_table schema="public" name="job" alias="j" x="48" y="48" >
+				<column name="id" />
+				<column name="name" />
+				<column name="crop_id" />
+				<column name="type_id" />
+				<column name="status" />
+				<column name="message" />
+				<column name="creation_date" />
+				<query_table schema="public" name="crop" alias="c1" x="240" y="48" fk="job_crop_fkey" type="Inner Join" >
+					<column name="id" />
+					<column name="name" />
+					<column name="database_name" />
+					<column name="owner" />
+					<column name="creation_date" />
+					<query_table schema="public" name="template" alias="t" x="464" y="48" fk="template_crop_fkey" type="Inner Join" >
+						<column name="id" />
+						<column name="name" />
+						<column name="crop_id" />
+						<column name="template" />
+						<column name="description" />
+						<column name="creation_date" />
+					</query_table>
+				</query_table>
+			</query_table>
+		</query>
+	</layout>
+</project>
