@@ -47,10 +47,14 @@ cd /build/liquibase
 export PATH=$PATH:$PWD
 export _JAVA_OPTIONS="-Xmx2g -Dliquibase.headless=true"
 
+#NOTE: We do not use liquibase labels in GOBii but placeholders are made in case we decide to do so in the future
+#and to align to the general EBS DB structure
+
 #meta database
-liquibase --username=$db_user --password=$db_pass --url=jdbc:postgresql://localhost:5432/gobii_meta --driver=org.postgresql.Driver --classpath="bin/drivers/$pg_driver" --changeLogFile=changelogs/db.changelog-master.xml --contexts=meta_general update;
+echo liquibase --username=$db_user --password=$db_pass --url=jdbc:postgresql://localhost:5432/gobii_meta --driver=org.postgresql.Driver --classpath="bin/drivers/$pg_driver" --changeLogFile=changelogs/db.changelog-master.xml --contexts=$lq_meta_contexts update;
+liquibase --username=$db_user --password=$db_pass --url=jdbc:postgresql://localhost:5432/gobii_meta --driver=org.postgresql.Driver --classpath="bin/drivers/$pg_driver" --changeLogFile=changelogs/db.changelog-master.xml --contexts=$lq_meta_contexts update;
 #crop database
-echo liquibase --username=$db_user --password=$db_pass --url=jdbc:postgresql://localhost:5432/$db_name --driver=org.postgresql.Driver --classpath="bin/drivers/$pg_driver" --changeLogFile=changelogs/db.changelog-master.xml --contexts=$lq_contexts --labels=$lq_labels update;
-liquibase --username=$db_user --password=$db_pass --url=jdbc:postgresql://localhost:5432/$db_name --driver=org.postgresql.Driver --classpath="bin/drivers/$pg_driver" --changeLogFile=changelogs/db.changelog-master.xml --contexts=$lq_contexts --labels=$lq_labels update;
+echo liquibase --username=$db_user --password=$db_pass --url=jdbc:postgresql://localhost:5432/$db_name --driver=org.postgresql.Driver --classpath="bin/drivers/$pg_driver" --changeLogFile=changelogs/db.changelog-master.xml --contexts=$lq_contexts update;
+liquibase --username=$db_user --password=$db_pass --url=jdbc:postgresql://localhost:5432/$db_name --driver=org.postgresql.Driver --classpath="bin/drivers/$pg_driver" --changeLogFile=changelogs/db.changelog-master.xml --contexts=$lq_contexts update;
 
 /bin/bash
