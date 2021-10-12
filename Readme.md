@@ -17,62 +17,6 @@ This project has been fully containerized. The commands to help you use this con
 5. Database created based on the passed variable or created from the defaults - this includes both the gobii_meta and one crop database
 6. Liquibase migration against the created databases - effectively giving you the latest GOBii schema. Note that you can override the default contexts if you need fixture data, etc.
 
-
-
-## The ERD
-
-You'll find an interactive HTML5 diagram of the data model here: [GOBii ERD](https://gobiiproject.atlassian.net/wiki/spaces/GDW/pages/249200646/Entity+Relationship+Diagram)
-
-
-## Database Versioning and Change Control Management
-
-When we first started this project we only used raw SQL files and git for version control. We quickly found out it wasn't sufficient, especially when there are multiple contexts involved (add to that the complexity of managing seed data). So we decided to use [Liquibase](https://www.liquibase.org/) in tandem with git. 
-
-#### Liquibase in GOBii
-
-There are too many ways you can use Liquibase for database versioning and change control, and as of 04/2021, we have put up a [guideline across EBS as to how a database project should be structured](https://ebsproject.atlassian.net/wiki/spaces/DB/pages/29006528708/EBS+Database+Project+Structure). If you are contributing to this repository, it is imperative that you read the linked document and conform to the standards we've put in place.
-
-
-## Contents of this repository
-
-
-#### Dockerfile and config.sh
-Contains all the containerization steps. The config.sh is the entrypoint and you'll find all the database provisioning in there.
-
-### Design
-
-This directory contains all the files we use to design the schema as well as the graphical representation of the schema for all versions of the data warehouse.
-
-* **DBSchema** - DBSchema is a visual tool for database management. It has a lot of features that make data visualization, random data generation, data loading (mainly for testing), and reports and forms generation really easy. The HTML5 ERD you see linked above was generated using DBSchema. This directory contains the DBSchema project files. 
-* **ERD** - This contains the HTML5 and JPEG versions of the ERD suffixed by version. We keep the files here up to date with the source code.
-
-
-### Build
-
-This contains everything you need to build the schema from scratch. Note that if you are using one of our pre-configured containers, all these scripts were already ran for you.
-
-* **Rawbase** - raw SQL files that will build the schema from an empty database. Running this will create GOBii's foundation schema.
-* **Liquibase** - as mentioned in the "Database Versioning" section above, this directory contains all the Liquibase changelogs and changesets.
-
-### Data Access Layer
-
-To satisfy big data requirements, we implemented a thin data access layer (written in Python) that handle bulk loading and extraction with high speed and data volume.
-
-#### GOBII_IFL (Intermmediate File Loader)
-
-Python library that provides fast bulk loading of huge amounts of data.
-
-* [IFL Architecture](https://gobiiproject.atlassian.net/wiki/spaces/GDW/pages/257589467/IFL+Architecture)
-* [IFL Mapping Files](https://gobiiproject.atlassian.net/wiki/spaces/GDW/pages/257589483/IFL+Mapping+Files)
-* [IFL User Guide](https://gobiiproject.atlassian.net/wiki/spaces/GDW/pages/257589524/IFL+User+Guide)
-
-#### GOBII_MDE (MetaData Extractor)
-
-Python library that provides fast bulk extraction of huge amounts of data.
-
-* [MDE User Guide](https://gobiiproject.atlassian.net/wiki/spaces/GDW/pages/260178249/MDE+User+Guide)
-
-
 ## Using this container
 
 Usage can be classified into two types: database development and general usage. The following environment variables/parameters are available (shown below with their respective default values) and can be set during `docker run` invocation:
@@ -92,7 +36,7 @@ os_pass=g0b11Admin
 os_group=gobii
 ```
 
-#### General Usage (via Docker Compose)
+### General Usage (via Docker Compose)
 
 Typically, for general usage, you do not need to modify any database scripts or add new SQL. So the steps are simple. 
 Note that the example command below will create the container off of the nightly build (tag=dev). Change the tag (or any parameter) from the `deploy/.env` file as needed - prior to running docker compose.
@@ -148,6 +92,62 @@ su - postgres
 psql
 ```
 * Lastly, you have the option to either **keep the container running** as long as you're making your database changes, then invoking liquibase within the container to test. This way you save time by not having to rebuild the image everytime. Once you are happy with your work, push your liquibase changesets to this repository.
+
+
+
+## The ERD
+
+You'll find an interactive HTML5 diagram of the data model here: [GOBii ERD](https://gobiiproject.atlassian.net/wiki/spaces/GDW/pages/249200646/Entity+Relationship+Diagram)
+
+
+## Database Versioning and Change Control Management
+
+When we first started this project we only used raw SQL files and git for version control. We quickly found out it wasn't sufficient, especially when there are multiple contexts involved (add to that the complexity of managing seed data). So we decided to use [Liquibase](https://www.liquibase.org/) in tandem with git. 
+
+#### Liquibase in GOBii
+
+There are too many ways you can use Liquibase for database versioning and change control, and as of 04/2021, we have put up a [guideline across EBS as to how a database project should be structured](https://ebsproject.atlassian.net/wiki/spaces/DB/pages/29006528708/EBS+Database+Project+Structure). If you are contributing to this repository, it is imperative that you read the linked document and conform to the standards we've put in place.
+
+
+## Contents of this repository
+
+
+#### Dockerfile and config.sh
+Contains all the containerization steps. The config.sh is the entrypoint and you'll find all the database provisioning in there.
+
+### Design
+
+This directory contains all the files we use to design the schema as well as the graphical representation of the schema for all versions of the data warehouse.
+
+* **DBSchema** - DBSchema is a visual tool for database management. It has a lot of features that make data visualization, random data generation, data loading (mainly for testing), and reports and forms generation really easy. The HTML5 ERD you see linked above was generated using DBSchema. This directory contains the DBSchema project files. 
+* **ERD** - This contains the HTML5 and JPEG versions of the ERD suffixed by version. We keep the files here up to date with the source code.
+
+
+### Build
+
+This contains everything you need to build the schema from scratch. Note that if you are using one of our pre-configured containers, all these scripts were already ran for you.
+
+* **Rawbase** - raw SQL files that will build the schema from an empty database. Running this will create GOBii's foundation schema.
+* **Liquibase** - as mentioned in the "Database Versioning" section above, this directory contains all the Liquibase changelogs and changesets.
+
+### Data Access Layer
+
+To satisfy big data requirements, we implemented a thin data access layer (written in Python) that handle bulk loading and extraction with high speed and data volume.
+
+#### GOBII_IFL (Intermmediate File Loader)
+
+Python library that provides fast bulk loading of huge amounts of data.
+
+* [IFL Architecture](https://gobiiproject.atlassian.net/wiki/spaces/GDW/pages/257589467/IFL+Architecture)
+* [IFL Mapping Files](https://gobiiproject.atlassian.net/wiki/spaces/GDW/pages/257589483/IFL+Mapping+Files)
+* [IFL User Guide](https://gobiiproject.atlassian.net/wiki/spaces/GDW/pages/257589524/IFL+User+Guide)
+
+#### GOBII_MDE (MetaData Extractor)
+
+Python library that provides fast bulk extraction of huge amounts of data.
+
+* [MDE User Guide](https://gobiiproject.atlassian.net/wiki/spaces/GDW/pages/260178249/MDE+User+Guide)
+
 
 
 
