@@ -95,49 +95,23 @@ os_group=gobii
 #### General Usage (via Docker Compose)
 
 Typically, for general usage, you do not need to modify any database scripts or add new SQL. So the steps are simple. 
-Go into the `deploy` directory, then:
+Note that the example command below will create the container off of the nightly build (tag=dev). Change the tag (or any parameter) from the `deploy/.env` file as needed - prior to running docker compose.
+If you are okay with keeping all the defaults or have modified the env file according to what you need, then `cd` into the `deploy` directory, and:
 
-* To start the cs-db container/service:
+* Start the gobii-db container/service:
 ```bash
-docker compose -f cs-db.yml up -d
+docker compose -f gobii-db.yml up -d
 ```
+
+A few useful commands:
+
 * To stop the cs-db container/service
 ```bash
-docker compose -f cs-db.yml down
+docker compose -f gobii-db.yml down
 ```
 * To check if the container is now running
 ```bash
 docker compose ps
-```
-
-
-> The example commands above will create the container off of the nightly build (tag=dev). Change the tag (or any parameter) from the .env file as needed - prior to running docker compose.
-
-#### Get the official docker image from **EBSProject Dockerhub**
-
-> The official nightly build tag is **dev**. Release images are tagged according to version numbers. Check the Dockerhub Repository for current tags. [GOBii-DB Dockerhub](https://hub.docker.com/r/ebsproject/gobii-db)
-
-**Steps**
-
-
-* Run the container. You have two options depending on wether or not you want the database data to persist.
-
-* Persist data across docker runs:
-```bash
-docker run --detach --name gobii-db -h gobii-db -p 5434:5432 --health-cmd="pg_isready -U postgres || exit 1" -e "db_name=gobii_db" -e "db_user=kevin" -e "lq_contexts=general,seed_general,seed_cornell" -v gobii_postgres_etc:/etc/postgresql -v gobii_postgres_log:/var/log/postgresql -v gobii_postgres_lib:/var/lib/postgresql -it ebsproject/gobii-db:dev
-```
-* Do not persist data (whenever container is removed via `docker rm`, the data goes away with it): 
-```bash
-docker run --detach --name gobii-db -h gobii-db -p 5434:5432 --health-cmd="pg_isready -U postgres || exit 1" -e "db_name=gobii_db" -e "db_user=kevin" -e "lq_contexts=general,seed_general,seed_cornell" -it ebsproject/gobii-db:dev
-```
-* Wait a minute or two. Feel free to check the status of the schema migration via `docker logs gobii-db`.
-
-* You now have a running Postgres 13 on port 5434 with all the latest changes. You can either connect to it to port 5434 from outside the container, or go inside the container and check via psql
-
-```bash
-docker exec -ti gobii-db bash
-su - postgres
-psql
 ```
 
 
