@@ -35,12 +35,6 @@ echo "SELECT 'CREATE DATABASE $db_name OWNER $db_user' WHERE NOT EXISTS (SELECT 
 echo "Creating the META database..."
 echo "SELECT 'CREATE DATABASE gobii_meta OWNER $db_user' WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'gobii_meta')\gexec" | sudo -u postgres psql
 
-#create the foundation database
-echo 'Creating the CROP foundation schema...'
-cd /build/rawbase/
-sudo -u postgres psql $db_name -f build_gobii_pg.sql
-
-
 echo "Starting liquibase migration..."
 cd /build/liquibase
 
