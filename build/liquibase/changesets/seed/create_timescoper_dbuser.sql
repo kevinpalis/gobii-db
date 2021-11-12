@@ -12,7 +12,7 @@ BEGIN
       FROM   pg_catalog.pg_roles
       WHERE  rolname = 'timescoper'
       ) THEN
-      create user timescoper with superuser password 't1m3sc0p3dbusr' valid until 'infinity';
+      create user timescoper with password 't1m3sc0p3dbusr' valid until 'infinity' CREATEDB CREATEROLE LOGIN;
    END IF;
 END
 $do$;
