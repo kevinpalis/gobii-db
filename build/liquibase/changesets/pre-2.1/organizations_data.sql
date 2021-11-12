@@ -1,6 +1,16 @@
 --liquibase formatted sql
 
 --changeset raza:org_seed context:seed_general splitStatements:false
+CREATE OR REPLACE FUNCTION createorganization(orgname text, orgaddress text, orgwebsite text, createdby integer, createddate date, modifiedby integer, modifieddate date, orgstatus integer, OUT id integer) RETURNS integer
+    LANGUAGE plpgsql
+    AS $$
+  BEGIN
+    insert into organization (name, address, website, created_by, created_date, modified_by, modified_date, status)
+      values (orgName, orgAddress, orgWebsite, createdBy, createdDate, modifiedBy, modifiedDate, orgStatus); 
+    select lastval() into id;
+  END;
+$$;
+
 Select * from createorganization('Affymetrix, Inc., USA','Thermo Fisher Scientific, 3420 Central Expressway, Santa Clara, CA 95051' ,'http://www.affymetrix.com/',1,current_date,NULL,NULL,1);
 Select * from createorganization('BGI Shenzhen, China','Main Building, Beishan Industrial Zone, Yantian District, Shenzhen 518083, China' ,'http://www.genomics.cn/',1,current_date,NULL,NULL,1);
 Select * from createorganization('DArT','Building 3, Level D, Monana St, University of Canberra, Bruce ACT 2617, Australia' ,'http://www.diversityarrays.com/',1,current_date,NULL,NULL,1);

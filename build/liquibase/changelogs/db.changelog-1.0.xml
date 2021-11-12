@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
+	<include file="changesets/pre-2.1/gobii_foundation.sql"/>
 	<include file="changesets/pre-2.1/create_indices.sql"/>
 	<include file="changesets/pre-2.1/dataset_join_tables_fix.sql"/>
 	<include file="changesets/pre-2.1/fix_functions_jsonb_idx.sql"/>
