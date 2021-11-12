@@ -12,7 +12,7 @@ version: "3.7"
 
 services:
   
-  # BA DB
+  # DB
   gobii-db:
     image: ${GOBII_DB_IMAGE}:${GOBII_DB_IMAGE_TAG}
     ports:
@@ -30,7 +30,7 @@ services:
       - pg_driver=${PG_DRIVER}
       - lq_contexts=${LIQUIBASE_CONTEXTS}
       - lq_labels=${LIQUIBASE_LABELS}
-      - default_statistigobii_target=${DEFAULT_STATISTIGOBII_TARGET}
+      - default_statistics_target=${DEFAULT_STATISTICS_TARGET}
       - random_page_cost=${RANDOM_PAGE_COST}
       - effective_cache_size=${EFFECTIVE_CACHE_SIZE}
       - max_parallel_workers_per_gather=${MAX_PARALLEL_WORKERS_PER_GATHER}
