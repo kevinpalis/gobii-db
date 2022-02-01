@@ -25493,7 +25493,11 @@ unique global OBO identifier for this cvterm.]]></comment>
 			<column name="status" type="integer" length="10" decimal="0" jt="4" mandatory="y" >
 				<defo><![CDATA[1]]></defo>
 			</column>
+<<<<<<< HEAD
 			<column name="props" type="jsonb" decimal="0" jt="2000" regexp="{(\&quot;51\&quot;:\&quot;[PKJLJ]{5,10}\&quot;)((, \&quot;52\&quot;:\&quot;[23423]{5,10}\&quot;)?)}" >
+=======
+			<column name="props" type="jsonb" decimal="0" jt="2000" >
+>>>>>>> 4e8f130eac168be0a5e83fbd093fc70019c93c69
 				<defo><![CDATA['{}'::jsonb]]></defo>
 			</column>
 			<index name="pk_cv" unique="PRIMARY_KEY" >
@@ -25506,11 +25510,50 @@ unique global OBO identifier for this cvterm.]]></comment>
 				<column name="dbxref_id" />
 			</index>
 			<index name="unique_cvterm_term_cvgroupid" unique="UNIQUE_KEY" >
+<<<<<<< HEAD
+				<column name="term" />
+				<column name="cvgroup_id" />
+			</index>
+			<index name="idx_cv_term" unique="NORMAL" >
+=======
+>>>>>>> 4e8f130eac168be0a5e83fbd093fc70019c93c69
 				<column name="term" />
 				<column name="cvgroup_id" />
 			</index>
 			<index name="idx_cv_term" unique="NORMAL" >
 				<column name="term" />
+			</index>
+		</table>
+		<table name="cvgroup" >
+			<comment><![CDATA[A controlled vocabulary or ontology. A cv is
+composed of cvterms (AKA terms, classes, types, universals - relations
+and properties are also stored in cvterm) and the relationships
+between them.]]></comment>
+			<column name="cvgroup_id" type="integer" length="10" decimal="0" jt="4" mandatory="y" >
+				<defo><![CDATA[nextval('cvgroup_cvgroup_id_seq'::regclass)]]></defo>
+			</column>
+			<column name="name" type="text" decimal="0" jt="12" mandatory="y" >
+				<comment><![CDATA[The name of the group.]]></comment>
+			</column>
+			<column name="definition" type="text" decimal="0" jt="12" >
+				<comment><![CDATA[A text description of the criteria for membership of this group.]]></comment>
+			</column>
+			<column name="type" type="integer" length="10" decimal="0" jt="4" mandatory="y" >
+				<defo><![CDATA[1]]></defo>
+				<comment><![CDATA[Determines if CV group is of type "System CV" (1) or "Custom CV" (2). More types can be added as needed]]></comment>
+			</column>
+			<column name="props" type="jsonb" decimal="0" jt="2000" >
+				<defo><![CDATA['{}'::jsonb]]></defo>
+			</column>
+			<index name="cv_pkey" unique="PRIMARY_KEY" >
+				<column name="cvgroup_id" />
+			</index>
+			<index name="unique_cvgroup_name_type" unique="UNIQUE_KEY" >
+				<column name="name" />
+				<column name="type" />
+			</index>
+			<index name="idx_cvgroup" unique="NORMAL" >
+				<column name="type" />
 			</index>
 			<fk name="cv_cvgroupid_fkey" to_schema="gobii_rice1.public" to_table="cvgroup" >
 				<fk_column name="cvgroup_id" pk="cvgroup_id" />
@@ -25614,6 +25657,7 @@ between them.]]></comment>
 				<fk_column name="job_id" pk="job_id" />
 			</fk>
 		</table>
+<<<<<<< HEAD
 		<table name="dbxref" generator_rows="100" >
 			<comment><![CDATA[A unique, global, public, stable identifier. Not necessarily an external reference - can reference data items inside the particular instance being used. Typically a row in a table can be uniquely identified with a primary identifier (called dbxref_id); a table may also have secondary identifiers (in a linking table <T>_dbxref). A dbxref is generally written as <DB>:<ACCESSION> or as <DB>:<ACCESSION>:<VERSION>.]]></comment>
 			<column name="dbxref_id" type="integer" length="10" decimal="0" jt="4" mandatory="y" >
@@ -25636,6 +25680,30 @@ bioinformatics and biomedical realm.]]></comment>
 			<column name="props" type="jsonb" decimal="0" jt="2000" >
 				<defo><![CDATA['{}'::jsonb]]></defo>
 			</column>
+=======
+		<table name="dbxref" >
+			<comment><![CDATA[A unique, global, public, stable identifier. Not necessarily an external reference - can reference data items inside the particular instance being used. Typically a row in a table can be uniquely identified with a primary identifier (called dbxref_id); a table may also have secondary identifiers (in a linking table <T>_dbxref). A dbxref is generally written as <DB>:<ACCESSION> or as <DB>:<ACCESSION>:<VERSION>.]]></comment>
+			<column name="dbxref_id" type="integer" length="10" decimal="0" jt="4" mandatory="y" >
+				<defo><![CDATA[nextval('dbxref_dbxref_id_seq'::regclass)]]></defo>
+			</column>
+			<column name="accession" type="text" decimal="0" jt="12" mandatory="y" >
+				<defo><![CDATA[''::text]]></defo>
+				<comment><![CDATA[The local part of the identifier. Guaranteed by the db authority to be unique for that db.]]></comment>
+			</column>
+			<column name="ver" type="text" decimal="0" jt="12" />
+			<column name="description" type="text" decimal="0" jt="12" />
+			<column name="db_name" type="text" decimal="0" jt="12" >
+				<comment><![CDATA[source name, ex. EDAM Ontology
+A database authority. Typical databases in
+bioinformatics are FlyBase, GO, UniProt, NCBI, MGI, etc. The authority
+is generally known by this shortened form, which is unique within the
+bioinformatics and biomedical realm.]]></comment>
+			</column>
+			<column name="url" type="text" decimal="0" jt="12" />
+			<column name="props" type="jsonb" decimal="0" jt="2000" >
+				<defo><![CDATA['{}'::jsonb]]></defo>
+			</column>
+>>>>>>> 4e8f130eac168be0a5e83fbd093fc70019c93c69
 			<index name="dbxref_pkey" unique="PRIMARY_KEY" >
 				<column name="dbxref_id" />
 			</index>
@@ -25650,9 +25718,15 @@ bioinformatics and biomedical realm.]]></comment>
 				<column name="ver" />
 			</index>
 		</table>
+<<<<<<< HEAD
 		<table name="display" generator_rows="100" >
 			<column name="display_id" type="integer" length="10" decimal="0" jt="4" mandatory="y" >
 				<identity><![CDATA[GENERATED BY DEFAULT AS IDENTITY]]></identity>
+=======
+		<table name="display" >
+			<column name="display_id" type="integer" length="10" decimal="0" jt="4" mandatory="y" >
+				<defo><![CDATA[nextval('display_display_id_seq'::regclass)]]></defo>
+>>>>>>> 4e8f130eac168be0a5e83fbd093fc70019c93c69
 			</column>
 			<column name="table_name" type="text" length="2147483647" decimal="0" jt="12" mandatory="y" />
 			<column name="column_name" type="text" length="2147483647" decimal="0" jt="12" />
@@ -25703,7 +25777,11 @@ bioinformatics and biomedical realm.]]></comment>
 				<fk_column name="experiment_id" pk="experiment_id" />
 			</fk>
 		</table>
+<<<<<<< HEAD
 		<table name="dnasample" generator_rows="337" >
+=======
+		<table name="dnasample" >
+>>>>>>> 4e8f130eac168be0a5e83fbd093fc70019c93c69
 			<column name="dnasample_id" type="integer" length="10" decimal="0" jt="4" mandatory="y" >
 				<identity><![CDATA[GENERATED BY DEFAULT AS IDENTITY]]></identity>
 			</column>
@@ -25757,7 +25835,11 @@ bioinformatics and biomedical realm.]]></comment>
 				<fk_column name="project_id" pk="project_id" />
 			</fk>
 		</table>
+<<<<<<< HEAD
 		<table name="edge" generator_rows="225" >
+=======
+		<table name="edge" >
+>>>>>>> 4e8f130eac168be0a5e83fbd093fc70019c93c69
 			<column name="edge_id" type="integer" length="10" decimal="0" jt="4" mandatory="y" >
 				<defo><![CDATA[nextval('edge_edge_id_seq'::regclass)]]></defo>
 			</column>
@@ -25782,7 +25864,11 @@ bioinformatics and biomedical realm.]]></comment>
 				<column name="type_id" />
 			</index>
 			<constraint name="self_loops_check" >
+<<<<<<< HEAD
 				<string><![CDATA[(start_vertex <> end_vertex)]]></string>
+=======
+				<string><![CDATA[CHECK ((start_vertex <> end_vertex))]]></string>
+>>>>>>> 4e8f130eac168be0a5e83fbd093fc70019c93c69
 			</constraint>
 			<fk name="edge_type_id_fkey" to_schema="gobii_rice1.public" to_table="cv" update_action="cascade" >
 				<fk_column name="type_id" pk="cv_id" />
@@ -25831,9 +25917,12 @@ bioinformatics and biomedical realm.]]></comment>
 			<fk name="experiment_project_id_fkey" to_schema="gobii_rice1.public" to_table="project" >
 				<fk_column name="project_id" pk="project_id" />
 			</fk>
+<<<<<<< HEAD
 			<fk name="experiment_vendor_protocol_id_fkey" to_schema="gobii_rice1.public" to_table="vendor_protocol" >
 				<fk_column name="vendor_protocol_id" pk="vendor_protocol_id" />
 			</fk>
+=======
+>>>>>>> 4e8f130eac168be0a5e83fbd093fc70019c93c69
 		</table>
 		<table name="germplasm" generator_rows="150" >
 			<column name="germplasm_id" type="integer" length="10" decimal="0" jt="4" mandatory="y" >
@@ -25854,6 +25943,9 @@ bioinformatics and biomedical realm.]]></comment>
 			<column name="status" type="integer" length="10" decimal="0" jt="4" mandatory="y" />
 			<column name="code" type="text" length="2147483647" decimal="0" jt="12" >
 				<defo><![CDATA['0'::text]]></defo>
+			</column>
+			<column name="props" type="jsonb" decimal="0" jt="2000" >
+				<defo><![CDATA['{}'::jsonb]]></defo>
 			</column>
 			<column name="props" type="jsonb" decimal="0" jt="2000" >
 				<defo><![CDATA['{}'::jsonb]]></defo>
@@ -25886,7 +25978,11 @@ bioinformatics and biomedical realm.]]></comment>
 				<fk_column name="type_id" pk="cv_id" />
 			</fk>
 		</table>
+<<<<<<< HEAD
 		<table name="gobiiprop" generator_rows="100" >
+=======
+		<table name="gobiiprop" >
+>>>>>>> 4e8f130eac168be0a5e83fbd093fc70019c93c69
 			<comment><![CDATA[This table is different from other prop tables/columns in the database, as it is for storing information about the database itself, like schema version]]></comment>
 			<column name="gobiiprop_id" type="integer" length="10" decimal="0" jt="4" mandatory="y" >
 				<defo><![CDATA[nextval('gobiiprop_gobiiprop_id_seq'::regclass)]]></defo>
@@ -25913,7 +26009,11 @@ default 0 value should be used.]]></comment>
 				<column name="rank" />
 			</index>
 		</table>
+<<<<<<< HEAD
 		<table name="job" generator_rows="225" >
+=======
+		<table name="job" >
+>>>>>>> 4e8f130eac168be0a5e83fbd093fc70019c93c69
 			<comment><![CDATA[This table keeps track of all the data loading and extraction jobs.]]></comment>
 			<column name="job_id" type="integer" length="10" decimal="0" jt="4" mandatory="y" >
 				<defo><![CDATA[nextval('job_job_id_seq'::regclass)]]></defo>
@@ -26023,7 +26123,11 @@ default 0 value should be used.]]></comment>
 				<column name="manifest_id" />
 			</index>
 		</table>
+<<<<<<< HEAD
 		<table name="mapset" generator_rows="150" >
+=======
+		<table name="mapset" >
+>>>>>>> 4e8f130eac168be0a5e83fbd093fc70019c93c69
 			<column name="mapset_id" type="integer" length="10" decimal="0" jt="4" mandatory="y" >
 				<identity><![CDATA[GENERATED BY DEFAULT AS IDENTITY]]></identity>
 			</column>
@@ -26318,7 +26422,11 @@ allele (what is in the REF field), 1 for the first allele listed in ALT, 2 for t
 				<defo><![CDATA[('now'::text)::date]]></defo>
 			</column>
 			<column name="status" type="integer" length="10" decimal="0" jt="4" mandatory="y" />
+<<<<<<< HEAD
 			<column name="props" type="jsonb" decimal="0" jt="2000" regexp="{(\&quot;51\&quot;:\&quot;[ACTG]{5,10}\&quot;)((, \&quot;52\&quot;:\&quot;[ACTG]{5,10}\&quot;)?)}" >
+=======
+			<column name="props" type="jsonb" decimal="0" jt="2000" >
+>>>>>>> 4e8f130eac168be0a5e83fbd093fc70019c93c69
 				<defo><![CDATA['{}'::jsonb]]></defo>
 			</column>
 			<index name="pk_project" unique="PRIMARY_KEY" >
@@ -26341,7 +26449,11 @@ allele (what is in the REF field), 1 for the first allele listed in ALT, 2 for t
 				<fk_column name="pi_contact" pk="contact_id" />
 			</fk>
 		</table>
+<<<<<<< HEAD
 		<table name="protocol" generator_rows="225" >
+=======
+		<table name="protocol" >
+>>>>>>> 4e8f130eac168be0a5e83fbd093fc70019c93c69
 			<comment><![CDATA[A Platform can have multiple protocols and more than one protocol can be run by more than one vendor.]]></comment>
 			<column name="protocol_id" type="integer" length="10" decimal="0" jt="4" mandatory="y" >
 				<defo><![CDATA[nextval('protocol_protocol_id_seq'::regclass)]]></defo>
@@ -26415,6 +26527,7 @@ allele (what is in the REF field), 1 for the first allele listed in ALT, 2 for t
 				<column name="role_name" />
 			</index>
 		</table>
+<<<<<<< HEAD
 		<table name="sample_genotype" >
 			<comment><![CDATA[Sample-fast genotype table. This is one solution for SNPs, polyploids, indels - of virtually any length. Table partitioning can be implemented on a dataset level for big data cases.]]></comment>
 			<column name="dataset_id" type="integer" jt="4" mandatory="y" >
@@ -26456,6 +26569,9 @@ allele (what is in the REF field), 1 for the first allele listed in ALT, 2 for t
 			</fk>
 		</table>
 		<table name="timescoper" generator_rows="100" >
+=======
+		<table name="timescoper" >
+>>>>>>> 4e8f130eac168be0a5e83fbd093fc70019c93c69
 			<column name="timescoper_id" type="integer" length="10" decimal="0" jt="4" mandatory="y" >
 				<defo><![CDATA[nextval('timescoper_timescoper_id_seq'::regclass)]]></defo>
 			</column>
@@ -26474,7 +26590,11 @@ allele (what is in the REF field), 1 for the first allele listed in ALT, 2 for t
 				<column name="username" />
 			</index>
 		</table>
+<<<<<<< HEAD
 		<table name="transitive_closure" generator_rows="100" >
+=======
+		<table name="transitive_closure" >
+>>>>>>> 4e8f130eac168be0a5e83fbd093fc70019c93c69
 			<column name="start_vertex" type="integer" length="10" decimal="0" jt="4" />
 			<column name="end_vertex" type="integer" length="10" decimal="0" jt="4" />
 			<column name="distance" type="integer" length="10" decimal="0" jt="4" />
@@ -26493,7 +26613,11 @@ allele (what is in the REF field), 1 for the first allele listed in ALT, 2 for t
 				<column name="variant_id" />
 			</index>
 		</table>
+<<<<<<< HEAD
 		<table name="vendor_protocol" generator_rows="337" >
+=======
+		<table name="vendor_protocol" >
+>>>>>>> 4e8f130eac168be0a5e83fbd093fc70019c93c69
 			<comment><![CDATA[Vendors reside in the Organization table. A vendor can provide multiple protocols, and a particular protocol can be offered by multiple vendors, hence the N:M relationship table.]]></comment>
 			<column name="vendor_protocol_id" type="integer" length="10" decimal="0" jt="4" mandatory="y" >
 				<defo><![CDATA[nextval('vendor_protocol_vendor_protocol_id_seq'::regclass)]]></defo>
@@ -26522,7 +26646,11 @@ allele (what is in the REF field), 1 for the first allele listed in ALT, 2 for t
 				<fk_column name="protocol_id" pk="protocol_id" />
 			</fk>
 		</table>
+<<<<<<< HEAD
 		<table name="vertex" generator_rows="150" >
+=======
+		<table name="vertex" >
+>>>>>>> 4e8f130eac168be0a5e83fbd093fc70019c93c69
 			<column name="vertex_id" type="integer" length="10" decimal="0" jt="4" mandatory="y" >
 				<defo><![CDATA[nextval('vertex_vertex_id_seq'::regclass)]]></defo>
 			</column>
@@ -26694,6 +26822,32 @@ allele (what is in the REF field), 1 for the first allele listed in ALT, 2 for t
 			<column name="job_submitted_date" type="timestamptz" />
 			<column name="total_samples" type="integer" />
 			<column name="total_markers" type="integer" />
+<<<<<<< HEAD
+=======
+		</view>
+		<view name="v_marker_group_summary" >
+			<view_script><![CDATA[CREATE VIEW ${schema}.${name} AS  SELECT mg.marker_group_id,
+    mg.name AS marker_group_name,
+    mg.germplasm_group,
+    m.name AS marker_name,
+    p.name AS platform,
+    array_to_string(ARRAY( SELECT jsonb_array_elements_text(mg.value) AS jsonb_array_elements_text), ','::text, '?'::text) AS favorable_alleles
+   FROM marker m,
+    platform p,
+    ( SELECT marker_group.marker_group_id,
+            marker_group.name,
+            marker_group.germplasm_group,
+            (jsonb_each(marker_group.markers)).key AS key,
+            (jsonb_each(marker_group.markers)).value AS value
+           FROM marker_group) mg
+  WHERE ((m.marker_id = (mg.key)::integer) AND (p.platform_id = m.platform_id));]]></view_script>
+			<column name="marker_group_id" type="integer" />
+			<column name="marker_group_name" type="text" />
+			<column name="germplasm_group" type="text" />
+			<column name="marker_name" type="text" />
+			<column name="platform" type="text" />
+			<column name="favorable_alleles" type="text" />
+>>>>>>> 4e8f130eac168be0a5e83fbd093fc70019c93c69
 		</view>
 		<view name="v_marker_group_summary" >
 			<view_script><![CDATA[CREATE VIEW ${schema}.${name} AS  SELECT mg.marker_group_id,
@@ -26802,6 +26956,7 @@ allele (what is in the REF field), 1 for the first allele listed in ALT, 2 for t
 			<column name="props" type="jsonb" />
 			<column name="dataset_vendor_protocol" type="jsonb" />
 		</view>
+<<<<<<< HEAD
 		<sequence name="cvgroup_cvgroup_id_seq" options="START WITH 1 INCREMENT BY 1" />
 		<sequence name="dbxref_dbxref_id_seq" options="START WITH 1 INCREMENT BY 1" />
 		<sequence name="edge_edge_id_seq" options="START WITH 1 INCREMENT BY 1" />
@@ -26811,6 +26966,38 @@ allele (what is in the REF field), 1 for the first allele listed in ALT, 2 for t
 		<sequence name="timescoper_timescoper_id_seq" options="START WITH 1 INCREMENT BY 1" />
 		<sequence name="vendor_protocol_vendor_protocol_id_seq" options="START WITH 1 INCREMENT BY 1" />
 		<sequence name="vertex_vertex_id_seq" options="START WITH 1 INCREMENT BY 1" />
+=======
+		<sequence name="analysis_analysis_id_seq" options="START WITH 1" />
+		<sequence name="contact_contact_id_seq" options="START WITH 1" />
+		<sequence name="cv_cv_id_seq" options="START WITH 1" />
+		<sequence name="cvgroup_cvgroup_id_seq" options="START WITH 1" />
+		<sequence name="dataset_dataset_id_seq" options="START WITH 1" />
+		<sequence name="dbxref_dbxref_id_seq" options="START WITH 1" />
+		<sequence name="display_display_id_seq" options="START WITH 1" />
+		<sequence name="dnarun_dnarun_id_seq" options="START WITH 1" />
+		<sequence name="dnasample_dnasample_id_seq" options="START WITH 1" />
+		<sequence name="edge_edge_id_seq" options="START WITH 1" />
+		<sequence name="experiment_experiment_id_seq" options="START WITH 1" />
+		<sequence name="germplasm_germplasm_id_seq" options="START WITH 1" />
+		<sequence name="gobiiprop_gobiiprop_id_seq" options="START WITH 1" />
+		<sequence name="job_job_id_seq" options="START WITH 1" />
+		<sequence name="linkage_group_linkage_group_id_seq" options="START WITH 1" />
+		<sequence name="manifest_manifest_id_seq" options="START WITH 1" />
+		<sequence name="map_map_id_seq" options="START WITH 1" />
+		<sequence name="marker_group_marker_group_id_seq" options="START WITH 1" />
+		<sequence name="marker_map_marker_map_id_seq" options="START WITH 1" />
+		<sequence name="marker_marker_id_seq" options="START WITH 1" />
+		<sequence name="organization_organization_id_seq" options="START WITH 1" />
+		<sequence name="platform_platform_id_seq" options="START WITH 1" />
+		<sequence name="project_project_id_seq" options="START WITH 1" />
+		<sequence name="protocol_protocol_id_seq" options="START WITH 1" />
+		<sequence name="reference_reference_id_seq" options="START WITH 1" />
+		<sequence name="role_role_id_seq" options="START WITH 1" />
+		<sequence name="timescoper_timescoper_id_seq" options="START WITH 1" />
+		<sequence name="variant_variant_id_seq" options="START WITH 1" />
+		<sequence name="vendor_protocol_vendor_protocol_id_seq" options="START WITH 1" />
+		<sequence name="vertex_vertex_id_seq" options="START WITH 1" />
+>>>>>>> 4e8f130eac168be0a5e83fbd093fc70019c93c69
 		<function name="appendanalysistodataset" id="Function_1d8f9bee" isSystem="false" params_known="n" >
 			<string><![CDATA[CREATE OR REPLACE FUNCTION public.appendanalysistodataset(datasetid integer, analysisid integer)
  RETURNS void
@@ -26838,6 +27025,7 @@ $function$
 		<function name="appendroletocontact" id="Function_475cea3" isSystem="false" params_known="n" >
 			<string><![CDATA[CREATE OR REPLACE FUNCTION public.appendroletocontact(contactid integer, roleid integer)
  RETURNS void
+<<<<<<< HEAD
  LANGUAGE plpgsql
 AS $function$
     BEGIN
@@ -27194,10 +27382,36 @@ AS $function$
 		</function>
 		<function name="createdataset" id="Function_98cfa4e" isSystem="false" params_known="y" >
 			<string><![CDATA[CREATE OR REPLACE FUNCTION public.createdataset(datasetname text, experimentid integer, callinganalysisid integer, datasetanalyses integer[], datatable text, datafile text, qualitytable text, qualityfile text, createdby integer, createddate date, modifiedby integer, modifieddate date, datasetstatus integer, typeid integer, jobid integer, OUT id integer)
+=======
+ LANGUAGE plpgsql
+AS $function$
+    BEGIN
+    update contact set roles=array_append(roles, roleId)
+     where contact_id = contactId;
+    END;
+$function$
+]]></string>
+		</function>
+		<function name="appendwritetabletorole" id="Function_153857ad" isSystem="false" params_known="n" >
+			<string><![CDATA[CREATE OR REPLACE FUNCTION public.appendwritetabletorole(roleid integer, tableid integer)
+ RETURNS void
+ LANGUAGE plpgsql
+AS $function$
+    BEGIN
+    update role set write_tables=array_append(write_tables, tableId)
+     where role_id = roleId;
+    END;
+$function$
+]]></string>
+		</function>
+		<function name="createcontact" id="Function_20a8605b" isSystem="false" params_known="n" >
+			<string><![CDATA[CREATE OR REPLACE FUNCTION public.createcontact(lastname text, firstname text, contactcode text, contactemail text, contactroles integer[], createdby integer, createddate date, modifiedby integer, modifieddate date, organizationid integer, OUT id integer)
+>>>>>>> 4e8f130eac168be0a5e83fbd093fc70019c93c69
  RETURNS integer
  LANGUAGE plpgsql
 AS $function$
   BEGIN
+<<<<<<< HEAD
     insert into dataset (experiment_id, callinganalysis_id, analyses, data_table, data_file, quality_table, quality_file, scores, created_by, created_date, modified_by, modified_date, status, type_id, name, job_id)
       values (experimentId, callinganalysisId, datasetAnalyses, dataTable, dataFile, qualityTable, qualityFile, '{}'::jsonb, createdBy, createdDate, modifiedBy, modifiedDate, datasetStatus, typeId, datasetName, jobid);
     select lastval() into id;
@@ -27239,6 +27453,27 @@ AS $function$
 			<input_param name="pdbname" jt="-1" type="text" />
 			<input_param name="purl" jt="-1" type="text" />
 			<result_param name="id" jt="-1" type="integer" />
+=======
+    insert into contact (lastname, firstname, code, email, roles, created_by, created_date, modified_by, modified_date, organization_id)
+      values (lastName, firstName, contactCode, contactEmail, contactRoles, createdBy, createdDate, modifiedBy, modifiedDate, organizationId); 
+    select lastval() into id;
+  END;
+$function$
+]]></string>
+		</function>
+		<function name="createdataset" id="Function_98cfa4e" isSystem="false" params_known="n" >
+			<string><![CDATA[CREATE OR REPLACE FUNCTION public.createdataset(datasetname text, experimentid integer, callinganalysisid integer, datasetanalyses integer[], datatable text, datafile text, qualitytable text, qualityfile text, createdby integer, createddate date, modifiedby integer, modifieddate date, datasetstatus integer, typeid integer, OUT id integer)
+ RETURNS integer
+ LANGUAGE plpgsql
+AS $function$
+  BEGIN
+    insert into dataset (experiment_id, callinganalysis_id, analyses, data_table, data_file, quality_table, quality_file, scores, created_by, created_date, modified_by, modified_date, status, type_id, name)
+      values (experimentId, callinganalysisId, datasetAnalyses, dataTable, dataFile, qualityTable, qualityFile, '{}'::jsonb, createdBy, createdDate, modifiedBy, modifiedDate, datasetStatus, typeId, datasetName); 
+    select lastval() into id;
+  END;
+$function$
+]]></string>
+>>>>>>> 4e8f130eac168be0a5e83fbd093fc70019c93c69
 		</function>
 		<function name="createdisplay" id="Function_8111462" isSystem="false" params_known="n" >
 			<string><![CDATA[CREATE OR REPLACE FUNCTION public.createdisplay(tablename text, columnname text, displayname text, createdby integer, createddate date, modifiedby integer, modifieddate date, displayrank integer, OUT id integer)
@@ -27436,6 +27671,7 @@ $function$
 			<result_param name="id" jt="-1" type="integer" />
 			<result_param name="id" jt="-1" type="integer" />
 		</function>
+<<<<<<< HEAD
 		<function name="createjob" id="Function-252a" isSystem="false" params_known="y" >
 			<string><![CDATA[CREATE OR REPLACE FUNCTION public.createjob(_name text, _type text, _payload_type text, _status text, _message text, _submitted_by integer, OUT id integer)
  RETURNS integer
@@ -27465,6 +27701,10 @@ $function$
 		</function>
 		<function name="createjob" id="Function-1a38" isSystem="false" params_known="y" >
 			<string><![CDATA[CREATE OR REPLACE FUNCTION public.createjob(_name text, _type_id integer, _payload_type_id integer, _status integer, _message text, _submitted_by integer, OUT id integer)
+=======
+		<function name="createmanifest" id="Function_1847805" isSystem="false" params_known="n" >
+			<string><![CDATA[CREATE OR REPLACE FUNCTION public.createmanifest(manifestname text, manifestcode text, filepath text, createdby integer, createddate date, modifiedby integer, modifieddate date, OUT mid integer)
+>>>>>>> 4e8f130eac168be0a5e83fbd093fc70019c93c69
  RETURNS integer
  LANGUAGE plpgsql
 AS $function$
@@ -27613,6 +27853,7 @@ AS $function$
 $function$
 ]]></string>
 		</function>
+<<<<<<< HEAD
 		<function name="createmarkerlinkagegroup" id="Function-6e6" isSystem="false" params_known="y" >
 			<string><![CDATA[CREATE OR REPLACE FUNCTION public.createmarkerlinkagegroup(markerid integer, markerlinkagegroupstart numeric, markerlinkagegroupstop numeric, linkagegroupid integer, OUT id integer)
  RETURNS integer
@@ -27631,6 +27872,8 @@ $function$
 			<input_param name="linkagegroupid" jt="-1" type="integer" />
 			<result_param name="id" jt="-1" type="integer" />
 		</function>
+=======
+>>>>>>> 4e8f130eac168be0a5e83fbd093fc70019c93c69
 		<function name="createorganization" id="Function_37442826" isSystem="false" params_known="n" >
 			<string><![CDATA[CREATE OR REPLACE FUNCTION public.createorganization(orgname text, orgaddress text, orgwebsite text, createdby integer, createddate date, modifiedby integer, modifieddate date, orgstatus integer, OUT id integer)
  RETURNS integer
@@ -27644,6 +27887,7 @@ AS $function$
 $function$
 ]]></string>
 		</function>
+<<<<<<< HEAD
 		<function name="createplatform" id="Function-1036" isSystem="false" params_known="y" >
 			<string><![CDATA[CREATE OR REPLACE FUNCTION public.createplatform(platformname text, platformcode text, platformdescription text, createdby integer, createddate date, modifiedby integer, modifieddate date, platformstatus integer, typeid integer, OUT id integer)
  RETURNS integer
@@ -27667,6 +27911,8 @@ AS $function$
 			<input_param name="typeid" jt="-1" type="integer" />
 			<result_param name="id" jt="-1" type="integer" />
 		</function>
+=======
+>>>>>>> 4e8f130eac168be0a5e83fbd093fc70019c93c69
 		<function name="createproject" id="Function_b8fbf60" isSystem="false" params_known="y" >
 			<string><![CDATA[CREATE OR REPLACE FUNCTION public.createproject(projectname text, projectcode text, projectdescription text, picontact integer, createdby integer, createddate date, modifiedby integer, modifieddate date, projectstatus integer, OUT projectid integer)
  RETURNS integer
@@ -27700,6 +27946,7 @@ $function$
 			<result_param name="projectid" jt="-1" type="integer" />
 			<result_param name="projectid" jt="-1" type="integer" />
 		</function>
+<<<<<<< HEAD
 		<function name="createprotocol" id="Function-d17" isSystem="false" params_known="y" >
 			<string><![CDATA[CREATE OR REPLACE FUNCTION public.createprotocol(pname text, pdescription text, ptypeid integer, pplatformid integer, pcreatedby integer, pcreateddate date, pmodifiedby integer, pmodifieddate date, pstatus integer, OUT id integer)
  RETURNS integer
@@ -27744,6 +27991,8 @@ $function$
 			<input_param name="modifieddate" jt="-1" type="date" />
 			<result_param name="id" jt="-1" type="integer" />
 		</function>
+=======
+>>>>>>> 4e8f130eac168be0a5e83fbd093fc70019c93c69
 		<function name="createrole" id="Function_2af1e879" isSystem="false" params_known="n" >
 			<string><![CDATA[CREATE OR REPLACE FUNCTION public.createrole(rolename text, rolecode text, readtables integer[], writetables integer[], OUT id integer)
  RETURNS integer
@@ -27951,6 +28200,7 @@ AS $function$
 $function$
 ]]></string>
 		</function>
+<<<<<<< HEAD
 		<function name="deletedatasetdnarunindices" id="Function-1e6f" isSystem="false" params_known="y" >
 			<string><![CDATA[CREATE OR REPLACE FUNCTION public.deletedatasetdnarunindices(datasetid integer)
  RETURNS integer
@@ -28003,6 +28253,8 @@ AS $function$
 ;]]></string>
 			<input_param name="id" jt="-1" type="integer" />
 		</function>
+=======
+>>>>>>> 4e8f130eac168be0a5e83fbd093fc70019c93c69
 		<function name="deletedisplay" id="Function_22bb1735" isSystem="false" params_known="n" >
 			<string><![CDATA[CREATE OR REPLACE FUNCTION public.deletedisplay(id integer)
  RETURNS integer
@@ -28694,6 +28946,7 @@ AS $function$
 $function$
 ]]></string>
 		</function>
+<<<<<<< HEAD
 		<function name="getallchrlenbydataset" id="Function-1883" isSystem="false" params_known="y" >
 			<string><![CDATA[CREATE OR REPLACE FUNCTION public.getallchrlenbydataset(datasetid integer)
  RETURNS TABLE(linkage_group_name character varying, linkage_group_length integer)
@@ -28750,6 +29003,8 @@ $function$
 			<result_param name="linkage_group_name" jt="-1" type="character varying" />
 			<result_param name="linkage_group_length" jt="-1" type="integer" />
 		</function>
+=======
+>>>>>>> 4e8f130eac168be0a5e83fbd093fc70019c93c69
 		<function name="getallcontactsbyrole" id="Function_1cd3698" isSystem="false" params_known="n" >
 			<string><![CDATA[CREATE OR REPLACE FUNCTION public.getallcontactsbyrole(roleid integer)
  RETURNS SETOF contact
@@ -29228,6 +29483,7 @@ $function$
 			<result_param name="num" jt="-1" type="text" />
 			<result_param name="well_row" jt="-1" type="text" />
 			<result_param name="well_col" jt="-1" type="text" />
+<<<<<<< HEAD
 			<result_param name="dnarun_name" jt="-1" type="text" />
 			<result_param name="sample_name" jt="-1" type="text" />
 			<result_param name="sample_uuid" jt="-1" type="text" />
@@ -29283,6 +29539,12 @@ $function$
 		<function name="getalluserpropertiesofdnasample" id="Function-406" isSystem="false" params_known="y" >
 			<string><![CDATA[CREATE OR REPLACE FUNCTION public.getalluserpropertiesofdnasample(id integer)
  RETURNS TABLE(eid integer, property_id integer, property_name text, property_value text)
+=======
+		</function>
+		<function name="getdnarunnamesbydataset" id="Function_367ced81" isSystem="false" params_known="y" >
+			<string><![CDATA[CREATE OR REPLACE FUNCTION public.getdnarunnamesbydataset(datasetid integer)
+ RETURNS TABLE(dnarun_id integer, dnarun_name text)
+>>>>>>> 4e8f130eac168be0a5e83fbd093fc70019c93c69
  LANGUAGE plpgsql
 AS $function$
   BEGIN
@@ -32316,6 +32578,7 @@ AS $function$
 $function$
 ]]></string>
 		</function>
+<<<<<<< HEAD
 		<function name="replace" id="Function-1e57" isSystem="false" params_known="y" >
 			<string><![CDATA[CREATE OR REPLACE FUNCTION public.replace(citext, citext, citext)
  RETURNS text
@@ -32547,6 +32810,10 @@ $function$
 		</function>
 		<function name="updateanalysis" id="Function-ac8" isSystem="false" params_known="y" >
 			<string><![CDATA[CREATE OR REPLACE FUNCTION public.updateanalysis(id integer, analysisname text, analysisdescription text, typeid integer, analysisprogram text, analysisprogramversion text, aanalysisalgorithm text, analysissourcename text, analysissourceversion text, analysissourceuri text, referenceid integer, analysisparameters jsonb, analysistimeexecuted timestamp without time zone, analysisstatus integer)
+=======
+		<function name="updatecontact" id="Function_5382ab" isSystem="false" params_known="n" >
+			<string><![CDATA[CREATE OR REPLACE FUNCTION public.updatecontact(contactid integer, contactlastname text, contactfirstname text, contactcode text, contactemail text, contactroles integer[], createdby integer, createddate date, modifiedby integer, modifieddate date, organizationid integer)
+>>>>>>> 4e8f130eac168be0a5e83fbd093fc70019c93c69
  RETURNS void
  LANGUAGE plpgsql
 AS $function$
@@ -32571,6 +32838,7 @@ $function$
 			<input_param name="analysistimeexecuted" jt="-1" type="timestamp without time zone" />
 			<input_param name="analysisstatus" jt="-1" type="integer" />
 		</function>
+<<<<<<< HEAD
 		<function name="updatecontact" id="Function_5382ab" isSystem="false" params_known="y" >
 			<string><![CDATA[CREATE OR REPLACE FUNCTION public.updatecontact(contactid integer, contactlastname text, contactfirstname text, contactcode text, contactemail text, contactroles integer[], createdby integer, createddate date, modifiedby integer, modifieddate date, organizationid integer, uname text)
  RETURNS void
@@ -32599,6 +32867,11 @@ $function$
 		<function name="updatecv" id="Function-2555" isSystem="false" params_known="y" >
 			<string><![CDATA[CREATE OR REPLACE FUNCTION public.updatecv(pid integer, pcvgroupid integer, pcvterm text, pcvdefinition text, pcvrank integer, pabbreviation text, pdbxrefid integer, pstatus integer)
  RETURNS integer
+=======
+		<function name="updatedataset" id="Function_1c882572" isSystem="false" params_known="n" >
+			<string><![CDATA[CREATE OR REPLACE FUNCTION public.updatedataset(id integer, datasetname text, experimentid integer, callinganalysisid integer, datasetanalyses integer[], datatable text, datafile text, qualitytable text, qualityfile text, createdby integer, createddate date, modifiedby integer, modifieddate date, datasetstatus integer, typeid integer)
+ RETURNS void
+>>>>>>> 4e8f130eac168be0a5e83fbd093fc70019c93c69
  LANGUAGE plpgsql
 AS $function$
      DECLARE
@@ -32620,6 +32893,7 @@ AS $function$
 			<input_param name="pdbxrefid" jt="-1" type="integer" />
 			<input_param name="pstatus" jt="-1" type="integer" />
 		</function>
+<<<<<<< HEAD
 		<function name="updatecvgroup" id="Function-1c66" isSystem="false" params_known="y" >
 			<string><![CDATA[CREATE OR REPLACE FUNCTION public.updatecvgroup(pid integer, pname text, pdefinition text, ptype integer)
  RETURNS integer
@@ -32709,6 +32983,8 @@ AS $function$
 			<input_param name="pdbname" jt="-1" type="text" />
 			<input_param name="purl" jt="-1" type="text" />
 		</function>
+=======
+>>>>>>> 4e8f130eac168be0a5e83fbd093fc70019c93c69
 		<function name="updatedisplay" id="Function_dfe1a" isSystem="false" params_known="n" >
 			<string><![CDATA[CREATE OR REPLACE FUNCTION public.updatedisplay(id integer, tablename text, columnname text, displayname text, createdby integer, createddate date, modifiedby integer, modifieddate date, displayrank integer)
  RETURNS void
@@ -32959,6 +33235,7 @@ $function$
 			<input_param name="_message" jt="-1" type="text" />
 			<input_param name="_submitted_by" jt="-1" type="integer" />
 		</function>
+<<<<<<< HEAD
 		<function name="updatelinkagegroup" id="Function-1b4b" isSystem="false" params_known="y" >
 			<string><![CDATA[CREATE OR REPLACE FUNCTION public.updatelinkagegroup(id integer, linkagegroupname text, linkagegroupstart integer, linkagegroupstop integer, mapid integer, createdby integer, createddate date, modifiedby integer, modifieddate date)
  RETURNS void
@@ -33001,6 +33278,8 @@ $function$
 			<input_param name="modifiedby" jt="-1" type="integer" />
 			<input_param name="modifieddate" jt="-1" type="date" />
 		</function>
+=======
+>>>>>>> 4e8f130eac168be0a5e83fbd093fc70019c93c69
 		<function name="updatemanifest" id="Function_15b3c2e4" isSystem="false" params_known="n" >
 			<string><![CDATA[CREATE OR REPLACE FUNCTION public.updatemanifest(manifestid integer, manifestname text, manifestcode text, filepath text, createdby integer, createddate date, modifiedby integer, modifieddate date)
  RETURNS void
@@ -33154,6 +33433,7 @@ $function$
 			<input_param name="modifieddate" jt="-1" type="date" />
 			<input_param name="markergroupstatus" jt="-1" type="integer" />
 		</function>
+<<<<<<< HEAD
 		<function name="updatemarkergroupname" id="Function-146d" isSystem="false" params_known="y" >
 			<string><![CDATA[CREATE OR REPLACE FUNCTION public.updatemarkergroupname(_id integer, _name text)
  RETURNS integer
@@ -33189,6 +33469,8 @@ $function$
 			<input_param name="markerlinkagegroupstop" jt="-1" type="numeric" />
 			<input_param name="linkagegroupid" jt="-1" type="integer" />
 		</function>
+=======
+>>>>>>> 4e8f130eac168be0a5e83fbd093fc70019c93c69
 		<function name="updatemarkerpropertybyid" id="Function_39e5e43f" isSystem="false" params_known="y" >
 			<string><![CDATA[CREATE OR REPLACE FUNCTION public.updatemarkerpropertybyid(id integer, propertyid integer, propertyvalue text)
  RETURNS void
@@ -33240,6 +33522,7 @@ AS $function$
 $function$
 ]]></string>
 		</function>
+<<<<<<< HEAD
 		<function name="updateplatform" id="Function-ae9" isSystem="false" params_known="y" >
 			<string><![CDATA[CREATE OR REPLACE FUNCTION public.updateplatform(id integer, platformname text, platformcode text, platformdescription text, createdby integer, createddate date, modifiedby integer, modifieddate date, platformstatus integer, typeid integer)
  RETURNS integer
@@ -33266,6 +33549,8 @@ AS $function$
 			<input_param name="platformstatus" jt="-1" type="integer" />
 			<input_param name="typeid" jt="-1" type="integer" />
 		</function>
+=======
+>>>>>>> 4e8f130eac168be0a5e83fbd093fc70019c93c69
 		<function name="updateplatformpropertybyid" id="Function_91998a7" isSystem="false" params_known="y" >
 			<string><![CDATA[CREATE OR REPLACE FUNCTION public.updateplatformpropertybyid(id integer, propertyid integer, propertyvalue text)
  RETURNS void
@@ -33382,6 +33667,7 @@ $function$
 			<input_param name="pmodifieddate" jt="-1" type="date" />
 			<input_param name="pstatus" jt="-1" type="integer" />
 		</function>
+<<<<<<< HEAD
 		<function name="updatereference" id="Function-7b5" isSystem="false" params_known="y" >
 			<string><![CDATA[CREATE OR REPLACE FUNCTION public.updatereference(id integer, referencename text, referenceversion text, referencelink text, filepath text, createdby integer, createddate date, modifiedby integer, modifieddate date)
  RETURNS void
@@ -33403,6 +33689,8 @@ $function$
 			<input_param name="modifiedby" jt="-1" type="integer" />
 			<input_param name="modifieddate" jt="-1" type="date" />
 		</function>
+=======
+>>>>>>> 4e8f130eac168be0a5e83fbd093fc70019c93c69
 		<function name="updaterole" id="Function_12d3301a" isSystem="false" params_known="n" >
 			<string><![CDATA[CREATE OR REPLACE FUNCTION public.updaterole(roleid integer, rolename text, rolecode text, readtables integer[], writetables integer[])
  RETURNS void
@@ -33892,7 +34180,7 @@ $function$
 			<input_param name="propertyvalue" jt="-1" type="text" />
 		</function>
 	</schema>
-	<connector name="Aurora-GOBii" database="PostgreSQL" driver_class="org.postgresql.Driver" driver_jar="postgresql-42.2.23.jar" driver_desc="Standard" host="ebs-aurora-poc1.cluster-c8xqoherxu9x.us-east-2.rds.amazonaws.com" port="5432" instance="gobii_dev_bak" user="ebsadm" passwd="RWJzREJBZG0xbiFzdHJhdDBy" sshEnable="true" sshHost="ec2-18-218-179-73.us-east-2.compute.amazonaws.com" sshPort="22" sshUser="ubuntu" sshUseKey="true" sshPrivateKey="/Users/KevinPalis/Work/AWS/keypairs/kpalis-swarm_master01.pem" />
+	<connector name="EBS-GOBII-CROP" database="PostgreSQL" driver_class="org.postgresql.Driver" driver_jar="postgresql-42.2.18.jar" driver_desc="Standard" host="13.229.210.246" port="5433" instance="gobii_dev" user="ebsuser" usage="Development" passwd="M250M3JwcjFTRSE=" />
 	<layout name="Default" id="Layout_300b53b2" show_relation="columns" >
 		<entity schema="gobii_rice1.public" name="analysis" color="BFD4F5" x="800" y="928" />
 		<entity schema="gobii_rice1.public" name="contact" color="C8F5BF" x="400" y="192" />
@@ -33937,9 +34225,12 @@ $function$
 FROM
 	"public".cv v;]]></string>
 		</script>
+<<<<<<< HEAD
 		<browser id="Browse_15d0" name="Editor" confirm_updates="y" >
 			<browse_table schema="gobii_rice1.public" entity="cv" x="20" y="20" width="400" height="300" />
 		</browser>
+=======
+>>>>>>> 4e8f130eac168be0a5e83fbd093fc70019c93c69
 		<browser id="Browse_10db0ac4" name="marker" confirm_updates="y" confirmed="y" >
 			<browse_table schema="gobii_rice1.public" entity="marker" x="10" y="10" width="400" height="300" >
 				<browse_table schema="gobii_rice1.public" entity="cv" fk="marker_strand_id_fkey" x="420" y="10" width="400" height="300" record_view="y" />
