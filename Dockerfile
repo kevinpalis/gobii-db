@@ -14,8 +14,8 @@ RUN apt-get update -y && apt-get install -y \
 EXPOSE 22 5432
 
 #set all environment variables needed to initialize the database - these can all be overriden during container run
-ENV postgres_local_auth_method=trust
-ENV postgres_host_auth_method=trust
+ENV postgres_local_auth_method=md5
+ENV postgres_host_auth_method=md5
 ENV postgres_listen_address=*
 ENV db_user=ebsuser
 ENV db_pass=3nt3rpr1SE!
