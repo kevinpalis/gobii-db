@@ -18,8 +18,8 @@ class ForeignDataManager:
 		"""
 		header = self.getHeader(inputFile)
 		print("header: ", header)
-		columnSpec = ', '.join(c + ' text' for c in header)
-		fdwScript = ' '.join('CREATE TABLE', fdwTableName, '(', columnSpec, ')')
+		columnSpec = ', '.join([c + ' text' for c in header])
+		fdwScript = ' '.join(['CREATE TABLE', fdwTableName, '(', columnSpec, ')'])
 		print("fdwScript: ", fdwScript)
 		return header, fdwScript
 
