@@ -52,7 +52,10 @@ class PreprocessIfileManager:
 		header, fdwScript = self.fdm.generateFDWScript(iFile, fTableName)
 		#print("fdwScript: %s" % fdwScript)
 		self.cur.execute(fdwScript)
-		self.cur.copy_from(iFile, fTableName)
+		with open(iFile, 'r') as fi:
+			# skip header
+			fi.read()
+			self.cur.copy_from(fi, fTableName)
 		return header
 
 	def createFileWithDerivedIdsV1(self, outputFilePath, derivedIdSql):
