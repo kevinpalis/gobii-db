@@ -46,7 +46,7 @@ class PreprocessIfileManager:
 		return res
 
 	def dropForeignTable(self, fdwTableName):
-		self.cur.execute("drop foreign table if exists "+fdwTableName)
+		self.cur.execute("drop table if exists "+fdwTableName)
 
 	def createForeignTable(self, iFile, fTableName):
 		header, fdwScript = self.fdm.generateFDWScript(iFile, fTableName)

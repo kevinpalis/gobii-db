@@ -16,7 +16,7 @@ class LoadIfileManager:
 		#print("Load IFile Manager Initialized.")
 
 	def dropForeignTable(self, fdwTableName):
-		self.cur.execute("drop foreign table if exists "+fdwTableName+";")
+		self.cur.execute("drop table if exists "+fdwTableName+";")
 		#print("drop foreign table if exists "+fdwTableName+";")
 
 	def createForeignTable(self, iFile, fTableName):
