@@ -22,6 +22,7 @@ class LoadIfileManager:
 	def createForeignTable(self, iFile, fTableName):
 		header, fdwScript = self.fdm.generateFDWScript(iFile, fTableName)
 		self.cur.execute(fdwScript)
+		self.cur.copy_from(iFile, fTableName)
 		return header
 
 	def createFileWithoutDuplicatesV1(self, outputFilePath, noDupsSql):
