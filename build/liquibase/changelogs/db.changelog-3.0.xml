@@ -2,4 +2,5 @@
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
 	<include file="changesets/3.0/initialize_gobii_metadb.sql"/>
 	<include file="changesets/3.0/checksum_and_aspect_entities.sql"/>
+	<include file="changesets/3.0/add_prereq_pg_extensions.sql"/>
 </databaseChangeLog>
