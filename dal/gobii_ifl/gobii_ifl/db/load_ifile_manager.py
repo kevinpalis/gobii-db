@@ -24,7 +24,7 @@ class LoadIfileManager:
 		self.cur.execute(fdwScript)
 		with open(iFile, 'r') as fi:
 			# skip header
-			fi.read()
+			fi.readline()
 			self.cur.copy_from(fi, fTableName)
 		return header
 
