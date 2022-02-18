@@ -16,13 +16,16 @@ class LoadIfileManager:
 		#print("Load IFile Manager Initialized.")
 
 	def dropForeignTable(self, fdwTableName):
-		self.cur.execute("drop foreign table if exists "+fdwTableName+";")
+		self.cur.execute("drop table if exists "+fdwTableName+";")
 		#print("drop foreign table if exists "+fdwTableName+";")
 
 	def createForeignTable(self, iFile, fTableName):
 		header, fdwScript = self.fdm.generateFDWScript(iFile, fTableName)
 		self.cur.execute(fdwScript)
-		self.cur.copy_from(iFile, fTableName)
+		with open(iFile, 'r') as fi:
+			# skip header
+			fi.readline()
+			self.cur.copy_from(fi, fTableName)
 		return header
 
 	def createFileWithoutDuplicatesV1(self, outputFilePath, noDupsSql):
