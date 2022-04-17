@@ -3,4 +3,5 @@
 	<include file="changesets/3.0/initialize_gobii_metadb.sql"/>
 	<include file="changesets/3.0/checksum_and_aspect_entities.sql"/>
 	<include file="changesets/3.0/add_prereq_pg_extensions.sql"/>
+	<include file="changesets/seed/add_intertekLGC_template1.sql"/>
 </databaseChangeLog>
