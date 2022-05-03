@@ -4,7 +4,7 @@
 		<comment><![CDATA[standard public schema]]></comment>
 		<table name="checksum" generator_rows="100" >
 			<comment><![CDATA[This table stores MD5 checksums for easy and efficient duplicate checks. The checksums are updated every time a file is loaded to the system.]]></comment>
-			<column name="id" type="integer" jt="4" mandatory="y" regexp="sequence:from=0;step=1;" sequence="checksum_id_seq" >
+			<column name="id" type="integer" jt="4" mandatory="y" regexp="sequence:from=1;step=1;" sequence="checksum_id_seq" >
 				<defo><![CDATA[nextval('checksum_id_seq'::regclass)]]></defo>
 			</column>
 			<column name="file_name" type="text" length="100" jt="12" mandatory="y" regexp="[a-z]{3,10}.(bmp|doc|xls|txt|ini|php|asm|pdf)" >
