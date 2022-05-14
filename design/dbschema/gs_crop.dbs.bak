@@ -726,10 +726,10 @@ default 0 value should be used.]]></comment>
 		</table>
 		<table name="marker_genotype" >
 			<comment><![CDATA[This is the main table for unified genotypic data storage, ie. one solution for SNPs, polyploids, indels - of virtually any length. This can utilize the following: GiN index for jsonb, B-tree indices for the other columns, parallel index scans, partition by dataset or dataset range (as needed), and can be transposed (if needed). The columns were designed with both the VCF 4.2 standard and Intertek LGC datafiles in mind.]]></comment>
-			<column name="dataset_id" type="integer" jt="4" mandatory="y" >
+			<column name="dataset_id" type="integer" jt="4" >
 				<comment><![CDATA[Foreign key to the dataset table.]]></comment>
 			</column>
-			<column name="marker_id" type="integer" jt="4" mandatory="y" >
+			<column name="marker_id" type="integer" jt="4" >
 				<comment><![CDATA[Foreign key to the marker table.]]></comment>
 			</column>
 			<column name="genotype" type="jsonb" jt="2000" mandatory="y" >
@@ -784,7 +784,7 @@ H2="HapMap2 membership"
 
 NOTE: For flags, the key-value pair will just have an empty string for value.]]></comment>
 			</column>
-			<index name="pk_marker_genotype" unique="PRIMARY_KEY" >
+			<index name="idx_marker_genotype" unique="NORMAL" >
 				<column name="dataset_id" />
 				<column name="marker_id" />
 			</index>
@@ -1376,7 +1376,6 @@ NOTE: For flags, the key-value pair will just have an empty string for value.]]>
 	</schema>
 	<connector name="PostgreSQL" database="PostgreSQL" driver_class="org.postgresql.Driver" driver_jar="postgresql-42.3.2.jar" driver_desc="Standard" host="ebs-db-poc1.c8xqoherxu9x.us-east-2.rds.amazonaws.com" port="5432" instance="gs_wheat" user="ebsadm" passwd="RWJzREJBZG0xbmlzdHJhdDByMzIxIQ==" />
 	<layout name="Main Layout" id="Layout-b2c" show_column_type="y" show_relation="columns" >
-		<comment><![CDATA[gs_crop]]></comment>
 		<entity schema="public" name="analysis" color="BEBEF4" x="1520" y="688" />
 		<entity schema="public" name="contact" color="BED3F4" x="1280" y="1568" />
 		<entity schema="public" name="cv" color="BEBEF4" x="1568" y="368" />
